@@ -40,7 +40,7 @@ O problema foi identificado a partir de um caso real e validado com pesquisa com
 ## Prototipo de Estrutura Inicial do Projeto (em construção)
 
 ```
-cobrancazap/
+taemdia/
 ├── backend/                  # API Python
 │   ├── app/
 │   │   ├── models/           # Modelos do banco de dados
