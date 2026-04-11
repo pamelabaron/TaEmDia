@@ -24,7 +24,7 @@ O problema foi identificado a partir de um caso real e validado com pesquisa com
 
 ---
 
-## 🛠️ Stack Tecnológica
+## Stack Tecnológica
 
 | Camada | Tecnologia |
 |---|---|
