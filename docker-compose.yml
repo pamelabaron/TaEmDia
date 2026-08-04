@@ -31,14 +31,15 @@ services:
         condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-  # Interface (frontend Angular) — habilitado quando o app Angular for gerado
-  # frontend:
-  #   build: ./frontend
-  #   ports:
-  #     - "4200:4200"
-  #   volumes:
-  #     - ./frontend:/app
-  #   command: npm start
+  # Interface (frontend Angular) — servidor de desenvolvimento
+  frontend:
+    image: node:20
+    working_dir: /app
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend:/app
+    command: npx ng serve --host 0.0.0.0 --poll 2000
 
 volumes:
   postgres-data:

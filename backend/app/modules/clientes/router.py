@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.modules.auth.deps import get_current_vendedor_id
 from app.modules.clientes.repository import ClienteRepository
 from app.modules.clientes.schemas import ClienteCreate, ClienteOut, ClienteUpdate
 from app.modules.clientes.service import (
@@ -20,16 +21,10 @@ def get_service(db: Session = Depends(get_db)) -> ClienteService:
     return ClienteService(ClienteRepository(db))
 
 
-# TODO(Sprint 1): substituir por vendedor_id extraído do JWT (módulo auth).
-def get_vendedor_id() -> uuid.UUID:
-    """Placeholder até a autenticação existir. Retorna um vendedor fixo de teste."""
-    return uuid.UUID("00000000-0000-0000-0000-000000000001")
-
-
 @router.get("", response_model=list[ClienteOut])
 def listar_clientes(
     service: ClienteService = Depends(get_service),
-    vendedor_id: uuid.UUID = Depends(get_vendedor_id),
+    vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
 ):
     return service.listar(vendedor_id)
 
@@ -38,7 +33,7 @@ def listar_clientes(
 def cadastrar_cliente(
     dados: ClienteCreate,
     service: ClienteService = Depends(get_service),
-    vendedor_id: uuid.UUID = Depends(get_vendedor_id),
+    vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
 ):
     try:
         return service.cadastrar(vendedor_id, dados)
@@ -54,7 +49,7 @@ def editar_cliente(
     cliente_id: uuid.UUID,
     dados: ClienteUpdate,
     service: ClienteService = Depends(get_service),
-    vendedor_id: uuid.UUID = Depends(get_vendedor_id),
+    vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
 ):
     try:
         return service.editar(vendedor_id, cliente_id, dados)
@@ -66,7 +61,7 @@ def editar_cliente(
 def remover_cliente(
     cliente_id: uuid.UUID,
     service: ClienteService = Depends(get_service),
-    vendedor_id: uuid.UUID = Depends(get_vendedor_id),
+    vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
 ):
     try:
         service.desativar(vendedor_id, cliente_id)

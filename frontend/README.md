@@ -1,17 +1,27 @@
-# Frontend — TáEmDia (Angular)
+# TaemdiaWeb
 
-O aplicativo Angular será **gerado no Sprint 0**, depois que o Docker Desktop estiver instalado,
-com o comando (rodado dentro de um container Node, para você não precisar instalar o Node):
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.17.
 
-```bash
-docker run --rm -v "%cd%":/app -w /app node:20 npx -y @angular/cli@17 new taemdia-web \
-  --directory . --style=scss --routing --skip-git
-```
+## Development server
 
-Depois adicionamos o Angular Material:
-```bash
-docker run --rm -v "%cd%":/app -w /app node:20 npx -y @angular/cli@17 add @angular/material
-```
+Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
-Enquanto isso, esta pasta fica reservada para a interface. O serviço `frontend` do
-`docker-compose.yml` está comentado e será habilitado quando o app existir.
+## Code scaffolding
+
+Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+
+## Build
+
+Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+
+## Running unit tests
+
+Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+
+## Running end-to-end tests
+
+Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+
+## Further help
+
+To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.

@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.modules.auth.router import router as auth_router
 from app.modules.clientes.router import router as clientes_router
 
 app = FastAPI(
@@ -27,4 +28,5 @@ def health_check():
 
 
 # Módulos do domínio (crescem sprint a sprint)
+app.include_router(auth_router)
 app.include_router(clientes_router)

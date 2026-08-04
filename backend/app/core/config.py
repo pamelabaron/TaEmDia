@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str = ""
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/auth/google/callback"
 
+    # Endereço do frontend (para onde o login redireciona com o token)
+    FRONTEND_URL: str = "http://localhost:4200"
+
     # Evolution API (WhatsApp)
     EVOLUTION_API_URL: str = ""
     EVOLUTION_API_KEY: str = ""

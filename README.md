@@ -47,11 +47,19 @@ Na pasta do projeto, rode:
 ```bash
 docker compose up
 ```
-- A **API** ficará em: http://localhost:8000
+Isso sobe três serviços juntos (banco, API e interface):
+- A **interface (site)** em: http://localhost:4200
+- A **API** em: http://localhost:8000
 - A **documentação interativa da API** em: http://localhost:8000/docs
 - Teste rápido de saúde: http://localhost:8000/health
 
+> A interface (Angular) leva ~30s para compilar na primeira vez. Se abrir
+> http://localhost:4200 e ainda não carregar, aguarde alguns segundos e recarregue.
+
 Para desligar, aperte `Ctrl+C` no terminal (ou `docker compose down`).
+
+> **Login:** a tela inicial pede "Continuar com Google". Para o login funcionar,
+> configure as credenciais do Google seguindo [`docs/google-oauth-setup.md`](docs/google-oauth-setup.md).
 
 ---
 
