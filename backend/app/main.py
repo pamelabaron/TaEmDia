@@ -6,6 +6,7 @@ from app.modules.auth.router import router as auth_router
 from app.modules.clientes.router import router as clientes_router
 from app.modules.vendas.router import router as vendas_router
 from app.modules.relatorios.router import router as relatorios_router
+from app.modules.templates.router import router as templates_router
 
 app = FastAPI(
     title="TáEmDia API",
@@ -34,3 +35,4 @@ app.include_router(auth_router)
 app.include_router(clientes_router)
 app.include_router(vendas_router)
 app.include_router(relatorios_router)
+app.include_router(templates_router)

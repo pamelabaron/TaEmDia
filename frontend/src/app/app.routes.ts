@@ -26,5 +26,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/cliente-perfil/cliente-perfil.component').then((m) => m.ClientePerfilComponent),
   },
+  {
+    path: 'mensagens',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/templates/templates.component').then((m) => m.TemplatesComponent),
+  },
   { path: '**', redirectTo: 'painel' },
 ];

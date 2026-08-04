@@ -16,6 +16,7 @@ import { AuthService } from './core/auth.service';
         <nav>
           <a mat-button routerLink="/painel" routerLinkActive="ativo">Painel</a>
           <a mat-button routerLink="/clientes" routerLinkActive="ativo">Clientes</a>
+          <a mat-button routerLink="/mensagens" routerLinkActive="ativo">Mensagens</a>
         </nav>
       }
       <span class="espaco"></span>
