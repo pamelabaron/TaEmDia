@@ -16,5 +16,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/clientes/clientes.component').then((m) => m.ClientesComponent),
   },
+  {
+    path: 'clientes/:id',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/cliente-perfil/cliente-perfil.component').then((m) => m.ClientePerfilComponent),
+  },
   { path: '**', redirectTo: 'clientes' },
 ];

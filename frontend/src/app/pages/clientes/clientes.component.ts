@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -67,10 +68,11 @@ import { Cliente, ClientesService } from '../../core/clientes.service';
         <mat-card>
           <mat-list>
             @for (c of filtrados(); track c.id) {
-              <mat-list-item>
+              <mat-list-item class="clicavel" (click)="abrirPerfil(c.id)">
                 <mat-icon matListItemIcon>person</mat-icon>
                 <div matListItemTitle>{{ c.nome }}</div>
                 <div matListItemLine>{{ c.whatsapp_numero }}</div>
+                <mat-icon matListItemMeta>chevron_right</mat-icon>
               </mat-list-item>
             }
           </mat-list>
@@ -87,11 +89,14 @@ import { Cliente, ClientesService } from '../../core/clientes.service';
     .busca { margin-bottom: 8px; }
     .centro { display: flex; justify-content: center; padding: 32px; }
     .vazio { text-align: center; color: #888; padding: 24px; }
+    .clicavel { cursor: pointer; }
+    .clicavel:hover { background: #f5f5f5; }
   `],
 })
 export class ClientesComponent implements OnInit {
   private service = inject(ClientesService);
   private snack = inject(MatSnackBar);
+  private router = inject(Router);
 
   readonly clientes = signal<Cliente[]>([]);
   readonly carregando = signal<boolean>(true);
@@ -123,6 +128,10 @@ export class ClientesComponent implements OnInit {
 
   alternarFormulario(): void {
     this.mostrarForm.update((v) => !v);
+  }
+
+  abrirPerfil(clienteId: string): void {
+    this.router.navigate(['/clientes', clienteId]);
   }
 
   salvar(): void {
