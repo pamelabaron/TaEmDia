@@ -78,6 +78,23 @@ class RelatorioRepository:
         )
         return [(linha[0], linha[1]) for linha in self.db.execute(stmt)]
 
+    def parcelas_para_ranking(
+        self, vendedor_id: uuid.UUID, desde: date
+    ) -> list[tuple[uuid.UUID, date, date | None]]:
+        """(cliente_id, data_vencimento, data_pagamento) das parcelas de vendas ativas
+        com vencimento a partir de 'desde'."""
+        stmt = (
+            select(Venda.cliente_id, Parcela.data_vencimento, Parcela.data_pagamento)
+            .select_from(Parcela)
+            .join(Venda, Parcela.venda_id == Venda.id)
+            .where(
+                Venda.vendedor_id == vendedor_id,
+                Venda.status == "ativa",
+                Parcela.data_vencimento >= desde,
+            )
+        )
+        return [(l[0], l[1], l[2]) for l in self.db.execute(stmt)]
+
     def clientes_em_atraso(self, vendedor_id: uuid.UUID, hoje: date) -> list[tuple[uuid.UUID, str, Decimal]]:
         total = func.sum(Parcela.valor)
         stmt = (

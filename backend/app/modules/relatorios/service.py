@@ -1,7 +1,10 @@
 """Monta o dashboard financeiro a partir das consultas agregadas."""
 import uuid
+from collections import defaultdict
 from datetime import date
 
+from app.modules.clientes.repository import ClienteRepository
+from app.modules.relatorios.ranking import ParcelaRanking, classificar
 from app.modules.relatorios.repository import RelatorioRepository
 
 
@@ -13,9 +16,13 @@ def _primeiro_dia_meses_atras(d: date, n: int) -> date:
     return date(ano, mes, 1)
 
 
+CATEGORIAS_ORDEM = {"inadimplente": 0, "regular": 1, "bom": 2, "sem_historico": 3}
+
+
 class RelatorioService:
-    def __init__(self, repo: RelatorioRepository):
+    def __init__(self, repo: RelatorioRepository, cliente_repo: ClienteRepository):
         self.repo = repo
+        self.cliente_repo = cliente_repo
 
     def dashboard(self, vendedor_id: uuid.UUID) -> dict:
         hoje = date.today()
@@ -35,4 +42,38 @@ class RelatorioService:
                 {"id": cid, "nome": nome, "valor_atrasado": float(valor)}
                 for cid, nome, valor in atrasados
             ],
+        }
+
+    def ranking(self, vendedor_id: uuid.UUID, meses: int = 12) -> dict:
+        hoje = date.today()
+        desde = _primeiro_dia_meses_atras(hoje, meses - 1)
+
+        # Agrupa as parcelas do período por cliente.
+        por_cliente: dict = defaultdict(list)
+        for cliente_id, venc, pago in self.repo.parcelas_para_ranking(vendedor_id, desde):
+            por_cliente[cliente_id].append(ParcelaRanking(venc, pago))
+
+        clientes_out = []
+        contagem = {"bom": 0, "regular": 0, "inadimplente": 0, "sem_historico": 0}
+        for cliente in self.cliente_repo.listar(vendedor_id):
+            c = classificar(por_cliente.get(cliente.id, []), hoje)
+            contagem[c.categoria] += 1
+            clientes_out.append({
+                "id": cliente.id,
+                "nome": cliente.nome,
+                "classificacao": c.categoria,
+                "percentual_em_dia": c.percentual_em_dia,
+                "media_dias_atraso": c.media_dias_atraso,
+                "total_avaliadas": c.total_avaliadas,
+            })
+
+        # Ordena: inadimplentes primeiro (atenção), depois regulares, bons e sem histórico.
+        clientes_out.sort(key=lambda x: (CATEGORIAS_ORDEM[x["classificacao"]], -x["percentual_em_dia"]))
+
+        return {
+            "bons": contagem["bom"],
+            "regulares": contagem["regular"],
+            "inadimplentes": contagem["inadimplente"],
+            "sem_historico": contagem["sem_historico"],
+            "clientes": clientes_out,
         }
