@@ -31,5 +31,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/templates/templates.component').then((m) => m.TemplatesComponent),
   },
+  {
+    path: 'ranking',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/ranking/ranking.component').then((m) => m.RankingComponent),
+  },
   { path: '**', redirectTo: 'painel' },
 ];
