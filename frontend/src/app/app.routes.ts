@@ -36,5 +36,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/ranking/ranking.component').then((m) => m.RankingComponent),
   },
+  {
+    path: 'configuracoes',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/configuracoes/configuracoes.component').then((m) => m.ConfiguracoesComponent),
+  },
   { path: '**', redirectTo: 'painel' },
 ];

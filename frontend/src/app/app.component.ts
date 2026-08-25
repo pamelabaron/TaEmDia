@@ -3,26 +3,62 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { AuthService } from './core/auth.service';
+
+interface ItemMenu { rota: string; titulo: string; icone: string; }
+
+const MENU: ItemMenu[] = [
+  { rota: '/painel', titulo: 'Painel', icone: 'dashboard' },
+  { rota: '/clientes', titulo: 'Clientes', icone: 'people' },
+  { rota: '/ranking', titulo: 'Ranking', icone: 'leaderboard' },
+  { rota: '/mensagens', titulo: 'Mensagens', icone: 'chat' },
+  { rota: '/configuracoes', titulo: 'Configurações', icone: 'settings' },
+];
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatToolbarModule, MatButtonModule, MatIconModule],
+  imports: [
+    RouterOutlet, RouterLink, RouterLinkActive,
+    MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule,
+  ],
   template: `
     <mat-toolbar color="primary">
-      <span class="marca">TáEmDia</span>
       @if (auth.logado()) {
-        <nav>
-          <a mat-button routerLink="/painel" routerLinkActive="ativo">Painel</a>
-          <a mat-button routerLink="/clientes" routerLinkActive="ativo">Clientes</a>
-          <a mat-button routerLink="/ranking" routerLinkActive="ativo">Ranking</a>
-          <a mat-button routerLink="/mensagens" routerLinkActive="ativo">Mensagens</a>
+        <!-- Celular: menu sanduíche -->
+        <button mat-icon-button class="so-mobile" [matMenuTriggerFor]="menuMobile" aria-label="Abrir menu">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <mat-menu #menuMobile="matMenu">
+          @for (item of menu; track item.rota) {
+            <a mat-menu-item [routerLink]="item.rota">
+              <mat-icon>{{ item.icone }}</mat-icon>
+              <span>{{ item.titulo }}</span>
+            </a>
+          }
+          <a mat-menu-item (click)="auth.sair()">
+            <mat-icon>logout</mat-icon>
+            <span>Sair</span>
+          </a>
+        </mat-menu>
+      }
+
+      <span class="marca">TáEmDia</span>
+
+      @if (auth.logado()) {
+        <!-- Computador: menu na barra -->
+        <nav class="so-desktop">
+          @for (item of menu; track item.rota) {
+            <a mat-button [routerLink]="item.rota" routerLinkActive="ativo">{{ item.titulo }}</a>
+          }
         </nav>
       }
+
       <span class="espaco"></span>
+
       @if (auth.logado()) {
-        <button mat-button (click)="auth.sair()">
+        <button mat-button class="so-desktop" (click)="auth.sair()">
           <mat-icon>logout</mat-icon>
           Sair
         </button>
@@ -34,9 +70,20 @@ import { AuthService } from './core/auth.service';
     .marca { font-weight: 500; margin-right: 24px; }
     .espaco { flex: 1 1 auto; }
     nav a { margin-right: 4px; }
-    .ativo { background: rgba(255,255,255,0.15); }
+    .ativo { background: rgba(255, 255, 255, 0.15); }
+
+    /* Por padrão (computador): esconde o menu sanduíche. */
+    .so-mobile { display: none; }
+
+    /* Telas estreitas (celular): troca o menu da barra pelo sanduíche. */
+    @media (max-width: 820px) {
+      .so-desktop { display: none; }
+      .so-mobile { display: inline-flex; }
+      .marca { margin-right: 8px; }
+    }
   `],
 })
 export class AppComponent {
   readonly auth = inject(AuthService);
+  readonly menu = MENU;
 }
