@@ -37,6 +37,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/ranking/ranking.component').then((m) => m.RankingComponent),
   },
   {
+    path: 'cobrancas',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/cobrancas/cobrancas.component').then((m) => m.CobrancasComponent),
+  },
+  {
     path: 'configuracoes',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/configuracoes/configuracoes.component').then((m) => m.ConfiguracoesComponent),

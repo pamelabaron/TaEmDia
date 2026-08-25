@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     # Evolution API (WhatsApp)
     EVOLUTION_API_URL: str = ""
     EVOLUTION_API_KEY: str = ""
+    EVOLUTION_INSTANCIA: str = "taemdia"
+
+    # Agendador de tarefas em segundo plano
+    AGENDADOR_ATIVO: bool = True
 
 
 settings = Settings()

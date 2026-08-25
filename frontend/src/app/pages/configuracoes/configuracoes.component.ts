@@ -10,6 +10,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Configuracao, ConfiguracoesService } from '../../core/configuracoes.service';
+import { CobrancasService, StatusWhatsApp } from '../../core/cobrancas.service';
 
 // Horários possíveis para o resumo diário (fim do dia, conforme o RFC).
 const HORARIOS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00'];
@@ -25,6 +26,34 @@ const HORARIOS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00',
     <div class="pagina">
       <h2>Configurações</h2>
       <p class="ajuda">Ajuste como o sistema cobra seus clientes e como você recebe os avisos.</p>
+
+      <mat-card class="bloco">
+        <h3>WhatsApp</h3>
+        @if (whats(); as w) {
+          <div class="linha">
+            <div class="texto">
+              <span class="rotulo">
+                @if (w.modo_simulador) { Modo simulador }
+                @else if (w.conectado) { Conectado }
+                @else { Não conectado }
+              </span>
+              <span class="descricao">{{ w.detalhe }}</span>
+            </div>
+            <span class="bolinha" [class.on]="w.conectado"></span>
+          </div>
+          @if (w.qrcode) {
+            <div class="qr">
+              <p class="descricao">Abra o WhatsApp no celular, toque em Aparelhos conectados e escaneie:</p>
+              <img [src]="w.qrcode" alt="QR Code do WhatsApp" />
+            </div>
+          }
+          @if (w.conectado && !w.modo_simulador) {
+            <button mat-stroked-button color="warn" (click)="desconectar()">Desconectar</button>
+          }
+        } @else {
+          <p class="descricao">Verificando conexão…</p>
+        }
+      </mat-card>
 
       @if (carregando()) {
         <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
@@ -119,21 +148,31 @@ const HORARIOS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00',
     .acoes { display: flex; justify-content: flex-end; }
     @media (max-width: 600px) {
       .linha { flex-direction: column; align-items: flex-start; }
-      .acoes button { width: 100%; }
+      .bolinha { width: 12px; height: 12px; border-radius: 50%; background: #c62828; flex: none; }
+    .bolinha.on { background: #2e7d32; }
+    .qr { text-align: center; padding: 12px 0; }
+    .qr img { max-width: 240px; width: 100%; }
+    .acoes button { width: 100%; }
     }
   `],
 })
 export class ConfiguracoesComponent implements OnInit {
   private service = inject(ConfiguracoesService);
   private snack = inject(MatSnackBar);
+  private cobrancas = inject(CobrancasService);
 
   config: Configuracao | null = null;
   horario = '20:00';
   readonly horarios = HORARIOS;
   readonly carregando = signal<boolean>(true);
   readonly salvando = signal<boolean>(false);
+  readonly whats = signal<StatusWhatsApp | null>(null);
 
   ngOnInit(): void {
+    this.cobrancas.statusWhatsApp().subscribe({
+      next: (w) => this.whats.set(w),
+      error: () => this.whats.set(null),
+    });
     this.service.obter().subscribe({
       next: (c) => {
         this.config = c;
@@ -144,6 +183,16 @@ export class ConfiguracoesComponent implements OnInit {
         this.carregando.set(false);
         this.snack.open('Erro ao carregar as configurações.', 'OK', { duration: 4000 });
       },
+    });
+  }
+
+  desconectar(): void {
+    this.cobrancas.desconectarWhatsApp().subscribe({
+      next: () => {
+        this.snack.open("WhatsApp desconectado.", "OK", { duration: 3000 });
+        this.cobrancas.statusWhatsApp().subscribe((w) => this.whats.set(w));
+      },
+      error: () => this.snack.open("Erro ao desconectar.", "OK", { duration: 4000 }),
     });
   }
 

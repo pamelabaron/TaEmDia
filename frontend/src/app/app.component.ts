@@ -12,6 +12,7 @@ const MENU: ItemMenu[] = [
   { rota: '/painel', titulo: 'Painel', icone: 'dashboard' },
   { rota: '/clientes', titulo: 'Clientes', icone: 'people' },
   { rota: '/ranking', titulo: 'Ranking', icone: 'leaderboard' },
+  { rota: '/cobrancas', titulo: 'Cobranças', icone: 'send' },
   { rota: '/mensagens', titulo: 'Mensagens', icone: 'chat' },
   { rota: '/configuracoes', titulo: 'Configurações', icone: 'settings' },
 ];
