@@ -2,6 +2,8 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Dashboard, DashboardService } from '../../core/dashboard.service';
 
@@ -12,10 +14,15 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [MatCardModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [MatCardModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule],
   template: `
     <div class="pagina">
-      <h2>Painel</h2>
+      <div class="cabecalho">
+        <h2>Painel</h2>
+        <button mat-stroked-button (click)="exportarPdf()" [disabled]="exportando()">
+          <mat-icon>picture_as_pdf</mat-icon> Exportar PDF
+        </button>
+      </div>
 
       @if (carregando()) {
         <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
@@ -76,6 +83,8 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
   `,
   styles: [`
     .pagina { max-width: 820px; margin: 0 auto; padding: 16px; }
+    .cabecalho { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .cabecalho h2 { margin: 0; }
     .centro { display: flex; justify-content: center; padding: 32px; }
     .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
     .kpi { display: flex; flex-direction: column; padding: 16px; border-left: 4px solid #1565c0; }
@@ -102,9 +111,11 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
 export class DashboardComponent implements OnInit {
   private service = inject(DashboardService);
   private router = inject(Router);
+  private snack = inject(MatSnackBar);
 
   readonly dados = signal<Dashboard | null>(null);
   readonly carregando = signal<boolean>(true);
+  readonly exportando = signal<boolean>(false);
 
   readonly barras = computed<Barra[]>(() => {
     const d = this.dados();
@@ -122,6 +133,30 @@ export class DashboardComponent implements OnInit {
       next: (d) => { this.dados.set(d); this.carregando.set(false); },
       error: () => this.carregando.set(false),
     });
+  }
+
+  exportarPdf(): void {
+    this.exportando.set(true);
+    this.service.exportarPdf().subscribe({
+      next: (arquivo) => {
+        this.exportando.set(false);
+        this.baixar(arquivo);
+      },
+      error: () => {
+        this.exportando.set(false);
+        this.snack.open('Não foi possível gerar o relatório.', 'OK', { duration: 4000 });
+      },
+    });
+  }
+
+  /** Entrega o arquivo ao navegador para download. */
+  private baixar(arquivo: Blob): void {
+    const url = URL.createObjectURL(arquivo);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'taemdia-relatorio.pdf';
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   abrirPerfil(id: string): void { this.router.navigate(['/clientes', id]); }
