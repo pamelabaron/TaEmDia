@@ -1,0 +1,75 @@
+# Configuração de PRODUÇÃO.
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Diferenças em relação ao ambiente de desenvolvimento:
+#   - o banco NÃO expõe porta para fora do servidor;
+#   - o backend roda sem --reload e atrás do Nginx;
+#   - o frontend é servido compilado (build de produção), não pelo ng serve;
+#   - o Nginx é a única porta de entrada, com HTTPS.
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # Sem "ports": o banco só é acessível pela rede interna do Docker.
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      AMBIENTE: producao
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/taemdia.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - backend
+      - frontend
+
+  evolution:
+    image: atendai/evolution-api:v2.1.1
+    restart: unless-stopped
+    profiles: ["whatsapp"]
+    environment:
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY}
+      DATABASE_ENABLED: "false"
+      CACHE_REDIS_ENABLED: "false"
+      CACHE_LOCAL_ENABLED: "true"
+      WEBHOOK_GLOBAL_ENABLED: "true"
+      WEBHOOK_GLOBAL_URL: "http://backend:8000/whatsapp/webhook?token=${WEBHOOK_TOKEN}"
+    volumes:
+      - evolution-data:/evolution/instances
+    # Sem "ports": a Evolution API fica acessível apenas internamente.
+
+volumes:
+  postgres-data:
+  evolution-data:

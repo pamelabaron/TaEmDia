@@ -18,7 +18,13 @@ from app.modules.agente.agendador import iniciar_agendador, parar_agendador
 
 @asynccontextmanager
 async def ciclo_de_vida(app: FastAPI):
-    """Liga o agendador ao subir a API e desliga ao encerrar."""
+    """Valida a configuração, liga o agendador ao subir a API e desliga ao encerrar."""
+    if settings.em_producao:
+        problemas = settings.validar_para_producao()
+        if problemas:
+            raise RuntimeError(
+                "Configuração insegura para produção: " + "; ".join(problemas)
+            )
     if settings.AGENDADOR_ATIVO:
         iniciar_agendador()
     yield
@@ -35,7 +41,7 @@ app = FastAPI(
 # Libera o frontend Angular (localhost:4200) a chamar a API durante o desenvolvimento.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],
+    allow_origins=settings.origens_permitidas,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -30,3 +30,6 @@ Thumbs.db
 backend/htmlcov/
 backend/coverage.xml
 backend/.coverage
+
+# Certificados TLS (nunca versionar)
+docker/nginx/certs/*.pem

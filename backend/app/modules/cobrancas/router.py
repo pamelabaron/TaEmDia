@@ -26,6 +26,7 @@ from app.modules.cobrancas.service import (
 )
 from app.modules.templates.repository import TemplateRepository
 from app.modules.whatsapp.client import get_whatsapp_client
+from app.modules.whatsapp.webhook_auth import validar_token_webhook
 
 router = APIRouter(tags=["cobrancas"])
 
@@ -103,7 +104,8 @@ def desconectar_whatsapp(vendedor_id: uuid.UUID = Depends(get_current_vendedor_i
     get_whatsapp_client().desconectar()
 
 
-@router.post("/whatsapp/webhook", response_model=ResultadoRespostaOut)
+@router.post("/whatsapp/webhook", response_model=ResultadoRespostaOut,
+             dependencies=[Depends(validar_token_webhook)])
 def webhook_whatsapp(
     mensagem: MensagemRecebida,
     agente: AgenteService = Depends(get_agente_service),
