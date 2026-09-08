@@ -92,3 +92,64 @@ No Git Bash, prefixe com `MSYS_NO_PATHCONV=1` para o `-w /app` não ser converti
 - Rode os testes e confirme a saída antes de dizer que está pronto.
 - **Limpe os dados de teste** do banco (contas de teste usam e-mails `@teste.local`).
 - Nunca versione `.env` nem certificados.
+
+---
+
+# Zona morta
+
+Erros que **já foram cometidos neste projeto**. Cada linha custou tempo real.
+Consulte antes de agir na área correspondente.
+
+## Ambiente (Windows + Docker + terminal)
+
+| Armadilha | O que fazer |
+|---|---|
+| Heredoc grande no Bash quebra com aspas e acentos (`unexpected EOF`) | Escreva o arquivo com a ferramenta de escrita, não com `cat <<EOF` |
+| `perl -pi -e` com `\n` na substituição insere **quebra de linha real** e corrompe o arquivo | Use `sed`/`awk`, ou reescreva o arquivo inteiro |
+| `docker run -w /app` no Git Bash vira `C:/Program Files/Git/app` | Prefixe `MSYS_NO_PATHCONV=1` |
+| Terminal mostra `OlÃ¡` e quadradinho no lugar de emoji | É só exibição do console. **Não "conserte" o dado** — confira no navegador |
+| Captura de tela do navegador embutido congela num quadro antigo | Meça com `getBoundingClientRect()` via JS antes de concluir que há bug |
+| `docker compose restart frontend` pode deixar o `ng serve` morto | Use `up -d --force-recreate frontend` e aguarde ~45s |
+
+## Angular e Material
+
+| Armadilha | O que fazer |
+|---|---|
+| `as` em `@else if` **não compila** (`NG5002`) — quebrou o build duas vezes | O alias só vale no `@if` principal: use `@else { @if (x; as y) { … } }` |
+| O tema `azure-blue` **não existe** no Material 17 (só do 18 em diante) | Confira `node_modules/@angular/material/prebuilt-themes/` antes de escolher |
+| Rota nova acessada direto cai no `/painel` | Espere o `ng serve` recompilar; o curinga `**` engole rota que ainda não existe |
+| Tema próprio e páginas maiores estouram o limite de tamanho do build | Ajuste `budgets` no `angular.json` — não é erro de código |
+
+Use a favor: **estilos globais no `styles.scss` alcançam classes de componente**.
+Foi assim que os alvos de toque de todas as telas foram corrigidos de um lugar só.
+
+## Backend e testes
+
+| Armadilha | O que fazer |
+|---|---|
+| Chave estrangeira `NOT NULL` numa coluna que às vezes não tem dono (o resumo diário não pertence a um cliente) | Deixe `nullable` e use **OUTER JOIN** — com `JOIN` normal a linha some da listagem |
+| `TestClient.get()` não aceita `json=` | Só `post`/`patch`/`put` aceitam |
+| Substring traiçoeira: a URL `connectionState` **contém** `connect` | Compare o caminho completo (`/instance/connect/`) |
+| Texto de exemplo longo passa em validação de tamanho (`gere_uma_chave...` tem 40 caracteres) | Valide contra uma **lista de valores de exemplo**, não só pelo comprimento |
+
+## Sinais de alerta — pare e verifique
+
+Estes são os erros que mais custaram, porque passaram por "pronto":
+
+- **Troquei o `import` mas esqueci de trocar o uso.** A proteção das rotas ficou
+  inativa e quase foi declarada concluída. Depois de refatorar, **rode o caso que
+  deveria falhar** e veja falhar.
+- **Disse "responsivo" sem medir.** A auditoria seguinte achou 28 alvos de toque
+  abaixo do mínimo. Medir é barato; supor é caro.
+- **Dois estados diferentes ficaram com a mesma cor** ("Paga" e "Pendente", ambos
+  verdes). Ao mexer em cor, compare os estados lado a lado.
+
+| Pensamento | Realidade |
+|---|---|
+| "É uma mudança pequena, não precisa testar" | As três falhas acima vieram de mudanças pequenas |
+| "O código compila, então está certo" | Compilar não é funcionar. A proteção inativa compilava |
+| "Já testei uma tela, as outras seguem o padrão" | Não seguem. Meça cada uma |
+| "A captura de tela parece estranha, deve ser bug" | Confira por medição antes de sair corrigindo o que não está quebrado |
+
+**Antes de dizer "pronto"**, use `superpowers:verification-before-completion`:
+rode o comando, leia a saída, e só então afirme.
