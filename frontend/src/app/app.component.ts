@@ -25,8 +25,10 @@ const MENU: ItemMenu[] = [
     MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule,
   ],
   template: `
-    <mat-toolbar color="primary">
-      @if (auth.logado()) {
+    <!-- A barra só aparece depois do login: a página de apresentação tem
+         o cabeçalho próprio dela. -->
+    @if (auth.logado()) {
+      <mat-toolbar color="primary">
         <!-- Celular: menu sanduíche -->
         <button mat-icon-button class="so-mobile" [matMenuTriggerFor]="menuMobile" aria-label="Abrir menu">
           <mat-icon>menu</mat-icon>
@@ -43,41 +45,40 @@ const MENU: ItemMenu[] = [
             <span>Sair</span>
           </a>
         </mat-menu>
-      }
 
-      <span class="marca">TáEmDia</span>
+        <span class="marca"><mat-icon>task_alt</mat-icon> TáEmDia</span>
 
-      @if (auth.logado()) {
         <!-- Computador: menu na barra -->
         <nav class="so-desktop">
           @for (item of menu; track item.rota) {
             <a mat-button [routerLink]="item.rota" routerLinkActive="ativo">{{ item.titulo }}</a>
           }
         </nav>
-      }
 
-      <span class="espaco"></span>
+        <span class="espaco"></span>
 
-      @if (auth.logado()) {
         <button mat-button class="so-desktop" (click)="auth.sair()">
           <mat-icon>logout</mat-icon>
           Sair
         </button>
-      }
-    </mat-toolbar>
+      </mat-toolbar>
+    }
     <router-outlet></router-outlet>
   `,
   styles: [`
-    .marca { font-weight: 500; margin-right: 24px; }
+    .marca {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 500; margin-right: 24px;
+    }
     .espaco { flex: 1 1 auto; }
     nav a { margin-right: 4px; }
-    .ativo { background: rgba(255, 255, 255, 0.15); }
+    .ativo { background: rgba(255, 255, 255, 0.18); }
 
     /* Por padrão (computador): esconde o menu sanduíche. */
     .so-mobile { display: none; }
 
     /* Telas estreitas (celular): troca o menu da barra pelo sanduíche. */
-    @media (max-width: 820px) {
+    @media (max-width: 860px) {
       .so-desktop { display: none; }
       .so-mobile { display: inline-flex; }
       .marca { margin-right: 8px; }

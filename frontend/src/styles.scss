@@ -1,4 +1,96 @@
-/* You can add global styles to this file, and also import other style files */
+// ============================================================================
+// Tema do TáEmDia — verde e branco.
+// Uma paleta própria (o Angular Material não traz um verde adequado pronto).
+// ============================================================================
+@use '@angular/material' as mat;
+@use 'sass:map';
+
+@include mat.core();
+
+// --------------------------------------------------------------- paleta verde
+$taemdia-verde: (
+  50:  #e9f6ef,
+  100: #c8e9d7,
+  200: #a3dbbc,
+  300: #7ccda0,
+  400: #5cc18b,
+  500: #3cb676,
+  600: #34a76a,
+  700: #29945b,
+  800: #1f824d,
+  900: #0f6234,
+  contrast: (
+    50: rgba(0, 0, 0, 0.87), 100: rgba(0, 0, 0, 0.87), 200: rgba(0, 0, 0, 0.87),
+    300: rgba(0, 0, 0, 0.87), 400: rgba(0, 0, 0, 0.87), 500: #ffffff,
+    600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff,
+  ),
+);
+
+$primaria: mat.define-palette($taemdia-verde, 800, 400, 900);
+$destaque: mat.define-palette($taemdia-verde, 500, 300, 700);
+$aviso:    mat.define-palette(mat.$red-palette, 700);
+
+$tema: mat.define-light-theme((
+  color: (primary: $primaria, accent: $destaque, warn: $aviso),
+  typography: mat.define-typography-config(),
+  density: 0,
+));
+
+@include mat.all-component-themes($tema);
+
+// ------------------------------------------------- variáveis usadas nas telas
+:root {
+  // Marca
+  --verde-900: #0f6234;
+  --verde-800: #1f824d;
+  --verde-700: #29945b;
+  --verde-500: #3cb676;
+  --verde-100: #c8e9d7;
+  --verde-50:  #e9f6ef;
+
+  // Superfícies e texto
+  --fundo:        #f6faf7;
+  --superficie:   #ffffff;
+  --borda:        #e3ebe6;
+  --texto:        #1c2b23;
+  --texto-suave:  #5f7369;
+  --texto-fraco:  #8ba095;
+
+  // Cores com significado (mantidas para leitura rápida do status)
+  --sucesso:      #1f824d;
+  --sucesso-bg:   #e9f6ef;
+  --alerta:       #b26a00;
+  --alerta-bg:    #fff5e5;
+  --perigo:       #c0392b;
+  --perigo-bg:    #fdecea;
+  --info:         #29945b;
+  --info-bg:      #eef7f2;
+
+  // Neutro: para o que ainda nao aconteceu (ex.: parcela pendente).
+  // Fica proposital fora da familia verde, para nao se confundir com "pago".
+  --neutro:       #546b60;
+  --neutro-bg:    #eef1ef;
+
+  --sombra: 0 1px 3px rgba(15, 98, 52, 0.08), 0 1px 2px rgba(15, 98, 52, 0.06);
+  --raio: 12px;
+}
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: var(--fundo);
+  color: var(--texto);
+}
+
+// Cartões com cantos mais suaves e sombra leve, em vez do padrão do Material.
+.mat-mdc-card {
+  border-radius: var(--raio) !important;
+  box-shadow: var(--sombra) !important;
+  border: 1px solid var(--borda);
+}
+
+// Botões um pouco mais arredondados, combinando com os cartões.
+.mat-mdc-raised-button, .mat-mdc-outlined-button, .mat-mdc-button {
+  border-radius: 8px !important;
+}

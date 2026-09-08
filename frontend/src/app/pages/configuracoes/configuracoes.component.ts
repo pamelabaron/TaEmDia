@@ -131,25 +131,25 @@ const HORARIOS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00',
   `,
   styles: [`
     .pagina { max-width: 720px; margin: 0 auto; padding: 16px; }
-    .ajuda { color: #666; margin-bottom: 16px; }
+    .ajuda { color: var(--texto-suave); margin-bottom: 16px; }
     .centro { display: flex; justify-content: center; padding: 32px; }
     .bloco { padding: 16px 20px; margin-bottom: 16px; }
-    .bloco h3 { margin: 0 0 8px; color: #1565c0; }
+    .bloco h3 { margin: 0 0 8px; color: var(--verde-800); }
     .linha {
       display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; padding: 14px 0; border-bottom: 1px solid #eee;
+      gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--borda);
     }
     .linha:last-of-type { border-bottom: none; }
     .texto { display: flex; flex-direction: column; }
     .rotulo { font-weight: 500; }
-    .descricao { font-size: 0.8rem; color: #777; margin-top: 2px; }
+    .descricao { font-size: 0.8rem; color: var(--texto-suave); margin-top: 2px; }
     .campo-curto { width: 110px; margin-bottom: -1.25em; }
-    .nota { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #777; margin: 12px 0 0; }
+    .nota { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--texto-suave); margin: 12px 0 0; }
     .acoes { display: flex; justify-content: flex-end; }
     @media (max-width: 600px) {
       .linha { flex-direction: column; align-items: flex-start; }
-      .bolinha { width: 12px; height: 12px; border-radius: 50%; background: #c62828; flex: none; }
-    .bolinha.on { background: #2e7d32; }
+      .bolinha { width: 12px; height: 12px; border-radius: 50%; background: var(--perigo); flex: none; }
+    .bolinha.on { background: var(--sucesso); }
     .qr { text-align: center; padding: 12px 0; }
     .qr img { max-width: 240px; width: 100%; }
     .acoes button { width: 100%; }

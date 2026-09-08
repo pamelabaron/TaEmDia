@@ -90,22 +90,22 @@ const ROTULO: Record<string, string> = {
     .card { display: flex; flex-direction: column; align-items: center; padding: 16px; }
     .card mat-icon { font-size: 36px; height: 36px; width: 36px; }
     .card .num { font-size: 2rem; font-weight: 700; }
-    .card .rot { color: #666; font-size: 0.85rem; }
-    .card.bom { color: #2e7d32; } .card.regular { color: #f9a825; } .card.inadimplente { color: #c62828; }
+    .card .rot { color: var(--texto-suave); font-size: 0.85rem; }
+    .card.bom { color: var(--sucesso); } .card.regular { color: #f9a825; } .card.inadimplente { color: var(--perigo); }
     .lista { padding: 8px 16px; }
-    .linha { display: flex; align-items: center; gap: 12px; padding: 12px 4px; border-bottom: 1px solid #eee; }
+    .linha { display: flex; align-items: center; gap: 12px; padding: 12px 4px; border-bottom: 1px solid var(--borda); }
     .info { min-width: 180px; display: flex; flex-direction: column; gap: 4px; }
     .nome { font-weight: 500; }
     .tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; width: fit-content; color: #fff; }
-    .tag.bom { background: #2e7d32; } .tag.regular { background: #f9a825; }
-    .tag.inadimplente { background: #c62828; } .tag.sem_historico { background: #9e9e9e; }
-    .barra-wrap { flex: 1; height: 10px; background: #eee; border-radius: 5px; overflow: hidden; }
+    .tag.bom { background: var(--sucesso); } .tag.regular { background: #f9a825; }
+    .tag.inadimplente { background: var(--perigo); } .tag.sem_historico { background: #9e9e9e; }
+    .barra-wrap { flex: 1; height: 10px; background: var(--borda); border-radius: 5px; overflow: hidden; }
     .barra { height: 100%; border-radius: 5px; }
-    .barra.bom { background: #2e7d32; } .barra.regular { background: #f9a825; }
-    .barra.inadimplente { background: #c62828; } .barra.sem_historico { background: #bdbdbd; }
-    .perc { width: 44px; text-align: right; font-size: 0.85rem; color: #555; }
-    .vazio { text-align: center; color: #888; padding: 24px; }
-    .clicavel { cursor: pointer; } .clicavel:hover { background: #f5f5f5; }
+    .barra.bom { background: var(--sucesso); } .barra.regular { background: #f9a825; }
+    .barra.inadimplente { background: var(--perigo); } .barra.sem_historico { background: #bdbdbd; }
+    .perc { width: 44px; text-align: right; font-size: 0.85rem; color: var(--texto-suave); }
+    .vazio { text-align: center; color: var(--texto-fraco); padding: 24px; }
+    .clicavel { cursor: pointer; } .clicavel:hover { background: var(--verde-50); }
   `],
 })
 export class RankingComponent implements OnInit {

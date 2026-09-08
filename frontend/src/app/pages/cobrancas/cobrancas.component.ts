@@ -63,24 +63,24 @@ const ROTULO_TIPO: Record<string, string> = {
   `,
   styles: [`
     .pagina { max-width: 760px; margin: 0 auto; padding: 16px; }
-    .ajuda { color: #666; margin-bottom: 8px; }
+    .ajuda { color: var(--texto-suave); margin-bottom: 8px; }
     .centro { display: flex; justify-content: center; padding: 32px; }
-    .vazio { text-align: center; color: #888; padding: 32px; }
+    .vazio { text-align: center; color: var(--texto-fraco); padding: 32px; }
     .item { padding: 14px 16px; margin: 12px 0; }
     .topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
     .cliente { font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .cliente:hover { text-decoration: underline; }
     .direita { display: flex; align-items: center; gap: 8px; }
-    .etiqueta { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: #e0e0e0; color: #444; }
-    .tipo-atraso { background: #ffe0e0; color: #c62828; }
-    .tipo-lembrete { background: #e3f2fd; color: #1565c0; }
-    .tipo-vencimento { background: #fff4e0; color: #e65100; }
-    .tipo-manual { background: #ede7f6; color: #5e35b1; }
-    .tipo-resumo { background: #e8f5e9; color: #2e7d32; }
-    .status { font-size: 0.75rem; color: #2e7d32; }
-    .status.falhou { color: #e65100; }
-    .mensagem { white-space: pre-wrap; color: #444; font-size: 0.88rem; margin: 8px 0 4px; }
-    .data { font-size: 0.72rem; color: #999; }
+    .etiqueta { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: var(--borda); color: var(--texto); }
+    .tipo-atraso { background: var(--perigo-bg); color: var(--perigo); }
+    .tipo-lembrete { background: var(--info-bg); color: var(--verde-800); }
+    .tipo-vencimento { background: var(--alerta-bg); color: var(--alerta); }
+    .tipo-manual { background: var(--verde-50); color: var(--verde-700); }
+    .tipo-resumo { background: var(--sucesso-bg); color: var(--sucesso); }
+    .status { font-size: 0.75rem; color: var(--sucesso); }
+    .status.falhou { color: var(--alerta); }
+    .mensagem { white-space: pre-wrap; color: var(--texto); font-size: 0.88rem; margin: 8px 0 4px; }
+    .data { font-size: 0.72rem; color: var(--texto-fraco); }
   `],
 })
 export class CobrancasComponent implements OnInit {

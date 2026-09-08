@@ -88,9 +88,9 @@ import { Cliente, ClientesService } from '../../core/clientes.service';
     .campo, .busca { width: 100%; }
     .busca { margin-bottom: 8px; }
     .centro { display: flex; justify-content: center; padding: 32px; }
-    .vazio { text-align: center; color: #888; padding: 24px; }
+    .vazio { text-align: center; color: var(--texto-fraco); padding: 24px; }
     .clicavel { cursor: pointer; }
-    .clicavel:hover { background: #f5f5f5; }
+    .clicavel:hover { background: var(--verde-50); }
   `],
 })
 export class ClientesComponent implements OnInit {

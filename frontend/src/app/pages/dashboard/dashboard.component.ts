@@ -87,25 +87,25 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     .cabecalho h2 { margin: 0; }
     .centro { display: flex; justify-content: center; padding: 32px; }
     .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .kpi { display: flex; flex-direction: column; padding: 16px; border-left: 4px solid #1565c0; }
-    .kpi .rotulo { font-size: 0.8rem; color: #777; }
+    .kpi { display: flex; flex-direction: column; padding: 16px; border-left: 4px solid var(--verde-800); }
+    .kpi .rotulo { font-size: 0.8rem; color: var(--texto-suave); }
     .kpi .valor { font-size: 1.5rem; font-weight: 600; margin-top: 4px; }
-    .kpi.receber { border-color: #1565c0; } .kpi.receber .valor { color: #1565c0; }
-    .kpi.recebido { border-color: #2e7d32; } .kpi.recebido .valor { color: #2e7d32; }
-    .kpi.atraso { border-color: #e65100; } .kpi.atraso .valor { color: #e65100; }
-    .kpi.inadimplentes { border-color: #c62828; } .kpi.inadimplentes .valor { color: #c62828; }
+    .kpi.receber { border-color: var(--verde-800); } .kpi.receber .valor { color: var(--verde-800); }
+    .kpi.recebido { border-color: var(--sucesso); } .kpi.recebido .valor { color: var(--sucesso); }
+    .kpi.atraso { border-color: var(--alerta); } .kpi.atraso .valor { color: var(--alerta); }
+    .kpi.inadimplentes { border-color: var(--perigo); } .kpi.inadimplentes .valor { color: var(--perigo); }
     .bloco { padding: 16px; margin-bottom: 16px; }
     .bloco h3 { margin: 0 0 16px; }
     .grafico { display: flex; align-items: flex-end; gap: 16px; height: 160px; padding-top: 20px; }
     .coluna { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; height: 100%; }
-    .cifra { font-size: 0.7rem; color: #555; margin-bottom: 4px; }
-    .barra { width: 70%; max-width: 48px; background: #2e7d32; border-radius: 4px 4px 0 0; min-height: 2px; transition: height .3s; }
-    .mes { font-size: 0.75rem; color: #777; margin-top: 6px; }
-    .vazio { color: #888; }
-    .linha-atraso { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid #eee; }
+    .cifra { font-size: 0.7rem; color: var(--texto-suave); margin-bottom: 4px; }
+    .barra { width: 70%; max-width: 48px; background: var(--sucesso); border-radius: 4px 4px 0 0; min-height: 2px; transition: height .3s; }
+    .mes { font-size: 0.75rem; color: var(--texto-suave); margin-top: 6px; }
+    .vazio { color: var(--texto-fraco); }
+    .linha-atraso { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--borda); }
     .linha-atraso span { display: flex; align-items: center; gap: 6px; }
-    .valor-atraso { color: #c62828; font-weight: 500; }
-    .clicavel { cursor: pointer; } .clicavel:hover { background: #f5f5f5; }
+    .valor-atraso { color: var(--perigo); font-weight: 500; }
+    .clicavel { cursor: pointer; } .clicavel:hover { background: var(--verde-50); }
   `],
 })
 export class DashboardComponent implements OnInit {
