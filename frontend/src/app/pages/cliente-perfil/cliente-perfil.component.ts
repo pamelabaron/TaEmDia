@@ -189,7 +189,7 @@ export class ClientePerfilComponent implements OnInit {
       data_primeira_parcela: this.nova.data_primeira_parcela,
     }).subscribe({
       next: () => {
-        this.snack.open('Venda registrada!', 'OK', { duration: 3000 });
+        this.snack.open('Venda registrada', 'OK', { duration: 3000 });
         this.nova = { valor_total: null, num_parcelas: 1, data_primeira_parcela: '' };
         this.mostrarForm.set(false); this.salvando.set(false);
         this.carregar();
@@ -200,7 +200,7 @@ export class ClientePerfilComponent implements OnInit {
 
   pagar(parcelaId: string): void {
     this.service.pagarParcela(parcelaId).subscribe({
-      next: () => { this.snack.open('Pagamento confirmado!', 'OK', { duration: 3000 }); this.carregar(); },
+      next: () => { this.snack.open('Pagamento confirmado', 'OK', { duration: 3000 }); this.carregar(); },
       error: () => this.snack.open('Erro ao confirmar pagamento.', 'OK', { duration: 4000 }),
     });
   }
@@ -210,7 +210,7 @@ export class ClientePerfilComponent implements OnInit {
     this.cobrancas.dispararManual(parcelaId).subscribe({
       next: () => {
         this.cobrando.set(false);
-        this.snack.open("Cobrança enviada pelo WhatsApp!", "OK", { duration: 3000 });
+        this.snack.open("Cobrança enviada pelo WhatsApp", "OK", { duration: 3000 });
       },
       error: (erro) => {
         this.cobrando.set(false);

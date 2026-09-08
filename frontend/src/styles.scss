@@ -30,9 +30,13 @@ $primaria: mat.define-palette($taemdia-verde, 800, 400, 900);
 $destaque: mat.define-palette($taemdia-verde, 500, 300, 700);
 $aviso:    mat.define-palette(mat.$red-palette, 700);
 
+// Plus Jakarta Sans no corpo: mais caráter que a Roboto padrão e legível em
+// tamanho pequeno. Os títulos usam Outfit (definida mais abaixo).
+$fonte-corpo: '"Plus Jakarta Sans", "Segoe UI", Roboto, sans-serif';
+
 $tema: mat.define-light-theme((
   color: (primary: $primaria, accent: $destaque, warn: $aviso),
-  typography: mat.define-typography-config(),
+  typography: mat.define-typography-config($font-family: $fonte-corpo),
   density: 0,
 ));
 
@@ -76,23 +80,101 @@ $tema: mat.define-light-theme((
 }
 
 html, body { height: 100%; }
+html { scroll-behavior: smooth; }
+
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: "Plus Jakarta Sans", "Segoe UI", Roboto, sans-serif;
   background: var(--fundo);
   color: var(--texto);
+  -webkit-font-smoothing: antialiased;
 }
 
-// Cartões com cantos mais suaves e sombra leve, em vez do padrão do Material.
+// Títulos com fonte própria, peso alto e entrelinha curta — é o que dá presença.
+h1, h2, h3, .fonte-titulo {
+  font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  text-wrap: balance; // evita palavra órfã sozinha na última linha
+}
+
+// Sistema financeiro: todo número precisa alinhar coluna a coluna.
+// Sem isso, "R$ 1.250,00" e "R$ 947,90" dançam na tabela.
+.valor, .cifra, .kpi .valor, .saldo .valor, .numero strong,
+table td, table th, .valor-atraso, .percentual, input[type="number"] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+// ============================================================================
+// Superfícies: degradês sutis e textura.
+//
+// Degradê linear de 45° em bloco chapado é a assinatura visual mais óbvia de
+// interface gerada por IA. Aqui usamos degradês RADIAIS em camadas, com pouca
+// diferença entre as paradas, mais um grão fino por cima — que é o que quebra a
+// sensação de "vetor plano".
+// ============================================================================
+
+// Grão: SVG embutido, sem arquivo nem biblioteca. Aplique a classe `com-grao`
+// em qualquer bloco colorido. Fica por cima, sem capturar cliques.
+.com-grao { position: relative; }
+.com-grao::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)' opacity='0.06'/%3E%3C/svg%3E");
+}
+
+body {
+  // Duas luzes verdes muito fracas nos cantos, em vez de fundo chapado.
+  background-color: var(--fundo);
+  background-image:
+    radial-gradient(60rem 40rem at 12% -10%, rgba(60, 182, 118, 0.07), transparent 60%),
+    radial-gradient(50rem 36rem at 100% 0%, rgba(31, 130, 77, 0.05), transparent 55%);
+  background-attachment: fixed;
+}
+
+// Cartões: degradê quase imperceptível do topo para a base, borda e sombra
+// esverdeadas (sombra preta genérica é outra marca de design apressado).
 .mat-mdc-card {
+  position: relative;
   border-radius: var(--raio) !important;
-  box-shadow: var(--sombra) !important;
   border: 1px solid var(--borda);
+  background-image: linear-gradient(180deg, #ffffff 0%, #fcfefd 100%) !important;
+  box-shadow: var(--sombra) !important;
+}
+
+// Barra superior: profundidade em vez de verde chapado.
+.mat-toolbar.mat-primary {
+  background-image:
+    radial-gradient(60rem 20rem at 15% 0%, rgba(255, 255, 255, 0.10), transparent 70%),
+    linear-gradient(180deg, var(--verde-700) 0%, var(--verde-800) 100%);
+  box-shadow: 0 1px 0 rgba(15, 98, 52, 0.25);
 }
 
 // Botões um pouco mais arredondados, combinando com os cartões.
-.mat-mdc-raised-button, .mat-mdc-outlined-button, .mat-mdc-button {
-  border-radius: 8px !important;
+.mat-mdc-raised-button, .mat-mdc-outlined-button, .mat-mdc-button,
+.mat-mdc-unelevated-button {
+  border-radius: 10px !important;
+  font-weight: 600;
+  letter-spacing: 0;
+  transition: transform 120ms ease, box-shadow 200ms ease, background-color 200ms ease;
+}
+
+// Retorno físico ao clicar: sem isso o botão parece "morto".
+// Usa transform (acelerado pela placa de vídeo), não width/height.
+.mat-mdc-raised-button:active, .mat-mdc-outlined-button:active,
+.mat-mdc-button:active, .mat-mdc-unelevated-button:active {
+  transform: scale(0.975);
+}
+
+// Foco visível para quem navega pelo teclado — exigência de acessibilidade.
+:focus-visible {
+  outline: 2px solid var(--verde-700);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 // ============================================================================

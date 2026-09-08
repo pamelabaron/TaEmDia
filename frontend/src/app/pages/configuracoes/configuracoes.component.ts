@@ -207,7 +207,7 @@ export class ConfiguracoesComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.salvando.set(false);
-        this.snack.open('Configurações salvas!', 'OK', { duration: 3000 });
+        this.snack.open('Configurações salvas', 'OK', { duration: 3000 });
       },
       error: () => {
         this.salvando.set(false);

@@ -67,7 +67,7 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
         <mat-card class="bloco">
           <h3>Clientes em atraso</h3>
           @if (d.clientes_em_atraso.length === 0) {
-            <p class="vazio">Nenhum cliente em atraso. 🎉</p>
+            <p class="vazio">Nenhum cliente em atraso.</p>
           } @else {
             @for (c of d.clientes_em_atraso; track c.id) {
               <div class="linha-atraso clicavel" (click)="abrirPerfil(c.id)">

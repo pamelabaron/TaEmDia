@@ -86,7 +86,7 @@ const PASSOS: Passo[] = [
         </div>
       </section>
 
-      <section class="faixa problema">
+      <section class="faixa problema com-grao">
         <h2>Cobrar manualmente custa caro</h2>
         <p class="secao-texto">
           Em pesquisa com pequenos empreendedores que vendem parcelado, o retrato foi este:
@@ -162,7 +162,7 @@ const PASSOS: Passo[] = [
         </div>
       </section>
 
-      <section class="chamada">
+      <section class="chamada com-grao">
         <h2>Comece agora</h2>
         <p>Leva menos de um minuto para cadastrar o primeiro cliente.</p>
         <button mat-flat-button class="btn-grande botao-claro" (click)="entrar()">
@@ -248,7 +248,13 @@ const PASSOS: Passo[] = [
     .secao-texto { color: var(--texto-suave); margin: 0 auto 40px; max-width: 40em; font-size: 1.02rem; }
 
     /* dados da pesquisa */
-    .problema { background: var(--verde-900); max-width: none; }
+    .problema {
+      position: relative; overflow: hidden; max-width: none;
+      background-color: var(--verde-900);
+      background-image:
+        radial-gradient(44rem 30rem at 78% 8%, rgba(41, 148, 91, 0.40), transparent 62%),
+        radial-gradient(30rem 22rem at 6% 100%, rgba(60, 182, 118, 0.22), transparent 58%);
+    }
     .problema h2, .problema .secao-texto { color: #fff; }
     .problema .secao-texto { opacity: 0.85; }
     .numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; max-width: 900px; margin: 0 auto; }
@@ -270,11 +276,20 @@ const PASSOS: Passo[] = [
     .passo h3 { font-size: 1rem; margin: 0 0 6px; }
     .passo p { font-size: 0.88rem; color: var(--texto-suave); margin: 0; line-height: 1.55; }
 
-    /* recursos */
-    .recursos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; text-align: left; }
+    /* Recursos em duas colunas desencontradas.
+       Três colunas iguais é o arranjo mais previsível que existe; o desencontro
+       cria ritmo e faz o olho percorrer em ziguezague. */
+    .recursos {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 22px 24px; text-align: left; padding-bottom: 34px;
+    }
+    /* Desencontro com margem (não transform): funciona em qualquer motor de
+       renderização e não depende de composição de camadas. */
+    .recursos > :nth-child(even) { margin-top: 34px; }
     .recurso {
       background: var(--superficie); border: 1px solid var(--borda);
-      border-radius: var(--raio); padding: 26px;
+      border-radius: var(--raio); padding: 28px 26px;
+      transition: transform 250ms ease, box-shadow 250ms ease;
     }
     .recurso-icone {
       display: flex; align-items: center; justify-content: center;
@@ -291,9 +306,14 @@ const PASSOS: Passo[] = [
     .garantia h3 { font-size: 1rem; margin: 0 0 6px; }
     .garantia p { font-size: 0.88rem; color: var(--texto-suave); margin: 0; line-height: 1.55; }
 
-    /* chamada final */
+    /* Chamada final: luzes radiais sobre o verde escuro, em vez do degradê
+       linear de 45° — que é a assinatura mais reconhecível de tela gerada por IA. */
     .chamada {
-      background: linear-gradient(135deg, var(--verde-800), var(--verde-900));
+      position: relative; overflow: hidden;
+      background-color: var(--verde-900);
+      background-image:
+        radial-gradient(38rem 26rem at 22% 0%, rgba(60, 182, 118, 0.42), transparent 62%),
+        radial-gradient(32rem 24rem at 88% 110%, rgba(41, 148, 91, 0.38), transparent 60%);
       padding: 76px 28px; text-align: center;
     }
     .chamada h2 { color: #fff; font-size: 1.9rem; margin: 0 0 10px; }
@@ -313,11 +333,15 @@ const PASSOS: Passo[] = [
       .capa { grid-template-columns: 1fr; gap: 40px; padding: 44px 20px 60px; text-align: center; }
       .capa h1 { font-size: 2rem; }
       .subtitulo { margin-left: auto; margin-right: auto; }
-      .recursos, .garantias { grid-template-columns: repeat(2, 1fr); }
+      .recursos { grid-template-columns: repeat(2, 1fr); }
+      .garantias { grid-template-columns: repeat(2, 1fr); }
       .passos { grid-template-columns: repeat(2, 1fr); }
       .faixa { padding: 52px 20px; }
     }
     @media (max-width: 600px) {
+      /* Uma coluna: o desencontro deixa de fazer sentido e vira buraco. */
+      .recursos > :nth-child(even) { margin-top: 0; }
+      .recursos { padding-bottom: 0; }
       .topo { padding: 10px 16px; }
       .capa h1 { font-size: 1.75rem; }
       .numeros, .recursos, .garantias, .passos { grid-template-columns: 1fr; }

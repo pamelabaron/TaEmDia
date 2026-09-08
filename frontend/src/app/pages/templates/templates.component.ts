@@ -13,9 +13,9 @@ import { Template, TemplatesService } from '../../core/templates.service';
 
 const VARIAVEIS = ['nome_cliente', 'valor_parcela', 'data_vencimento', 'dias_atraso'];
 const EXEMPLO: Record<string, string> = {
-  nome_cliente: 'Maria Silva',
-  valor_parcela: 'R$ 100,00',
-  data_vencimento: '10/08/2026',
+  nome_cliente: 'Rosangela Ferreira',
+  valor_parcela: 'R$ 147,90',
+  data_vencimento: '18/09/2026',
   dias_atraso: '3',
 };
 const TIPO_LABEL: Record<string, string> = {
@@ -126,7 +126,7 @@ export class TemplatesComponent implements OnInit {
   salvar(t: Template): void {
     this.salvando.set(true);
     this.service.editar(t.id, { titulo: t.titulo, corpo: t.corpo, ativo: t.ativo }).subscribe({
-      next: () => { this.salvando.set(false); this.snack.open('Mensagem salva!', 'OK', { duration: 3000 }); },
+      next: () => { this.salvando.set(false); this.snack.open('Mensagem salva', 'OK', { duration: 3000 }); },
       error: () => { this.salvando.set(false); this.snack.open('Erro ao salvar.', 'OK', { duration: 4000 }); },
     });
   }

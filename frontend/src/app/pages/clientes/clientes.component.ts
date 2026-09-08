@@ -147,7 +147,7 @@ export class ClientesComponent implements OnInit {
       endereco: this.novo.endereco.trim() || null,
     }).subscribe({
       next: () => {
-        this.snack.open('Cliente cadastrado!', 'OK', { duration: 3000 });
+        this.snack.open('Cliente cadastrado', 'OK', { duration: 3000 });
         this.novo = { nome: '', whatsapp_numero: '', cpf: '', endereco: '' };
         this.mostrarForm.set(false);
         this.salvando.set(false);
