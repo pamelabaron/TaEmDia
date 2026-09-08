@@ -105,7 +105,7 @@ const ROTULO: Record<string, string> = {
     .barra.inadimplente { background: var(--perigo); } .barra.sem_historico { background: #bdbdbd; }
     .perc { width: 44px; text-align: right; font-size: 0.85rem; color: var(--texto-suave); }
     .vazio { text-align: center; color: var(--texto-fraco); padding: 24px; }
-    .clicavel { cursor: pointer; } .clicavel:hover { background: var(--verde-50); }
+    .clicavel { cursor: pointer; }
   `],
 })
 export class RankingComponent implements OnInit {

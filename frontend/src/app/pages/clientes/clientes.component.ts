@@ -90,7 +90,7 @@ import { Cliente, ClientesService } from '../../core/clientes.service';
     .centro { display: flex; justify-content: center; padding: 32px; }
     .vazio { text-align: center; color: var(--texto-fraco); padding: 24px; }
     .clicavel { cursor: pointer; }
-    .clicavel:hover { background: var(--verde-50); }
+
   `],
 })
 export class ClientesComponent implements OnInit {

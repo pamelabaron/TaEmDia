@@ -94,3 +94,75 @@ body {
 .mat-mdc-raised-button, .mat-mdc-outlined-button, .mat-mdc-button {
   border-radius: 8px !important;
 }
+
+// ============================================================================
+// Adaptação por tipo de entrada (toque x mouse) e por dispositivo.
+//
+// O que decide o tamanho dos alvos não é a largura da tela, e sim o tipo de
+// ponteiro: um notebook com tela sensível ao toque precisa de alvos grandes
+// mesmo tendo tela larga. Por isso usamos `pointer` e `hover` em vez de só
+// `max-width`.
+// ============================================================================
+
+// --------------------------------------------------- dedo (toque / caneta)
+@media (pointer: coarse) {
+  // Alvo mínimo de 44x44px: o menor toque confortável com o polegar.
+  .mat-mdc-button,
+  .mat-mdc-raised-button,
+  .mat-mdc-outlined-button,
+  .mat-mdc-unelevated-button {
+    min-height: 44px !important;
+  }
+
+  .mat-mdc-icon-button {
+    width: 48px !important;
+    height: 48px !important;
+    padding: 12px !important;
+  }
+
+  // Itens de lista e de menu ficam mais altos e mais fáceis de acertar.
+  .mat-mdc-list-item { min-height: 56px !important; }
+  .mat-mdc-menu-item { min-height: 48px !important; }
+  .mat-mdc-tab { min-height: 48px !important; }
+
+  // O interruptor desenha um trilho de apenas 14px. O Material já cria uma área
+  // tocável de 40px em volta; aqui ela cresce para 44px sem mexer no desenho.
+  .mat-mdc-slide-toggle button.mdc-switch {
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  // Mais respiro entre controles, para reduzir toque errado.
+  .mat-mdc-card .mat-mdc-button-base + .mat-mdc-button-base { margin-left: 8px; }
+}
+
+// ------------------------------------------------------ mouse / trackpad
+// Efeitos de passar o mouse só existem onde há mouse de verdade: em telas de
+// toque o `:hover` "gruda" depois do toque e confunde.
+@media (hover: hover) and (pointer: fine) {
+  .clicavel:hover { background: var(--verde-50); }
+  .cliente:hover { text-decoration: underline; }
+}
+
+// ------------------------------------------- celulares com entalhe (notch)
+// Evita que conteúdo fique embaixo do entalhe ou da barra inferior do sistema.
+@supports (padding: max(0px)) {
+  .mat-toolbar {
+    padding-left: max(16px, env(safe-area-inset-left)) !important;
+    padding-right: max(16px, env(safe-area-inset-right)) !important;
+  }
+  .pagina {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+// ------------------------------------------------------ telas bem estreitas
+// Em 320px cada pixel conta: reduz o respiro lateral e evita títulos quebrados.
+@media (max-width: 360px) {
+  .pagina { padding-left: 12px; padding-right: 12px; }
+  h2 { font-size: 1.35rem; }
+  h3 { font-size: 1rem; }
+}

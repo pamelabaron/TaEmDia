@@ -69,7 +69,7 @@ const ROTULO_TIPO: Record<string, string> = {
     .item { padding: 14px 16px; margin: 12px 0; }
     .topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
     .cliente { font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-    .cliente:hover { text-decoration: underline; }
+
     .direita { display: flex; align-items: center; gap: 8px; }
     .etiqueta { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: var(--borda); color: var(--texto); }
     .tipo-atraso { background: var(--perigo-bg); color: var(--perigo); }

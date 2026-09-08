@@ -89,7 +89,7 @@ const TIPO_LABEL: Record<string, string> = {
     .campo { width: 100%; }
     .variaveis { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
     .variaveis .rot { color: var(--texto-suave); font-size: 0.85rem; }
-    .chip-var { font-size: 0.75rem; min-width: 0; padding: 0 10px; line-height: 30px; }
+    .chip-var { font-size: 0.75rem; min-width: 0; padding: 0 12px; }
     .preview { background: var(--verde-50); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
     .preview .rot { font-size: 0.75rem; color: var(--verde-800); font-weight: 500; }
     .preview p { margin: 4px 0 0; white-space: pre-wrap; }

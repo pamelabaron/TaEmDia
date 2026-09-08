@@ -105,7 +105,7 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     .linha-atraso { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--borda); }
     .linha-atraso span { display: flex; align-items: center; gap: 6px; }
     .valor-atraso { color: var(--perigo); font-weight: 500; }
-    .clicavel { cursor: pointer; } .clicavel:hover { background: var(--verde-50); }
+    .clicavel { cursor: pointer; }
   `],
 })
 export class DashboardComponent implements OnInit {
