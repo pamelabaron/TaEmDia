@@ -109,6 +109,8 @@ Consulte antes de agir na área correspondente.
 | `docker run -w /app` no Git Bash vira `C:/Program Files/Git/app` | Prefixe `MSYS_NO_PATHCONV=1` |
 | Terminal mostra `OlÃ¡` e quadradinho no lugar de emoji | É só exibição do console. **Não "conserte" o dado** — confira no navegador |
 | Captura de tela do navegador embutido congela num quadro antigo | Meça com `getBoundingClientRect()` via JS antes de concluir que há bug |
+| No navegador embutido, `transform` **não renderiza** (nem inline com `!important`), mas `margin` funciona | Se um deslocamento "não aplica", teste com margem antes de supor que o CSS está errado |
+| `getComputedStyle` durante uma transição devolve o **valor inicial**, não o final | Meça posição real com `getBoundingClientRect()` |
 | `docker compose restart frontend` pode deixar o `ng serve` morto | Use `up -d --force-recreate frontend` e aguarde ~45s |
 
 ## Angular e Material
