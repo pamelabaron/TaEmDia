@@ -246,20 +246,9 @@ const PASSOS: Passo[] = [
     @media (prefers-reduced-motion: reduce) {
       .capa-texto > *, .capa-visual { animation: none; }
     }
-    /* "em dia" não é só colorido: ganha um traço lima por trás, como marca de
-       caneta. Cor sozinha some no meio da frase. */
-    .destaque {
-      position: relative;
-      color: var(--verde-900);
-      white-space: nowrap;
-    }
-    .destaque::after {
-      content: "";
-      position: absolute; left: -0.06em; right: -0.06em; bottom: 0.06em;
-      height: 0.34em; z-index: -1; border-radius: 0.1em;
-      background-image: linear-gradient(100deg,
-        var(--lima-400) 0%, var(--lima-300) 58%, rgba(195, 242, 94, 0.35) 100%);
-    }
+    /* Sem traço atrás: o destaque é a própria cor, no verde mais saturado da
+       paleta, que já se separa do texto escuro em volta. */
+    .destaque { color: var(--verde-600); }
     .subtitulo { font-size: 1.1rem; color: var(--texto-suave); line-height: 1.6; margin: 0 0 28px; max-width: 30em; }
     .btn-grande { height: 50px; padding: 0 28px !important; font-size: 1rem; }
     .btn-grande mat-icon { margin-right: 8px; }
