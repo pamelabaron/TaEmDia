@@ -10,6 +10,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Template, TemplatesService } from '../../core/templates.service';
+import { bloqueadoPorAssinatura } from '../../core/erros';
 
 const VARIAVEIS = ['nome_cliente', 'valor_parcela', 'data_vencimento', 'dias_atraso'];
 const EXEMPLO: Record<string, string> = {
@@ -127,7 +128,11 @@ export class TemplatesComponent implements OnInit {
     this.salvando.set(true);
     this.service.editar(t.id, { titulo: t.titulo, corpo: t.corpo, ativo: t.ativo }).subscribe({
       next: () => { this.salvando.set(false); this.snack.open('Mensagem salva', 'OK', { duration: 3000 }); },
-      error: () => { this.salvando.set(false); this.snack.open('Erro ao salvar.', 'OK', { duration: 4000 }); },
+      error: (erro) => {
+        this.salvando.set(false);
+        if (bloqueadoPorAssinatura(erro)) return;
+        this.snack.open('Erro ao salvar.', 'OK', { duration: 4000 });
+      },
     });
   }
 }

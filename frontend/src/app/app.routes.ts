@@ -47,5 +47,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/configuracoes/configuracoes.component').then((m) => m.ConfiguracoesComponent),
   },
+  {
+    path: 'assinaturas',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/assinaturas/assinaturas.component').then((m) => m.AssinaturasComponent),
+  },
   { path: '**', redirectTo: 'painel' },
 ];

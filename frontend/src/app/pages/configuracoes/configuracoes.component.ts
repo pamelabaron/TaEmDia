@@ -11,6 +11,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Configuracao, ConfiguracoesService } from '../../core/configuracoes.service';
 import { CobrancasService, StatusWhatsApp } from '../../core/cobrancas.service';
+import { MinhaAssinaturaComponent } from './minha-assinatura.component';
+import { bloqueadoPorAssinatura } from '../../core/erros';
 
 // Horários possíveis para o resumo diário (fim do dia, conforme o RFC).
 const HORARIOS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00'];
@@ -21,15 +23,28 @@ const HORARIOS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00',
   imports: [
     FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule,
     MatButtonModule, MatIconModule, MatSlideToggleModule, MatProgressSpinnerModule,
+    MinhaAssinaturaComponent,
   ],
   template: `
     <div class="pagina">
       <h2>Configurações</h2>
       <p class="ajuda">Ajuste como o sistema cobra seus clientes e como você recebe os avisos.</p>
 
+      <app-minha-assinatura />
+
       <mat-card class="bloco">
         <h3>WhatsApp</h3>
-        @if (whats(); as w) {
+        @if (whatsBloqueado()) {
+          <div class="linha">
+            <div class="texto">
+              <span class="rotulo">Disponível com assinatura ativa</span>
+              <span class="descricao">
+                Renove para conectar seu número e voltar a enviar cobranças.
+              </span>
+            </div>
+          </div>
+        } @else {
+          @if (whats(); as w) {
           <div class="linha">
             <div class="texto">
               <span class="rotulo">
@@ -50,8 +65,9 @@ const HORARIOS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00',
           @if (w.conectado && !w.modo_simulador) {
             <button mat-stroked-button color="warn" (click)="desconectar()">Desconectar</button>
           }
-        } @else {
-          <p class="descricao">Verificando conexão…</p>
+          } @else {
+            <p class="descricao">Verificando conexão…</p>
+          }
         }
       </mat-card>
 
@@ -167,11 +183,16 @@ export class ConfiguracoesComponent implements OnInit {
   readonly carregando = signal<boolean>(true);
   readonly salvando = signal<boolean>(false);
   readonly whats = signal<StatusWhatsApp | null>(null);
+  /** O WhatsApp respondeu 402: depende de assinatura ativa. */
+  readonly whatsBloqueado = signal<boolean>(false);
 
   ngOnInit(): void {
     this.cobrancas.statusWhatsApp().subscribe({
-      next: (w) => this.whats.set(w),
-      error: () => this.whats.set(null),
+      next: (w) => { this.whats.set(w); this.whatsBloqueado.set(false); },
+      error: (erro) => {
+        this.whats.set(null);
+        this.whatsBloqueado.set(bloqueadoPorAssinatura(erro));
+      },
     });
     this.service.obter().subscribe({
       next: (c) => {
@@ -192,7 +213,10 @@ export class ConfiguracoesComponent implements OnInit {
         this.snack.open("WhatsApp desconectado.", "OK", { duration: 3000 });
         this.cobrancas.statusWhatsApp().subscribe((w) => this.whats.set(w));
       },
-      error: () => this.snack.open("Erro ao desconectar.", "OK", { duration: 4000 }),
+      error: (erro) => {
+        if (bloqueadoPorAssinatura(erro)) return;
+        this.snack.open("Erro ao desconectar.", "OK", { duration: 4000 });
+      },
     });
   }
 
@@ -209,8 +233,9 @@ export class ConfiguracoesComponent implements OnInit {
         this.salvando.set(false);
         this.snack.open('Configurações salvas', 'OK', { duration: 3000 });
       },
-      error: () => {
+      error: (erro) => {
         this.salvando.set(false);
+        if (bloqueadoPorAssinatura(erro)) return;
         this.snack.open('Erro ao salvar. Confira os valores e tente de novo.', 'OK', { duration: 4000 });
       },
     });

@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { API_URL } from './api.config';
 
 export interface Vendedor {
@@ -9,6 +9,7 @@ export interface Vendedor {
   google_email: string;
   nome: string;
   whatsapp_numero: string | null;
+  administrador: boolean;
 }
 
 const TOKEN_KEY = 'taemdia_token';
@@ -39,13 +40,19 @@ export class AuthService {
     window.location.href = `${API_URL}/auth/google/login`;
   }
 
+  /** Só decide o que mostrar no menu. A porta de verdade é o 403 do servidor. */
+  readonly administrador = signal<boolean>(false);
+
   me(): Observable<Vendedor> {
-    return this.http.get<Vendedor>(`${API_URL}/auth/me`);
+    return this.http
+      .get<Vendedor>(`${API_URL}/auth/me`)
+      .pipe(tap((v) => this.administrador.set(v.administrador === true)));
   }
 
   sair(): void {
     localStorage.removeItem(TOKEN_KEY);
     this.logado.set(false);
+    this.administrador.set(false);
     this.router.navigate(['/login']);
   }
 }

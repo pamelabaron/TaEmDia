@@ -60,4 +60,6 @@ def dados_do_vendedor_logado(
     vendedor = db.get(Vendedor, vendedor_id)
     if vendedor is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vendedor não encontrado.")
-    return vendedor
+    saida = VendedorOut.model_validate(vendedor)
+    saida.administrador = (vendedor.google_email or "").lower() in settings.administradores
+    return saida

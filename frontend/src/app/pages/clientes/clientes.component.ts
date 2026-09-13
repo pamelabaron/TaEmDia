@@ -10,6 +10,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Cliente, ClientesService } from '../../core/clientes.service';
+import { bloqueadoPorAssinatura } from '../../core/erros';
 
 @Component({
   selector: 'app-clientes',
@@ -155,6 +156,7 @@ export class ClientesComponent implements OnInit {
       },
       error: (erro) => {
         this.salvando.set(false);
+        if (bloqueadoPorAssinatura(erro)) return;
         const msg = erro.status === 409
           ? 'Já existe um cliente com esse número de WhatsApp.'
           : 'Erro ao cadastrar cliente.';

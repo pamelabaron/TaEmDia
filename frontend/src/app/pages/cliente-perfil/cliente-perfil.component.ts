@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CobrancasService } from '../../core/cobrancas.service';
 import { PerfilCliente, VendasService } from '../../core/vendas.service';
+import { bloqueadoPorAssinatura } from '../../core/erros';
 
 @Component({
   selector: 'app-cliente-perfil',
@@ -194,14 +195,21 @@ export class ClientePerfilComponent implements OnInit {
         this.mostrarForm.set(false); this.salvando.set(false);
         this.carregar();
       },
-      error: () => { this.salvando.set(false); this.snack.open('Erro ao registrar a venda.', 'OK', { duration: 4000 }); },
+      error: (erro) => {
+        this.salvando.set(false);
+        if (bloqueadoPorAssinatura(erro)) return;
+        this.snack.open('Erro ao registrar a venda.', 'OK', { duration: 4000 });
+      },
     });
   }
 
   pagar(parcelaId: string): void {
     this.service.pagarParcela(parcelaId).subscribe({
       next: () => { this.snack.open('Pagamento confirmado', 'OK', { duration: 3000 }); this.carregar(); },
-      error: () => this.snack.open('Erro ao confirmar pagamento.', 'OK', { duration: 4000 }),
+      error: (erro) => {
+        if (bloqueadoPorAssinatura(erro)) return;
+        this.snack.open('Erro ao confirmar pagamento.', 'OK', { duration: 4000 });
+      },
     });
   }
 
@@ -214,6 +222,7 @@ export class ClientePerfilComponent implements OnInit {
       },
       error: (erro) => {
         this.cobrando.set(false);
+        if (bloqueadoPorAssinatura(erro)) return;
         const msg = erro.status === 502
           ? "WhatsApp indisponível. A mensagem ficou na fila e será reenviada."
           : "Não foi possível enviar a cobrança.";
@@ -225,7 +234,10 @@ export class ClientePerfilComponent implements OnInit {
   cancelar(vendaId: string): void {
     this.service.cancelarVenda(vendaId).subscribe({
       next: () => { this.snack.open('Venda cancelada.', 'OK', { duration: 3000 }); this.carregar(); },
-      error: () => this.snack.open('Erro ao cancelar a venda.', 'OK', { duration: 4000 }),
+      error: (erro) => {
+        if (bloqueadoPorAssinatura(erro)) return;
+        this.snack.open('Erro ao cancelar a venda.', 'OK', { duration: 4000 });
+      },
     });
   }
 
