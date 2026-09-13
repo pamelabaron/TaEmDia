@@ -30,9 +30,10 @@ $primaria: mat.define-palette($taemdia-verde, 800, 400, 900);
 $destaque: mat.define-palette($taemdia-verde, 500, 300, 700);
 $aviso:    mat.define-palette(mat.$red-palette, 700);
 
-// Plus Jakarta Sans no corpo: mais caráter que a Roboto padrão e legível em
-// tamanho pequeno. Os títulos usam Outfit (definida mais abaixo).
-$fonte-corpo: '"Plus Jakarta Sans", "Segoe UI", Roboto, sans-serif';
+// Hanken Grotesk no corpo: humanista, com mais caráter que as grotescas que
+// aparecem em toda interface gerada, e desenhada para tamanho pequeno.
+// Os títulos usam Outfit (definida mais abaixo).
+$fonte-corpo: '"Hanken Grotesk", "Segoe UI", Roboto, sans-serif';
 
 $tema: mat.define-light-theme((
   color: (primary: $primaria, accent: $destaque, warn: $aviso),
@@ -75,16 +76,61 @@ $tema: mat.define-light-theme((
   --neutro:       #546b60;
   --neutro-bg:    #eef1ef;
 
-  --sombra: 0 1px 3px rgba(15, 98, 52, 0.08), 0 1px 2px rgba(15, 98, 52, 0.06);
+  // --- Profundidade ---------------------------------------------------------
+  // Uma escala, não uma sombra só. Toda sombra tem deslocamento E desfoque:
+  // halo sem deslocamento é adesivo, não profundidade. O tom vem do verde da
+  // marca — sombra preta genérica é a marca de design apressado.
+  --elev-1: 0 1px 2px rgba(15, 98, 52, 0.06),
+            0 2px 6px rgba(15, 98, 52, 0.05);
+  --elev-2: 0 2px 4px rgba(15, 98, 52, 0.07),
+            0 8px 20px -6px rgba(15, 98, 52, 0.12);
+  --elev-3: 0 4px 8px rgba(15, 98, 52, 0.08),
+            0 18px 40px -12px rgba(15, 98, 52, 0.20);
+  --sombra: var(--elev-1); // nome antigo, mantido para não quebrar telas
+
   --raio: 12px;
+  --raio-interno: 8px; // elementos dentro de cartões: raio menor que o container
 }
+
+// ============================================================================
+// Superfícies do navegador.
+//
+// Seleção, cursor de texto e barra de rolagem vêm com o padrão do sistema e
+// não pertencem a design nenhum. Vestir essas peças é barato e é o que separa
+// uma página construída de uma montada.
+// ============================================================================
+::selection {
+  background: var(--verde-100);
+  color: var(--verde-900);
+}
+
+input, textarea {
+  caret-color: var(--verde-700);
+}
+
+// Firefox
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(31, 130, 77, 0.35) transparent;
+}
+
+// WebKit / Blink
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(31, 130, 77, 0.28);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(31, 130, 77, 0.45); background-clip: content-box; }
 
 html, body { height: 100%; }
 html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  font-family: "Plus Jakarta Sans", "Segoe UI", Roboto, sans-serif;
+  font-family: "Hanken Grotesk", "Segoe UI", Roboto, sans-serif;
   background: var(--fundo);
   color: var(--texto);
   -webkit-font-smoothing: antialiased;
@@ -92,7 +138,7 @@ body {
 
 // Títulos com fonte própria, peso alto e entrelinha curta — é o que dá presença.
 h1, h2, h3, .fonte-titulo {
-  font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
+  font-family: "Outfit", "Hanken Grotesk", sans-serif;
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.15;
@@ -138,20 +184,57 @@ body {
 
 // Cartões: degradê quase imperceptível do topo para a base, borda e sombra
 // esverdeadas (sombra preta genérica é outra marca de design apressado).
+//
+// A linha clara no topo é luz batendo na borda superior — a mesma fonte de luz
+// que as sombras abaixo pressupõem. É o que faz a superfície parecer ter
+// espessura em vez de ser um retângulo pintado.
 .mat-mdc-card {
   position: relative;
   border-radius: var(--raio) !important;
   border: 1px solid var(--borda);
-  background-image: linear-gradient(180deg, #ffffff 0%, #fcfefd 100%) !important;
-  box-shadow: var(--sombra) !important;
+  background-image: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    var(--elev-1) !important;
+  transition: box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-// Barra superior: profundidade em vez de verde chapado.
+// Cartão que leva a algum lugar sobe ao passar o mouse. Só onde há mouse:
+// em tela de toque o :hover gruda depois do toque.
+@media (hover: hover) and (pointer: fine) {
+  .mat-mdc-card.clicavel:hover,
+  .mat-mdc-card:has(.clicavel:hover) {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      var(--elev-2) !important;
+  }
+}
+
+// Barra superior fixa: o conteúdo desliza por baixo dela. A transparência com
+// desfoque existe para mostrar esse movimento — sem conteúdo passando atrás,
+// seria só enfeite. O fundo opaco fica de reserva onde backdrop-filter não há.
 .mat-toolbar.mat-primary {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   background-image:
     radial-gradient(60rem 20rem at 15% 0%, rgba(255, 255, 255, 0.10), transparent 70%),
     linear-gradient(180deg, var(--verde-700) 0%, var(--verde-800) 100%);
-  box-shadow: 0 1px 0 rgba(15, 98, 52, 0.25);
+  box-shadow:
+    inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+    0 1px 0 rgba(15, 98, 52, 0.25),
+    0 6px 24px -12px rgba(15, 98, 52, 0.45);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .mat-toolbar.mat-primary {
+    background-color: rgba(31, 130, 77, 0.82);
+    background-image:
+      radial-gradient(60rem 20rem at 15% 0%, rgba(255, 255, 255, 0.12), transparent 70%),
+      linear-gradient(180deg, rgba(41, 148, 91, 0.92) 0%, rgba(31, 130, 77, 0.94) 100%);
+    backdrop-filter: blur(14px) saturate(140%);
+  }
 }
 
 // Botões um pouco mais arredondados, combinando com os cartões.
@@ -160,7 +243,49 @@ body {
   border-radius: 10px !important;
   font-weight: 600;
   letter-spacing: 0;
-  transition: transform 120ms ease, box-shadow 200ms ease, background-color 200ms ease;
+  transition: transform 120ms ease,
+              box-shadow 240ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 200ms ease,
+              filter 200ms ease;
+}
+
+// O botão principal é a única superfície verde cheia da tela: ganha o degradê
+// e a luz na borda de cima, como os cartões. Sem isso ele é um retângulo
+// chapado ao lado de superfícies que têm espessura.
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  background-image: linear-gradient(180deg, var(--verde-700) 0%, var(--verde-800) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 1px 2px rgba(15, 98, 52, 0.24),
+    0 6px 16px -6px rgba(15, 98, 52, 0.45) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mat-mdc-raised-button.mat-primary:hover,
+  .mat-mdc-unelevated-button.mat-primary:hover {
+    filter: saturate(108%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 2px 4px rgba(15, 98, 52, 0.26),
+      0 12px 26px -8px rgba(15, 98, 52, 0.5) !important;
+  }
+}
+
+.mat-mdc-raised-button.mat-primary:active,
+.mat-mdc-unelevated-button.mat-primary:active {
+  box-shadow:
+    inset 0 1px 2px rgba(15, 98, 52, 0.35),
+    0 1px 2px rgba(15, 98, 52, 0.2) !important;
+}
+
+// Campo de texto: o miolo afunda um fio em relação ao cartão. É o inverso da
+// sombra do cartão — mesma fonte de luz, superfície para dentro.
+.mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  border-radius: var(--raio-interno) !important;
+}
+.mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper {
+  background-color: rgba(233, 246, 239, 0.35);
 }
 
 // Retorno físico ao clicar: sem isso o botão parece "morto".

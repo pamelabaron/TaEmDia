@@ -60,7 +60,6 @@ const PASSOS: Passo[] = [
 
       <section class="capa">
         <div class="capa-texto">
-          <span class="selo">Para quem vende parcelado</span>
           <h1>Suas cobranças <span class="destaque">em dia</span>, sem você precisar lembrar.</h1>
           <p class="subtitulo">
             O TáEmDia organiza seus clientes, controla as parcelas e envia as cobranças
@@ -205,6 +204,23 @@ const PASSOS: Passo[] = [
       margin-bottom: 18px;
     }
     .capa h1 { font-size: 2.7rem; line-height: 1.15; margin: 0 0 18px; letter-spacing: -0.5px; }
+
+    /* O único momento autorado de movimento do site, na primeira dobra. As
+       demais seções entram sem animação: repetir a mesma entrada em tudo é o
+       que faz um site parecer um modelo preenchido. */
+    .capa-texto > *, .capa-visual { animation: entrar 700ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .capa-texto > *:nth-child(1) { animation-delay: 40ms; }
+    .capa-texto > *:nth-child(2) { animation-delay: 110ms; }
+    .capa-texto > *:nth-child(3) { animation-delay: 180ms; }
+    .capa-texto > *:nth-child(4) { animation-delay: 240ms; }
+    .capa-visual { animation-delay: 200ms; }
+    @keyframes entrar {
+      from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+      to   { opacity: 1; transform: none; filter: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .capa-texto > *, .capa-visual { animation: none; }
+    }
     .destaque { color: var(--verde-700); }
     .subtitulo { font-size: 1.1rem; color: var(--texto-suave); line-height: 1.6; margin: 0 0 28px; max-width: 30em; }
     .btn-grande { height: 50px; padding: 0 28px !important; font-size: 1rem; }
@@ -214,9 +230,25 @@ const PASSOS: Passo[] = [
     /* ilustração da conversa */
     .capa-visual { display: flex; justify-content: center; }
     .celular {
+      position: relative;
       width: 300px; background: var(--verde-50); border: 1px solid var(--verde-100);
-      border-radius: 22px; padding: 16px; box-shadow: 0 12px 32px rgba(15, 98, 52, 0.12);
+      border-radius: 22px; padding: 16px;
+      /* Sombra em camadas: contato curto e escuro perto do objeto, difusa e
+         clara longe. Uma sombra só, grande e uniforme, boia. */
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        0 1px 2px rgba(15, 98, 52, 0.10),
+        0 8px 16px -6px rgba(15, 98, 52, 0.14),
+        0 28px 56px -20px rgba(15, 98, 52, 0.28);
     }
+    /* Reflexo no vidro: uma faixa clara na diagonal do canto superior. */
+    .celular::after {
+      content: ""; position: absolute; inset: 0; border-radius: 22px;
+      pointer-events: none;
+      background: linear-gradient(152deg, rgba(255, 255, 255, 0.55) 0%,
+                                  rgba(255, 255, 255, 0) 38%);
+    }
+    .celular > * { position: relative; z-index: 1; }
     .celular-topo {
       display: flex; align-items: center; gap: 8px;
       font-size: 0.82rem; color: var(--texto-suave); font-weight: 600;
@@ -262,19 +294,42 @@ const PASSOS: Passo[] = [
     .numero strong { display: block; font-size: 2.8rem; color: var(--verde-100); line-height: 1; margin-bottom: 10px; }
     .numero span { font-size: 0.92rem; opacity: 0.85; line-height: 1.5; display: block; }
 
-    /* passos */
-    .passos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; text-align: left; }
-    .passo {
-      background: var(--superficie); border: 1px solid var(--borda);
-      border-radius: var(--raio); padding: 22px;
+    /* passos
+       Quatro cartões iguais lado a lado não dizem que existe uma ordem: dizem
+       que existem quatro coisas. Aqui os passos ficam enfileirados sobre um
+       trilho, com os números apoiados nele — a linha é que conta a sequência,
+       e as caixas somem. */
+    .passos {
+      position: relative;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 22px; text-align: left;
+      padding-top: 6px;
     }
+    /* O trilho passa pelo centro dos números e para no primeiro e no último,
+       em vez de sangrar para fora da sequência. */
+    .passos::before {
+      content: "";
+      position: absolute;
+      top: 23px; left: calc(12.5% + 17px); right: calc(12.5% + 17px);
+      height: 2px;
+      background-image: linear-gradient(90deg,
+        var(--verde-100) 0%, var(--verde-300) 50%, var(--verde-100) 100%);
+    }
+    .passo { position: relative; padding: 0 4px 0 0; }
     .passo-numero {
       display: flex; align-items: center; justify-content: center;
       width: 34px; height: 34px; border-radius: 50%;
-      background: var(--verde-800); color: #fff; font-weight: 700; margin-bottom: 14px;
+      background-image: linear-gradient(180deg, var(--verde-700) 0%, var(--verde-900) 100%);
+      color: #fff; font-weight: 700; margin-bottom: 16px;
+      /* O anel na cor do fundo abre um vão no trilho em volta do número. */
+      box-shadow:
+        0 0 0 6px var(--fundo),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        0 2px 6px -1px rgba(15, 98, 52, 0.4);
     }
     .passo h3 { font-size: 1rem; margin: 0 0 6px; }
-    .passo p { font-size: 0.88rem; color: var(--texto-suave); margin: 0; line-height: 1.55; }
+    .passo p { font-size: 0.88rem; color: var(--texto-suave); margin: 0; line-height: 1.55;
+               max-width: 22em; }
 
     /* Recursos em duas colunas desencontradas.
        Três colunas iguais é o arranjo mais previsível que existe; o desencontro
@@ -335,7 +390,10 @@ const PASSOS: Passo[] = [
       .subtitulo { margin-left: auto; margin-right: auto; }
       .recursos { grid-template-columns: repeat(2, 1fr); }
       .garantias { grid-template-columns: repeat(2, 1fr); }
-      .passos { grid-template-columns: repeat(2, 1fr); }
+      /* Em duas colunas o trilho horizontal deixaria de acompanhar a ordem
+         (que passa a ser em zigue-zague): sai de cena. */
+      .passos { grid-template-columns: repeat(2, 1fr); row-gap: 30px; }
+      .passos::before { display: none; }
       .faixa { padding: 52px 20px; }
     }
     @media (max-width: 600px) {

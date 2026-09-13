@@ -101,7 +101,16 @@ import { AssinaturaService, PagamentoPendente } from '../../core/assinatura.serv
     .centro { display: flex; justify-content: center; padding: 32px; }
     .bloco { padding: 16px; margin-bottom: 16px; }
 
-    .vazio-card { text-align: center; padding: 40px 20px; }
+    /* Fila vazia é o estado normal, não uma falha: recebe respiro e uma luz
+       suave em vez de parecer erro. */
+    .vazio-card {
+      text-align: center; padding: 52px 24px 48px; overflow: hidden;
+    }
+    .vazio-card::before {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(24rem 12rem at 50% 0%, rgba(60, 182, 118, 0.10), transparent 70%);
+    }
+    .vazio-card > * { position: relative; }
     .vazio-card h3 { margin: 12px 0 4px; }
     .vazio-card p { color: var(--texto-suave); margin: 0; }
     .icone-grande { font-size: 40px; width: 40px; height: 40px; color: var(--texto-fraco); }
@@ -110,7 +119,8 @@ import { AssinaturaService, PagamentoPendente } from '../../core/assinatura.serv
             gap: 12px; flex-wrap: wrap; }
     .quem > div:first-child { display: flex; flex-direction: column; }
     .email { font-size: 0.85rem; color: var(--texto-suave); }
-    .valor { font-size: 1.3rem; font-weight: 600; color: var(--verde-800); }
+    .valor { font-size: 1.35rem; font-weight: 600; color: var(--verde-800);
+             letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 
     .meta { display: flex; align-items: center; justify-content: space-between;
             gap: 12px; flex-wrap: wrap; margin-top: 8px;

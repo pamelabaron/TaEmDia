@@ -87,19 +87,51 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     .cabecalho h2 { margin: 0; }
     .centro { display: flex; justify-content: center; padding: 32px; }
     .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .kpi { display: flex; flex-direction: column; padding: 16px; border-left: 4px solid var(--verde-800); }
-    .kpi .rotulo { font-size: 0.8rem; color: var(--texto-suave); }
-    .kpi .valor { font-size: 1.5rem; font-weight: 600; margin-top: 4px; }
-    .kpi.receber { border-color: var(--verde-800); } .kpi.receber .valor { color: var(--verde-800); }
-    .kpi.recebido { border-color: var(--sucesso); } .kpi.recebido .valor { color: var(--sucesso); }
-    .kpi.atraso { border-color: var(--alerta); } .kpi.atraso .valor { color: var(--alerta); }
-    .kpi.inadimplentes { border-color: var(--perigo); } .kpi.inadimplentes .valor { color: var(--perigo); }
+
+    /* A cor do estado vem de uma luz no canto do cartão e do próprio número,
+       não de uma tarja na lateral: a tarja é adesivo colado numa caixa branca,
+       a luz pertence à superfície. */
+    .kpi {
+      display: flex; flex-direction: column; padding: 18px 16px 16px;
+      overflow: hidden;
+      --tom: var(--verde-800);
+      --tom-rgb: 31, 130, 77;
+    }
+    .kpi::before {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(14rem 8rem at 100% 0%, rgba(var(--tom-rgb), 0.13), transparent 70%);
+    }
+    .kpi > * { position: relative; }
+    .kpi .rotulo { font-size: 0.8rem; color: var(--texto-suave); letter-spacing: 0.01em; }
+    .kpi .valor { font-size: 1.6rem; font-weight: 600; margin-top: 4px; color: var(--tom);
+                  letter-spacing: -0.02em; }
+
+    .kpi.receber       { --tom: var(--verde-800); --tom-rgb: 31, 130, 77; }
+    .kpi.recebido      { --tom: var(--sucesso);   --tom-rgb: 31, 130, 77; }
+    .kpi.atraso        { --tom: var(--alerta);    --tom-rgb: 178, 106, 0; }
+    .kpi.inadimplentes { --tom: var(--perigo);    --tom-rgb: 192, 57, 43; }
     .bloco { padding: 16px; margin-bottom: 16px; }
     .bloco h3 { margin: 0 0 16px; }
     .grafico { display: flex; align-items: flex-end; gap: 16px; height: 160px; padding-top: 20px; }
     .coluna { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; height: 100%; }
     .cifra { font-size: 0.7rem; color: var(--texto-suave); margin-bottom: 4px; }
-    .barra { width: 70%; max-width: 48px; background: var(--sucesso); border-radius: 4px 4px 0 0; min-height: 2px; transition: height .3s; }
+    /* Barra com volume: mais clara no topo, como se a luz viesse de cima —
+       a mesma direção que as sombras dos cartões pressupõem. */
+    .barra {
+      width: 70%; max-width: 48px; min-height: 2px;
+      border-radius: 6px 6px 2px 2px;
+      background-image: linear-gradient(180deg, var(--verde-500) 0%, var(--verde-800) 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28),
+                  0 2px 6px -2px rgba(15, 98, 52, 0.35);
+      transform-origin: bottom;
+      /* Sem transição em height: animar altura obriga o navegador a refazer o
+         layout a cada quadro. Quem faz a revelação é o scaleY abaixo, que roda
+         na placa de vídeo. */
+      animation: subir 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes subir { from { transform: scaleY(0.02); } to { transform: scaleY(1); } }
+    @media (prefers-reduced-motion: reduce) { .barra { animation: none; } }
     .mes { font-size: 0.75rem; color: var(--texto-suave); margin-top: 6px; }
     .vazio { color: var(--texto-fraco); }
     .linha-atraso { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--borda); }

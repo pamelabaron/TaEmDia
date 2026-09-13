@@ -129,13 +129,23 @@ const ROTULOS: Record<string, string> = {
     .bloco { padding: 16px; margin-bottom: 16px; }
     .topo { display: flex; align-items: center; justify-content: space-between; gap: 12px;
             flex-wrap: wrap; margin-bottom: 14px; }
-    .topo h3 { margin: 0; }
+    /* Mesmo verde dos demais títulos de bloco das Configurações. */
+    .topo h3 { margin: 0; color: var(--verde-800); }
     .centro { display: flex; justify-content: center; padding: 24px; }
 
-    .selo { font-size: 0.75rem; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
-    .selo.ativa { background: var(--sucesso-bg); color: var(--sucesso); }
-    .selo.em_teste { background: var(--info-bg); color: var(--info); }
-    .selo.vencida { background: var(--perigo-bg); color: var(--perigo); }
+    /* A etiqueta de situação é o dado mais consultado deste cartão: ganha
+       contorno próprio em vez de ser só um fundo pastel. */
+    .selo {
+      font-size: 0.75rem; font-weight: 600; padding: 5px 13px; border-radius: 999px;
+      border: 1px solid transparent;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+    .selo.ativa    { background: var(--sucesso-bg); color: var(--sucesso);
+                     border-color: rgba(31, 130, 77, 0.22); }
+    .selo.em_teste { background: var(--info-bg); color: var(--info);
+                     border-color: rgba(41, 148, 91, 0.22); }
+    .selo.vencida  { background: var(--perigo-bg); color: var(--perigo);
+                     border-color: rgba(192, 57, 43, 0.22); }
 
     .resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
               gap: 12px; margin-bottom: 14px; }
@@ -144,18 +154,30 @@ const ROTULOS: Record<string, string> = {
     .valor { font-size: 1.3rem; font-weight: 600; margin-top: 2px; }
     .descricao { font-size: 0.8rem; color: var(--texto-suave); }
 
-    .alerta { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 14px;
-              padding: 10px 12px; border-radius: var(--raio);
-              background: var(--perigo-bg); color: var(--perigo); font-size: 0.9rem; }
-    .pendente { display: flex; align-items: center; gap: 8px; padding: 12px;
-                border-radius: var(--raio); background: var(--alerta-bg); color: var(--alerta);
-                font-size: 0.9rem; }
+    .alerta, .pendente {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 11px 13px; border-radius: var(--raio-interno);
+      font-size: 0.9rem; line-height: 1.5;
+      border: 1px solid transparent;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    }
+    .alerta { margin: 0 0 14px; background: var(--perigo-bg); color: var(--perigo);
+              border-color: rgba(192, 57, 43, 0.18); }
+    .pendente { align-items: center; background: var(--alerta-bg); color: var(--alerta);
+                border-color: rgba(178, 106, 0, 0.20); }
 
     .pagar { display: flex; flex-direction: column; gap: 6px; }
     .rotulo.segundo { margin-top: 14px; }
-    .chave { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-             background: var(--verde-50); border: 1px solid var(--borda);
-             border-radius: var(--raio); padding: 6px 6px 6px 12px; }
+    /* A chave Pix é para copiar: o miolo afunda, como um campo, para dizer
+       "isto é conteúdo", não "isto é um botão". */
+    .chave {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      background-image: linear-gradient(180deg, #eef8f2 0%, #e6f4ec 100%);
+      border: 1px solid rgba(31, 130, 77, 0.18);
+      border-radius: var(--raio-interno);
+      box-shadow: inset 0 1px 3px rgba(15, 98, 52, 0.10);
+      padding: 6px 6px 6px 12px;
+    }
     .chave code { font-size: 0.95rem; word-break: break-all; }
     .envio { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
     .campo-valor { width: 160px; }
