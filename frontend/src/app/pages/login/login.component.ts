@@ -171,7 +171,7 @@ const PASSOS: Passo[] = [
 
       <footer class="rodape">
         <span><strong>TáEmDia</strong> — Cobrança automatizada via WhatsApp</span>
-        <span class="rodape-fraco">Projeto de Portfólio · Engenharia de Software · Católica SC</span>
+        <span class="rodape-fraco">© {{ ano }} TáEmDia</span>
       </footer>
     </div>
   `,
@@ -413,6 +413,8 @@ export class LoginComponent {
   private auth = inject(AuthService);
   readonly recursos = RECURSOS;
   readonly passos = PASSOS;
+  /** Atualiza sozinho na virada do ano. */
+  readonly ano = new Date().getFullYear();
 
   entrar(): void {
     this.auth.entrarComGoogle();
