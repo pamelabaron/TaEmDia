@@ -44,9 +44,28 @@ class Settings(BaseSettings):
     # Agendador de tarefas em segundo plano
     AGENDADOR_ATIVO: bool = True
 
+    # --- Assinatura ---------------------------------------------------------
+    # Administradores que conferem comprovantes. Fica em variável de ambiente,
+    # e não em coluna do banco, para que ninguém vire administrador por
+    # gravação: não existe bit a inverter.
+    ADMIN_EMAILS: str = ""
+
+    # Chave Pix mostrada em "Minha assinatura".
+    PIX_CHAVE: str = ""
+    PIX_NOME: str = ""
+    ASSINATURA_VALOR: float = 19.90
+
+    # Onde os comprovantes ficam guardados. Nunca é servido como pasta pública.
+    UPLOADS_DIR: str = "/app/uploads"
+
     @property
     def em_producao(self) -> bool:
         return self.AMBIENTE.lower().startswith("prod")
+
+    @property
+    def administradores(self) -> list[str]:
+        """E-mails com acesso à conferência de comprovantes, em minúsculas."""
+        return [e.strip().lower() for e in self.ADMIN_EMAILS.split(",") if e.strip()]
 
     @property
     def origens_permitidas(self) -> list[str]:

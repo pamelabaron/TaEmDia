@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.modules.assinatura.deps import exigir_assinatura_ativa
 from app.modules.auth.deps import get_current_vendedor_id
 from app.modules.templates.repository import TemplateRepository
 from app.modules.templates.schemas import (
@@ -49,7 +50,7 @@ def editar_template(
     template_id: uuid.UUID,
     dados: TemplateUpdate,
     service: TemplateService = Depends(get_service),
-    vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
+    vendedor_id: uuid.UUID = Depends(exigir_assinatura_ativa),
 ):
     try:
         return service.editar(vendedor_id, template_id, dados)

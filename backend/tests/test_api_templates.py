@@ -2,6 +2,24 @@
 import uuid
 
 
+def _dar_acesso(db, *vendedores):
+    """Vigência de teste para vendedores criados direto no banco.
+
+    O login real cria esses 7 dias sozinho (RN-A01); testes que inserem o
+    vendedor na mão precisam fazer o mesmo, senão a escrita responde 402.
+    """
+    from datetime import date, timedelta
+
+    from app.modules.assinatura.models import Assinatura
+
+    for v in vendedores:
+        db.add(Assinatura(vendedor_id=v.id,
+                          valido_ate=date.today() + timedelta(days=7),
+                          origem="teste"))
+    db.commit()
+
+
+
 class TestTemplates:
     def test_exige_autenticacao(self, cliente_http):
         assert cliente_http.get("/templates").status_code == 401
@@ -65,6 +83,7 @@ class TestTemplates:
         db.add(outro)
         db.commit()
         db.refresh(outro)
+        _dar_acesso(db, outro)
         resp = cliente_http.patch(
             "/templates/" + tid,
             headers={"Authorization": "Bearer " + criar_access_token(outro.id)},

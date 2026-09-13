@@ -11,6 +11,7 @@ from app.modules.relatorios.router import router as relatorios_router
 from app.modules.templates.router import router as templates_router
 from app.modules.configuracoes.router import router as configuracoes_router
 from app.modules.cobrancas.router import router as cobrancas_router
+from app.modules.assinatura.router import router as assinatura_router
 
 from app.core.config import settings
 from app.modules.agente.agendador import iniciar_agendador, parar_agendador
@@ -62,3 +63,4 @@ app.include_router(relatorios_router)
 app.include_router(templates_router)
 app.include_router(configuracoes_router)
 app.include_router(cobrancas_router)
+app.include_router(assinatura_router)

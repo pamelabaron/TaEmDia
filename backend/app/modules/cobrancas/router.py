@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.db.session import get_db
 from app.modules.agente.service import AgenteService
+from app.modules.assinatura.deps import exigir_assinatura_ativa
 from app.modules.auth.deps import get_current_vendedor_id
 from app.modules.cobrancas.repository import (
     CobrancaLogRepository,
@@ -69,7 +70,7 @@ def listar_cobrancas(
 def disparar_cobranca(
     parcela_id: uuid.UUID,
     service: CobrancaService = Depends(get_cobranca_service),
-    vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
+    vendedor_id: uuid.UUID = Depends(exigir_assinatura_ativa),
 ):
     """Disparo manual de cobrança pelo vendedor ('Cobrar agora')."""
     try:
@@ -89,7 +90,7 @@ def disparar_cobranca(
 
 
 @router.get("/whatsapp/status", response_model=StatusWhatsAppOut)
-def status_whatsapp(vendedor_id: uuid.UUID = Depends(get_current_vendedor_id)):
+def status_whatsapp(vendedor_id: uuid.UUID = Depends(exigir_assinatura_ativa)):
     """Estado da conexão com o WhatsApp; traz o QR Code quando desconectado."""
     cliente = get_whatsapp_client()
     s = cliente.status()
@@ -100,7 +101,7 @@ def status_whatsapp(vendedor_id: uuid.UUID = Depends(get_current_vendedor_id)):
 
 
 @router.post("/whatsapp/desconectar", status_code=status.HTTP_204_NO_CONTENT)
-def desconectar_whatsapp(vendedor_id: uuid.UUID = Depends(get_current_vendedor_id)):
+def desconectar_whatsapp(vendedor_id: uuid.UUID = Depends(exigir_assinatura_ativa)):
     get_whatsapp_client().desconectar()
 
 

@@ -6,6 +6,24 @@ import pytest
 from app.core.security import criar_access_token
 from app.modules.vendedores.models import Vendedor
 
+
+def _dar_acesso(db, *vendedores):
+    """Vigência de teste para vendedores criados direto no banco.
+
+    O login real cria esses 7 dias sozinho (RN-A01); testes que inserem o
+    vendedor na mão precisam fazer o mesmo, senão a escrita responde 402.
+    """
+    from datetime import date, timedelta
+
+    from app.modules.assinatura.models import Assinatura
+
+    for v in vendedores:
+        db.add(Assinatura(vendedor_id=v.id,
+                          valido_ate=date.today() + timedelta(days=7),
+                          origem="teste"))
+    db.commit()
+
+
 NOVO = {"nome": "Rosangela Ferreira", "whatsapp_numero": "5547999990001"}
 
 
@@ -96,6 +114,7 @@ class TestIsolamentoEntreContas:
         db.add(outro)
         db.commit()
         db.refresh(outro)
+        _dar_acesso(db, outro)
         cabecalho_outro = {"Authorization": f"Bearer {criar_access_token(outro.id)}"}
 
         assert cliente_http.get("/clientes", headers=cabecalho_outro).json() == []
@@ -107,6 +126,7 @@ class TestIsolamentoEntreContas:
         db.add(outro)
         db.commit()
         db.refresh(outro)
+        _dar_acesso(db, outro)
         cabecalho_outro = {"Authorization": f"Bearer {criar_access_token(outro.id)}"}
 
         resp = cliente_http.post("/clientes", json=NOVO, headers=cabecalho_outro)
@@ -119,6 +139,7 @@ class TestIsolamentoEntreContas:
         db.add(outro)
         db.commit()
         db.refresh(outro)
+        _dar_acesso(db, outro)
         cabecalho_outro = {"Authorization": f"Bearer {criar_access_token(outro.id)}"}
 
         resp = cliente_http.patch(f"/clientes/{cid}", json={"nome": "Invadido"},

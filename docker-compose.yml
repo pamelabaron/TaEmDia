@@ -26,6 +26,9 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      # Comprovantes de assinatura. Fica fora de qualquer pasta pública: os
+      # arquivos só saem pelo endpoint autenticado da administradora.
+      - uploads-data:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -62,3 +65,4 @@ services:
 volumes:
   postgres-data:
   evolution-data:
+  uploads-data:

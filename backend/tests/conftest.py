@@ -72,17 +72,48 @@ def cliente_http(db):
     app.dependency_overrides.clear()
 
 
-@pytest.fixture()
-def vendedor(db):
-    """Um vendedor pronto para uso nos testes."""
+def _criar_vendedor(db, email: str, nome: str, dias_de_acesso: int | None, origem: str = "teste"):
+    """Cria um vendedor e, quando pedido, a vigência da assinatura dele.
+
+    `dias_de_acesso=None` cria um vendedor sem nenhuma assinatura — o estado de
+    quem já venceu e nunca pagou.
+    """
+    from datetime import date, timedelta
+
+    from app.modules.assinatura.models import Assinatura
     from app.modules.vendedores.models import Vendedor
 
-    v = Vendedor(google_email="teste@exemplo.com", nome="Vendedor Teste",
-                 whatsapp_numero="5547900000000")
+    v = Vendedor(google_email=email, nome=nome, whatsapp_numero="5547900000000")
     db.add(v)
     db.commit()
     db.refresh(v)
+    if dias_de_acesso is not None:
+        db.add(Assinatura(vendedor_id=v.id,
+                          valido_ate=date.today() + timedelta(days=dias_de_acesso),
+                          origem=origem))
+        db.commit()
     return v
+
+
+@pytest.fixture()
+def vendedor(db):
+    """Vendedor com acesso liberado — é o estado de quem acabou de se cadastrar
+    (o login cria 7 dias de teste, RN-A01)."""
+    return _criar_vendedor(db, "teste@exemplo.com", "Vendedor Teste", dias_de_acesso=7)
+
+
+@pytest.fixture()
+def vendedor_vencido(db):
+    """Vendedor cuja assinatura venceu ontem."""
+    return _criar_vendedor(db, "vencido@exemplo.com", "Vendedor Vencido",
+                           dias_de_acesso=-1, origem="pago")
+
+
+@pytest.fixture()
+def cabecalho_vencido(vendedor_vencido):
+    from app.core.security import criar_access_token
+
+    return {"Authorization": f"Bearer {criar_access_token(vendedor_vencido.id)}"}
 
 
 @pytest.fixture()

@@ -21,6 +21,24 @@ from app.modules.templates.repository import TemplateRepository
 from app.modules.vendedores.models import Vendedor
 from app.modules.whatsapp.client import SimuladorWhatsAppClient
 
+
+def _dar_acesso(db, *vendedores):
+    """Vigência de teste para vendedores criados direto no banco.
+
+    O login real cria esses 7 dias sozinho (RN-A01); testes que inserem o
+    vendedor na mão precisam fazer o mesmo, senão a escrita responde 402.
+    """
+    from datetime import date, timedelta
+
+    from app.modules.assinatura.models import Assinatura
+
+    for v in vendedores:
+        db.add(Assinatura(vendedor_id=v.id,
+                          valido_ate=date.today() + timedelta(days=7),
+                          origem="teste"))
+    db.commit()
+
+
 HOJE = date.today()
 NUMERO_CLIENTE = "5547999990001"
 NUMERO_VENDEDOR = "5547900000000"
@@ -39,6 +57,7 @@ def test_fluxo_completo_de_ponta_a_ponta(cliente_http, db, whatsapp):
     db.add(vendedor)
     db.commit()
     db.refresh(vendedor)
+    _dar_acesso(db, vendedor)
     auth = {"Authorization": f"Bearer {criar_access_token(vendedor.id)}"}
 
     assert cliente_http.get("/auth/me", headers=auth).json()["nome"] == "Pâmela"
@@ -137,6 +156,7 @@ def test_isolamento_entre_contas_no_fluxo(cliente_http, db):
     db.commit()
     db.refresh(a)
     db.refresh(b)
+    _dar_acesso(db, a, b)
     auth_a = {"Authorization": f"Bearer {criar_access_token(a.id)}"}
     auth_b = {"Authorization": f"Bearer {criar_access_token(b.id)}"}
 

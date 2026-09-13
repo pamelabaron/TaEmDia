@@ -1,5 +1,7 @@
 """Regras de autenticação: cria ou recupera o vendedor e emite o JWT (RF01/RF02)."""
 from app.core.security import criar_access_token
+from app.modules.assinatura.repository import AssinaturaRepository
+from app.modules.assinatura.service import AssinaturaService
 from app.modules.auth.repository import VendedorRepository
 from app.modules.vendedores.models import Vendedor
 
@@ -14,5 +16,7 @@ class AuthService:
         vendedor = self.repo.buscar_por_email(email)
         if vendedor is None:
             vendedor = self.repo.criar(email=email, nome=nome)
+            # Conta nova começa com os dias de teste (RN-A01).
+            AssinaturaService(AssinaturaRepository(self.repo.db)).iniciar_teste(vendedor.id)
         token = criar_access_token(vendedor.id)
         return vendedor, token

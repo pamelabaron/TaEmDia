@@ -9,6 +9,9 @@ class VendedorRepository:
     def __init__(self, db: Session):
         self.db = db
 
+    def buscar_por_id(self, vendedor_id) -> Vendedor | None:
+        return self.db.get(Vendedor, vendedor_id)
+
     def buscar_por_email(self, email: str) -> Vendedor | None:
         return self.db.scalar(select(Vendedor).where(Vendedor.google_email == email))
 

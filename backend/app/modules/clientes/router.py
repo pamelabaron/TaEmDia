@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.modules.assinatura.deps import exigir_assinatura_ativa
 from app.modules.auth.deps import get_current_vendedor_id
 from app.modules.clientes.repository import ClienteRepository
 from app.modules.clientes.schemas import ClienteCreate, ClienteOut, ClienteUpdate
@@ -33,7 +34,7 @@ def listar_clientes(
 def cadastrar_cliente(
     dados: ClienteCreate,
     service: ClienteService = Depends(get_service),
-    vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
+    vendedor_id: uuid.UUID = Depends(exigir_assinatura_ativa),
 ):
     try:
         return service.cadastrar(vendedor_id, dados)
@@ -49,7 +50,7 @@ def editar_cliente(
     cliente_id: uuid.UUID,
     dados: ClienteUpdate,
     service: ClienteService = Depends(get_service),
-    vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
+    vendedor_id: uuid.UUID = Depends(exigir_assinatura_ativa),
 ):
     try:
         return service.editar(vendedor_id, cliente_id, dados)
@@ -61,7 +62,7 @@ def editar_cliente(
 def remover_cliente(
     cliente_id: uuid.UUID,
     service: ClienteService = Depends(get_service),
-    vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
+    vendedor_id: uuid.UUID = Depends(exigir_assinatura_ativa),
 ):
     try:
         service.desativar(vendedor_id, cliente_id)
