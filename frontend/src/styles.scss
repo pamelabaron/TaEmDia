@@ -76,6 +76,26 @@ $tema: mat.define-light-theme((
   --neutro:       #546b60;
   --neutro-bg:    #eef1ef;
 
+  // --- Acento e profundidade da marca ---------------------------------------
+  // Verde sozinho não tem contra o que brilhar. O lima é adjacente e muito mais
+  // claro: contra o verde escuro ele acende, e é o que tira a paleta do
+  // monocromático. O petróleo é o fundo profundo onde esse brilho aparece.
+  //
+  // IMPORTANTE: o lima NUNCA entra no sistema de status (verde=pago,
+  // laranja=atraso, vermelho=inadimplente, cinza=pendente). É cor de marca, não
+  // de dado — usá-lo num estado quebraria a leitura rápida do painel.
+  //
+  // Contraste: lima sobre branco reprova em texto. Só sobre superfície escura,
+  // ou como elemento gráfico (traço, brilho, borda), nunca como texto no claro.
+  --lima-300: #d7f98a;
+  --lima-400: #c3f25e;
+  --lima-500: #a8e34a;
+  --lima-600: #8bc734;
+
+  --petroleo-900: #04231f;
+  --petroleo-800: #06302b;
+  --petroleo-700: #0a4239;
+
   // --- Profundidade ---------------------------------------------------------
   // Uma escala, não uma sombra só. Toda sombra tem deslocamento E desfoque:
   // halo sem deslocamento é adesivo, não profundidade. O tom vem do verde da
@@ -174,11 +194,13 @@ table td, table th, .valor-atraso, .percentual, input[type="number"] {
 }
 
 body {
-  // Duas luzes verdes muito fracas nos cantos, em vez de fundo chapado.
+  // Luz de verdade nos cantos. A versão anterior ficava em 7% de opacidade e
+  // simplesmente não era vista — degradê que ninguém percebe não está lá.
   background-color: var(--fundo);
   background-image:
-    radial-gradient(60rem 40rem at 12% -10%, rgba(60, 182, 118, 0.07), transparent 60%),
-    radial-gradient(50rem 36rem at 100% 0%, rgba(31, 130, 77, 0.05), transparent 55%);
+    radial-gradient(58rem 40rem at 10% -12%, rgba(168, 227, 74, 0.30), transparent 58%),
+    radial-gradient(52rem 38rem at 100% 2%, rgba(60, 182, 118, 0.24), transparent 56%),
+    radial-gradient(46rem 34rem at 50% 108%, rgba(31, 130, 77, 0.16), transparent 60%);
   background-attachment: fixed;
 }
 
@@ -191,13 +213,31 @@ body {
 .mat-mdc-card {
   position: relative;
   border-radius: var(--raio) !important;
-  border: 1px solid var(--borda);
-  background-image: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%) !important;
+  // Borda clara em cima, mais fechada embaixo: a luz vem de cima, então a
+  // aresta superior brilha e a inferior recolhe. Borda de cor única em volta
+  // é desenho plano.
+  border: 1px solid rgba(31, 130, 77, 0.14);
+  border-top-color: rgba(255, 255, 255, 0.9);
+  // Vidro: o fundo com as luzes verdes atravessa o cartão em vez de ser tapado
+  // por um branco chapado. É isto que faz a superfície ter material.
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  background-image: linear-gradient(
+    158deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.72) 42%,
+    rgba(233, 246, 239, 0.62) 100%
+  ) !important;
+  backdrop-filter: blur(18px) saturate(150%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    var(--elev-1) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    var(--elev-2) !important;
   transition: box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1),
               transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+// Sem backdrop-filter o vidro vira um cartão lavado: devolve o branco cheio.
+@supports not (backdrop-filter: blur(1px)) {
+  .mat-mdc-card { background-color: #ffffff !important; }
 }
 
 // Cartão que leva a algum lugar sobe ao passar o mouse. Só onde há mouse:
@@ -219,21 +259,23 @@ body {
   top: 0;
   z-index: 10;
   background-image:
-    radial-gradient(60rem 20rem at 15% 0%, rgba(255, 255, 255, 0.10), transparent 70%),
-    linear-gradient(180deg, var(--verde-700) 0%, var(--verde-800) 100%);
+    radial-gradient(34rem 16rem at 4% 120%, rgba(168, 227, 74, 0.38), transparent 66%),
+    radial-gradient(40rem 18rem at 72% -30%, rgba(60, 182, 118, 0.40), transparent 64%),
+    linear-gradient(100deg, var(--petroleo-800) 0%, var(--verde-700) 100%);
   box-shadow:
-    inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(168, 227, 74, 0.28),
     0 1px 0 rgba(15, 98, 52, 0.25),
     0 6px 24px -12px rgba(15, 98, 52, 0.45);
 }
 
 @supports (backdrop-filter: blur(1px)) {
   .mat-toolbar.mat-primary {
-    background-color: rgba(31, 130, 77, 0.82);
+    background-color: rgba(10, 66, 57, 0.80);
     background-image:
-      radial-gradient(60rem 20rem at 15% 0%, rgba(255, 255, 255, 0.12), transparent 70%),
-      linear-gradient(180deg, rgba(41, 148, 91, 0.92) 0%, rgba(31, 130, 77, 0.94) 100%);
-    backdrop-filter: blur(14px) saturate(140%);
+      radial-gradient(34rem 16rem at 4% 120%, rgba(168, 227, 74, 0.42), transparent 66%),
+      radial-gradient(40rem 18rem at 72% -30%, rgba(60, 182, 118, 0.45), transparent 64%),
+      linear-gradient(100deg, rgba(6, 48, 43, 0.94) 0%, rgba(31, 130, 77, 0.90) 100%);
+    backdrop-filter: blur(18px) saturate(165%);
   }
 }
 

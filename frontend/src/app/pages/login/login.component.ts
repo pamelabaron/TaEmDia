@@ -195,15 +195,40 @@ const PASSOS: Passo[] = [
 
     /* apresentação */
     .capa {
+      position: relative;
       display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center;
-      padding: 72px 28px 88px; max-width: 1100px; margin: 0 auto;
+      padding: 84px 28px 104px; max-width: 1100px; margin: 0 auto;
     }
+    /* Aurora atrás da capa: três luzes em posições diferentes, uma delas lima.
+       Sangra para fora do container de propósito — luz contida numa caixa
+       parece adesivo. */
+    .capa::before {
+      content: "";
+      position: absolute; inset: -10% -30% -20% -30%;
+      pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(32rem 22rem at 18% 18%, rgba(168, 227, 74, 0.42), transparent 62%),
+        radial-gradient(28rem 20rem at 72% 8%, rgba(60, 182, 118, 0.32), transparent 60%),
+        radial-gradient(24rem 18rem at 88% 92%, rgba(10, 66, 57, 0.14), transparent 62%);
+      filter: blur(6px);
+    }
+    .capa > * { position: relative; z-index: 1; }
     .selo {
       display: inline-block; background: var(--verde-50); color: var(--verde-800);
       padding: 6px 14px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
       margin-bottom: 18px;
     }
-    .capa h1 { font-size: 2.7rem; line-height: 1.15; margin: 0 0 18px; letter-spacing: -0.5px; }
+    /* O título estava em 2.7rem — tamanho de subtítulo. Numa página que existe
+       para convencer, o título é o elemento; cresce até caber na largura e
+       fecha o espacejamento, que é o que faz texto grande parecer desenhado em
+       vez de apenas ampliado. */
+    .capa h1 {
+      font-size: clamp(2.6rem, 5.2vw, 4.4rem);
+      line-height: 0.98;
+      margin: 0 0 22px;
+      letter-spacing: -0.038em;
+      font-weight: 700;
+    }
 
     /* O único momento autorado de movimento do site, na primeira dobra. As
        demais seções entram sem animação: repetir a mesma entrada em tudo é o
@@ -221,7 +246,20 @@ const PASSOS: Passo[] = [
     @media (prefers-reduced-motion: reduce) {
       .capa-texto > *, .capa-visual { animation: none; }
     }
-    .destaque { color: var(--verde-700); }
+    /* "em dia" não é só colorido: ganha um traço lima por trás, como marca de
+       caneta. Cor sozinha some no meio da frase. */
+    .destaque {
+      position: relative;
+      color: var(--verde-900);
+      white-space: nowrap;
+    }
+    .destaque::after {
+      content: "";
+      position: absolute; left: -0.06em; right: -0.06em; bottom: 0.06em;
+      height: 0.34em; z-index: -1; border-radius: 0.1em;
+      background-image: linear-gradient(100deg,
+        var(--lima-400) 0%, var(--lima-300) 58%, rgba(195, 242, 94, 0.35) 100%);
+    }
     .subtitulo { font-size: 1.1rem; color: var(--texto-suave); line-height: 1.6; margin: 0 0 28px; max-width: 30em; }
     .btn-grande { height: 50px; padding: 0 28px !important; font-size: 1rem; }
     .btn-grande mat-icon { margin-right: 8px; }
@@ -274,24 +312,45 @@ const PASSOS: Passo[] = [
 
     /* faixas */
     .faixa { padding: 72px 28px; max-width: 1060px; margin: 0 auto; text-align: center; }
-    .faixa.claro { background: var(--fundo); max-width: none; }
+    /* A faixa clara não pode ser só cinza claro entre duas faixas escuras,
+       senão vira o vão entre elas. Ganha luz própria, da mesma família. */
+    .faixa.claro {
+      position: relative; overflow: hidden;
+      background-color: #eef6f1; max-width: none;
+      background-image:
+        radial-gradient(36rem 24rem at 88% -10%, rgba(168, 227, 74, 0.30), transparent 62%),
+        radial-gradient(30rem 22rem at 4% 108%, rgba(60, 182, 118, 0.22), transparent 60%);
+    }
     .faixa.claro > * { max-width: 1060px; margin-left: auto; margin-right: auto; }
-    .faixa h2 { font-size: 1.9rem; margin: 0 0 10px; letter-spacing: -0.3px; }
+    .faixa h2 {
+      font-size: clamp(1.9rem, 3.4vw, 2.9rem);
+      margin: 0 0 12px; letter-spacing: -0.03em; line-height: 1.04;
+    }
     .secao-texto { color: var(--texto-suave); margin: 0 auto 40px; max-width: 40em; font-size: 1.02rem; }
 
     /* dados da pesquisa */
+    /* A faixa da pesquisa é o pico da página: fundo petróleo, muito mais
+       profundo que o verde, com o lima acendendo de baixo. É o contraste que
+       faltava — verde sobre verde não brilha. */
     .problema {
       position: relative; overflow: hidden; max-width: none;
-      background-color: var(--verde-900);
+      background-color: var(--petroleo-900);
       background-image:
-        radial-gradient(44rem 30rem at 78% 8%, rgba(41, 148, 91, 0.40), transparent 62%),
-        radial-gradient(30rem 22rem at 6% 100%, rgba(60, 182, 118, 0.22), transparent 58%);
+        radial-gradient(40rem 26rem at 82% -6%, rgba(60, 182, 118, 0.50), transparent 62%),
+        radial-gradient(34rem 26rem at 10% 112%, rgba(168, 227, 74, 0.34), transparent 60%),
+        linear-gradient(160deg, var(--petroleo-900) 0%, var(--petroleo-700) 100%);
     }
     .problema h2, .problema .secao-texto { color: #fff; }
     .problema .secao-texto { opacity: 0.85; }
     .numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; max-width: 900px; margin: 0 auto; }
     .numero { color: #fff; }
-    .numero strong { display: block; font-size: 2.8rem; color: var(--verde-100); line-height: 1; margin-bottom: 10px; }
+    .numero strong {
+      display: block;
+      font-size: clamp(2.9rem, 5.4vw, 4.6rem);
+      color: var(--lima-400);
+      line-height: 0.9; letter-spacing: -0.04em; margin-bottom: 14px;
+      text-shadow: 0 0 42px rgba(168, 227, 74, 0.35);
+    }
     .numero span { font-size: 0.92rem; opacity: 0.85; line-height: 1.5; display: block; }
 
     /* passos
@@ -319,7 +378,8 @@ const PASSOS: Passo[] = [
     .passo-numero {
       display: flex; align-items: center; justify-content: center;
       width: 34px; height: 34px; border-radius: 50%;
-      background-image: linear-gradient(180deg, var(--verde-700) 0%, var(--verde-900) 100%);
+      background-image: linear-gradient(150deg,
+        var(--lima-500) 0%, var(--verde-700) 58%, var(--verde-900) 100%);
       color: #fff; font-weight: 700; margin-bottom: 16px;
       /* O anel na cor do fundo abre um vão no trilho em volta do número. */
       box-shadow:
@@ -342,14 +402,38 @@ const PASSOS: Passo[] = [
        renderização e não depende de composição de camadas. */
     .recursos > :nth-child(even) { margin-top: 34px; }
     .recurso {
-      background: var(--superficie); border: 1px solid var(--borda);
-      border-radius: var(--raio); padding: 28px 26px;
-      transition: transform 250ms ease, box-shadow 250ms ease;
+      position: relative;
+      /* Vidro: a luz da faixa atravessa o cartão. Branco chapado por cima de um
+         fundo com luz apaga justamente o que se quer mostrar. */
+      background-color: rgba(255, 255, 255, 0.62);
+      background-image: linear-gradient(158deg,
+        rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.58) 100%);
+      backdrop-filter: blur(16px) saturate(150%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-bottom-color: rgba(31, 130, 77, 0.14);
+      border-radius: var(--raio); padding: 30px 28px;
+      box-shadow: var(--elev-2);
+      transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1);
     }
+    @supports not (backdrop-filter: blur(1px)) {
+      .recurso { background-color: rgba(255, 255, 255, 0.94); }
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .recurso:hover { transform: translateY(-4px); box-shadow: var(--elev-3); }
+    }
+    /* O ícone é o único lugar do cartão onde o lima aparece: um ponto de cor
+       forte por cartão. Espalhar acento em tudo devolve o monocromático, só
+       que noutra cor. */
     .recurso-icone {
       display: flex; align-items: center; justify-content: center;
-      width: 46px; height: 46px; border-radius: 12px;
-      background: var(--verde-50); color: var(--verde-800); margin-bottom: 16px;
+      width: 50px; height: 50px; border-radius: 14px;
+      background-image: linear-gradient(145deg,
+        var(--lima-400) 0%, var(--verde-500) 55%, var(--verde-700) 100%);
+      color: var(--petroleo-900); margin-bottom: 18px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        0 6px 14px -4px rgba(60, 182, 118, 0.55);
     }
     .recurso h3 { font-size: 1.05rem; margin: 0 0 8px; }
     .recurso p { font-size: 0.9rem; color: var(--texto-suave); margin: 0; line-height: 1.6; }
@@ -365,11 +449,12 @@ const PASSOS: Passo[] = [
        linear de 45° — que é a assinatura mais reconhecível de tela gerada por IA. */
     .chamada {
       position: relative; overflow: hidden;
-      background-color: var(--verde-900);
+      background-color: var(--petroleo-900);
       background-image:
-        radial-gradient(38rem 26rem at 22% 0%, rgba(60, 182, 118, 0.42), transparent 62%),
-        radial-gradient(32rem 24rem at 88% 110%, rgba(41, 148, 91, 0.38), transparent 60%);
-      padding: 76px 28px; text-align: center;
+        radial-gradient(36rem 24rem at 24% -8%, rgba(168, 227, 74, 0.34), transparent 62%),
+        radial-gradient(32rem 24rem at 86% 112%, rgba(60, 182, 118, 0.44), transparent 60%),
+        linear-gradient(200deg, var(--petroleo-800) 0%, var(--petroleo-900) 100%);
+      padding: 92px 28px; text-align: center;
     }
     .chamada h2 { color: #fff; font-size: 1.9rem; margin: 0 0 10px; }
     .chamada p { color: #fff; opacity: 0.85; margin: 0 0 28px; }

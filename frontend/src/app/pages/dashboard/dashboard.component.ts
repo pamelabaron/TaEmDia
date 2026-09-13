@@ -86,7 +86,26 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     .cabecalho { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
     .cabecalho h2 { margin: 0; }
     .centro { display: flex; justify-content: center; padding: 32px; }
-    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    /* Quatro caixas de peso igual dizem que os quatro números importam igual.
+       "Total a receber" é o que a pessoa abre o sistema para ver: ocupa duas
+       colunas e é o único cartão escuro da tela. Os outros três recuam. */
+    .kpis { display: grid; gap: 14px; margin-bottom: 18px; }
+
+    /* Celular: um embaixo do outro. */
+    .kpis { grid-template-columns: 1fr; }
+
+    /* Tablet: 2x2 exatos. Dar a linha inteira ao principal deixaria o quarto
+       cartão sozinho ao lado de um vão — órfão numa grade lê como erro. */
+    @media (min-width: 620px) {
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* Computador: os quatro em linha, e o principal mais largo que os demais —
+       é a largura, além da cor, que diz qual número manda. */
+    @media (min-width: 960px) {
+      .kpis { grid-template-columns: 1.5fr 1fr 1fr 1fr; }
+      .kpi.receber { grid-column: auto; }
+    }
 
     /* A cor do estado vem de uma luz no canto do cartão e do próprio número,
        não de uma tarja na lateral: a tarja é adesivo colado numa caixa branca,
@@ -107,7 +126,28 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     .kpi .valor { font-size: 1.6rem; font-weight: 600; margin-top: 4px; color: var(--tom);
                   letter-spacing: -0.02em; }
 
-    .kpi.receber       { --tom: var(--verde-800); --tom-rgb: 31, 130, 77; }
+    /* O cartão principal: petróleo com o lima acendendo no canto. É a única
+       superfície escura do painel — se houvesse duas, nenhuma seria o destaque. */
+    .kpi.receber {
+      --tom: var(--lima-400); --tom-rgb: 168, 227, 74;
+      background-color: var(--petroleo-900) !important;
+      background-image:
+        radial-gradient(18rem 12rem at 108% 118%, rgba(168, 227, 74, 0.42), transparent 64%),
+        linear-gradient(148deg, var(--petroleo-800) 0%, var(--petroleo-900) 72%) !important;
+      border-color: rgba(168, 227, 74, 0.22) !important;
+      border-top-color: rgba(168, 227, 74, 0.34) !important;
+      backdrop-filter: none;
+      box-shadow:
+        inset 0 1px 0 rgba(168, 227, 74, 0.18),
+        var(--elev-3) !important;
+      padding: 22px 20px 20px;
+    }
+    .kpi.receber::before { display: none; }
+    .kpi.receber .rotulo { color: rgba(255, 255, 255, 0.72); }
+    .kpi.receber .valor {
+      font-size: 2.1rem; color: var(--lima-400);
+      text-shadow: 0 0 30px rgba(168, 227, 74, 0.30);
+    }
     .kpi.recebido      { --tom: var(--sucesso);   --tom-rgb: 31, 130, 77; }
     .kpi.atraso        { --tom: var(--alerta);    --tom-rgb: 178, 106, 0; }
     .kpi.inadimplentes { --tom: var(--perigo);    --tom-rgb: 192, 57, 43; }
@@ -121,7 +161,8 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     .barra {
       width: 70%; max-width: 48px; min-height: 2px;
       border-radius: 6px 6px 2px 2px;
-      background-image: linear-gradient(180deg, var(--verde-500) 0%, var(--verde-800) 100%);
+      background-image: linear-gradient(180deg,
+        var(--lima-500) 0%, var(--verde-500) 42%, var(--verde-800) 100%);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28),
                   0 2px 6px -2px rgba(15, 98, 52, 0.35);
       transform-origin: bottom;
