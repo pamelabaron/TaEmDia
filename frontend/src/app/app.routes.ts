@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth.guard';
+import { authGuard, visitanteGuard } from './core/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'painel', pathMatch: 'full' },
@@ -10,6 +10,7 @@ export const routes: Routes = [
   },
   {
     path: 'login',
+    canActivate: [visitanteGuard],
     loadComponent: () => import('./pages/login/login.component').then((m) => m.LoginComponent),
   },
   {
