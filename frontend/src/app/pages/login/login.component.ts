@@ -176,7 +176,18 @@ const PASSOS: Passo[] = [
     </div>
   `,
   styles: [`
-    .pagina { background: var(--superficie); }
+    /* A aurora da capa sangra para fora do container de propósito, e sem um
+       recorte aqui ela alargava o documento: a página rolava para os lados.
+       O recorte é "clip", não "hidden": "hidden" transformaria este elemento
+       numa área de rolagem própria e o cabeçalho fixo (.topo, sticky) deixaria
+       de grudar no topo. */
+    .pagina { background: var(--superficie); overflow-x: clip; }
+
+    /* Navegador sem "overflow: clip" (Safari anterior ao 16): a aurora não
+       sangra para os lados, para não haver o que recortar. */
+    @supports not (overflow: clip) {
+      .capa::before { left: 0; right: 0; }
+    }
     h1, h2, h3 { color: var(--texto); }
 
     /* topo fixo */

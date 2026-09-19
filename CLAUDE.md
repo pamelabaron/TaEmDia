@@ -111,6 +111,7 @@ Consulte antes de agir na área correspondente.
 | Captura de tela do navegador embutido congela num quadro antigo | Meça com `getBoundingClientRect()` via JS antes de concluir que há bug |
 | No navegador embutido, `transform` **não renderiza** (nem inline com `!important`), mas `margin` funciona | Se um deslocamento "não aplica", teste com margem antes de supor que o CSS está errado |
 | `getComputedStyle` durante uma transição devolve o **valor inicial**, não o final | Meça posição real com `getBoundingClientRect()` |
+| Varrer `querySelectorAll('*')` atrás de quem passa da borda **não enxerga pseudo-elementos** (`::before`/`::after`) — a varredura voltou vazia com a página rolando 279px para o lado | Compare `scrollWidth` com `clientWidth`; para achar o culpado, desligue o suspeito com um `<style>` injetado e meça de novo |
 | `docker compose restart frontend` pode deixar o `ng serve` morto | Use `up -d --force-recreate frontend` e aguarde ~45s |
 
 ## Angular e Material
@@ -121,6 +122,8 @@ Consulte antes de agir na área correspondente.
 | O tema `azure-blue` **não existe** no Material 17 (só do 18 em diante) | Confira `node_modules/@angular/material/prebuilt-themes/` antes de escolher |
 | Rota nova acessada direto cai no `/painel` | Espere o `ng serve` recompilar; o curinga `**` engole rota que ainda não existe |
 | Tema próprio e páginas maiores estouram o limite de tamanho do build | Ajuste `budgets` no `angular.json` — não é erro de código |
+| Crase dentro de comentário nos `styles` inline do componente (que já estão entre crases) **fecha a string** e quebra o build (`TS2304: Cannot find name`) | Nos estilos inline, cite código entre aspas, nunca entre crases |
+| Luz ou brilho que sangra para fora do container (`inset` negativo) alarga o documento e a página rola para os lados | Recorte na raiz da página com `overflow-x: clip`. **Não use `hidden`**: ele cria área de rolagem própria e o cabeçalho `sticky` para de grudar |
 
 Use a favor: **estilos globais no `styles.scss` alcançam classes de componente**.
 Foi assim que os alvos de toque de todas as telas foram corrigidos de um lugar só.
