@@ -44,6 +44,18 @@ def engine():
     eng.dispose()
 
 
+@pytest.fixture(autouse=True)
+def uploads_isolados(tmp_path, monkeypatch):
+    """Comprovantes enviados nos testes vão para uma pasta temporária.
+
+    Mesmo motivo do banco separado: teste não toca em dado real. Sem isto,
+    cada rodada da suíte deixava arquivos órfãos na pasta de comprovantes.
+    """
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "UPLOADS_DIR", str(tmp_path / "uploads"))
+
+
 @pytest.fixture()
 def db(engine):
     """Sessão limpa para cada teste."""
