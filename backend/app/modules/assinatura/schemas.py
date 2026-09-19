@@ -17,8 +17,8 @@ class PagamentoOut(BaseModel):
     observacao: str | None = None
 
 
-class PagamentoPendenteOut(PagamentoOut):
-    """O que a administradora vê na fila de conferência."""
+class ComprovanteAdminOut(PagamentoOut):
+    """O que a administração vê, na fila e no histórico."""
 
     vendedor_id: uuid.UUID
     vendedor_nome: str = ""

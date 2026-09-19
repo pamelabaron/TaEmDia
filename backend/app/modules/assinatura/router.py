@@ -1,6 +1,7 @@
 """Endpoints da assinatura: a tela do assinante e a conferência da administradora."""
 import uuid
 from pathlib import Path
+from typing import Literal
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
@@ -13,7 +14,7 @@ from app.modules.assinatura.deps import exigir_admin, get_assinatura_service
 from app.modules.assinatura.schemas import (
     MinhaAssinaturaOut,
     PagamentoOut,
-    PagamentoPendenteOut,
+    ComprovanteAdminOut,
     RecusaIn,
 )
 from app.modules.assinatura.service import (
@@ -90,18 +91,23 @@ async def enviar_comprovante(
 
 # ------------------------------------------------------------ administradora
 
-@router.get("/admin/comprovantes", response_model=list[PagamentoPendenteOut])
-def comprovantes_pendentes(
+@router.get("/admin/comprovantes", response_model=list[ComprovanteAdminOut])
+def listar_comprovantes(
+    situacao: Literal["pendente", "aprovado", "recusado"] = "pendente",
     _admin: uuid.UUID = Depends(exigir_admin),
     service: AssinaturaService = Depends(get_assinatura_service),
     db: Session = Depends(get_db),
 ):
-    """Fila de conferência, mais antigos primeiro."""
+    """Fila de conferência (padrão) ou histórico de aprovados e recusados.
+
+    Sem o filtro, devolve os pendentes, como antes: quem já chamava a fila
+    continua recebendo a fila.
+    """
     repo = VendedorRepository(db)
     saida = []
-    for p in service.pendentes():
+    for p in service.listar(situacao):
         vendedor = repo.buscar_por_id(p.vendedor_id)
-        item = PagamentoPendenteOut.model_validate(p)
+        item = ComprovanteAdminOut.model_validate(p)
         item.vendedor_nome = vendedor.nome if vendedor else ""
         item.vendedor_email = vendedor.google_email if vendedor else ""
         saida.append(item)

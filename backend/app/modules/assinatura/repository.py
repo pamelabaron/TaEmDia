@@ -56,15 +56,23 @@ class AssinaturaRepository:
             ).scalars()
         )
 
+    def por_situacao(self, situacao: str) -> list[PagamentoAssinatura]:
+        """Comprovantes de uma situação, na ordem que interessa a cada uma.
+
+        A fila (pendentes) sai do mais antigo para o mais novo: quem enviou
+        primeiro é atendido primeiro. O histórico (aprovados e recusados) sai do
+        mais recente para o mais antigo: interessa o que acabou de acontecer.
+        """
+        consulta = select(PagamentoAssinatura).where(PagamentoAssinatura.situacao == situacao)
+        if situacao == "pendente":
+            consulta = consulta.order_by(PagamentoAssinatura.enviado_em.asc())
+        else:
+            consulta = consulta.order_by(PagamentoAssinatura.avaliado_em.desc())
+        return list(self.db.execute(consulta).scalars())
+
     def pendentes(self) -> list[PagamentoAssinatura]:
         """Fila de conferência da administradora, mais antigos primeiro."""
-        return list(
-            self.db.execute(
-                select(PagamentoAssinatura)
-                .where(PagamentoAssinatura.situacao == "pendente")
-                .order_by(PagamentoAssinatura.enviado_em.asc())
-            ).scalars()
-        )
+        return self.por_situacao("pendente")
 
     def confirmar(self) -> None:
         self.db.commit()

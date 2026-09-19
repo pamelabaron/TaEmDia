@@ -249,3 +249,99 @@ class TestAprovacao:
         assert r.status_code == 200
         assert len(r.json()) == 1
         assert r.json()[0]["vendedor_email"] == "vencido@exemplo.com"
+
+
+class TestHistoricoDeComprovantes:
+    """A administração consulta o que já aprovou e recusou, não só a fila."""
+
+    @pytest.fixture()
+    def admin(self, db, monkeypatch):
+        from app.core.config import settings
+        from tests.conftest import _criar_vendedor
+
+        v = _criar_vendedor(db, "admin@exemplo.com", "Admin", dias_de_acesso=7)
+        monkeypatch.setattr(settings, "ADMIN_EMAILS", "admin@exemplo.com")
+        return v
+
+    @pytest.fixture()
+    def cabecalho_admin(self, admin):
+        from app.core.security import criar_access_token
+
+        return {"Authorization": f"Bearer {criar_access_token(admin.id)}"}
+
+    @pytest.fixture()
+    def outro(self, db):
+        """Segundo vendedor: um vendedor só tem um comprovante pendente por vez."""
+        from app.core.security import criar_access_token
+        from tests.conftest import _criar_vendedor
+
+        v = _criar_vendedor(db, "outro@exemplo.com", "Outro Vendedor", dias_de_acesso=-1,
+                            origem="pago")
+        return {"Authorization": f"Bearer {criar_access_token(v.id)}"}
+
+    def _enviar(self, cliente_http, cabecalho):
+        return cliente_http.post("/assinatura/comprovante", data={"valor": "19.90"},
+                                 files=_arquivo(), headers=cabecalho).json()
+
+    def _listar(self, cliente_http, cabecalho, situacao=None):
+        url = "/admin/comprovantes" + (f"?situacao={situacao}" if situacao else "")
+        return cliente_http.get(url, headers=cabecalho)
+
+    def test_sem_filtro_continua_sendo_a_fila(self, cliente_http, cabecalho_vencido,
+                                              cabecalho_admin):
+        """Quem já usava a tela sem filtro segue recebendo os pendentes."""
+        p = self._enviar(cliente_http, cabecalho_vencido)
+        r = self._listar(cliente_http, cabecalho_admin)
+        assert r.status_code == 200
+        assert [c["id"] for c in r.json()] == [p["id"]]
+
+    def test_aprovados_lista_apenas_aprovados(self, cliente_http, cabecalho_vencido, outro,
+                                              cabecalho_admin):
+        aprovado = self._enviar(cliente_http, cabecalho_vencido)
+        pendente = self._enviar(cliente_http, outro)
+        cliente_http.post(f"/admin/comprovantes/{aprovado['id']}/aprovar",
+                          headers=cabecalho_admin)
+
+        r = self._listar(cliente_http, cabecalho_admin, "aprovado")
+        assert r.status_code == 200
+        ids = [c["id"] for c in r.json()]
+        assert ids == [aprovado["id"]]
+        assert pendente["id"] not in ids
+        assert r.json()[0]["situacao"] == "aprovado"
+        assert r.json()[0]["avaliado_em"] is not None
+
+    def test_recusados_trazem_o_motivo(self, cliente_http, cabecalho_vencido, cabecalho_admin):
+        p = self._enviar(cliente_http, cabecalho_vencido)
+        cliente_http.post(f"/admin/comprovantes/{p['id']}/recusar",
+                          json={"motivo": "Valor diferente do combinado."},
+                          headers=cabecalho_admin)
+
+        r = self._listar(cliente_http, cabecalho_admin, "recusado")
+        assert r.status_code == 200
+        assert len(r.json()) == 1
+        item = r.json()[0]
+        assert item["observacao"] == "Valor diferente do combinado."
+        assert item["vendedor_email"] == "vencido@exemplo.com"
+
+    def test_historico_mostra_o_mais_recente_primeiro(self, cliente_http, cabecalho_vencido,
+                                                      outro, cabecalho_admin):
+        """Ao contrário da fila (mais antigo primeiro, para ninguém esperar demais),
+        o histórico interessa pelo que acabou de acontecer."""
+        primeiro = self._enviar(cliente_http, cabecalho_vencido)
+        segundo = self._enviar(cliente_http, outro)
+        cliente_http.post(f"/admin/comprovantes/{primeiro['id']}/aprovar",
+                          headers=cabecalho_admin)
+        cliente_http.post(f"/admin/comprovantes/{segundo['id']}/aprovar",
+                          headers=cabecalho_admin)
+
+        r = self._listar(cliente_http, cabecalho_admin, "aprovado")
+        assert [c["id"] for c in r.json()] == [segundo["id"], primeiro["id"]]
+
+    def test_situacao_invalida_e_recusada(self, cliente_http, cabecalho_admin):
+        r = self._listar(cliente_http, cabecalho_admin, "qualquer")
+        assert r.status_code == 422
+
+    def test_historico_e_restrito_a_administracao(self, cliente_http, cabecalho_auth):
+        for situacao in ("aprovado", "recusado"):
+            r = self._listar(cliente_http, cabecalho_auth, situacao)
+            assert r.status_code == 403

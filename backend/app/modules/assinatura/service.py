@@ -115,6 +115,10 @@ class AssinaturaService:
     def pendentes(self) -> list[PagamentoAssinatura]:
         return self.repo.pendentes()
 
+    def listar(self, situacao: str) -> list[PagamentoAssinatura]:
+        """Fila (pendente) ou histórico (aprovado, recusado)."""
+        return self.repo.por_situacao(situacao)
+
     def pagamento_por_id(self, pagamento_id: uuid.UUID) -> PagamentoAssinatura | None:
         return self.repo.pagamento_por_id(pagamento_id)
 

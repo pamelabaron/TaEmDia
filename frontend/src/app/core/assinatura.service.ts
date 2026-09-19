@@ -13,7 +13,10 @@ export interface Pagamento {
   observacao: string | null;
 }
 
-export interface PagamentoPendente extends Pagamento {
+/** Situações que a administração consulta: a fila e o histórico. */
+export type SituacaoComprovante = 'pendente' | 'aprovado' | 'recusado';
+
+export interface ComprovanteAdmin extends Pagamento {
   vendedor_id: string;
   vendedor_nome: string;
   vendedor_email: string;
@@ -61,8 +64,11 @@ export class AssinaturaService {
 
   // ------------------------------------------------------------ administração
 
-  pendentes(): Observable<PagamentoPendente[]> {
-    return this.http.get<PagamentoPendente[]>(`${API_URL}/admin/comprovantes`);
+  /** Fila (pendente) ou histórico (aprovado, recusado). */
+  listar(situacao: SituacaoComprovante): Observable<ComprovanteAdmin[]> {
+    return this.http.get<ComprovanteAdmin[]>(`${API_URL}/admin/comprovantes`, {
+      params: { situacao },
+    });
   }
 
   /** O arquivo sai por endpoint autenticado — nunca por caminho público. */

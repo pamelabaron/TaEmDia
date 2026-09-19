@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AssinaturaService, MinhaAssinatura } from '../../core/assinatura.service';
+import { dataHoraLocal } from '../../core/datas';
 
 const ROTULOS: Record<string, string> = {
   em_teste: 'Período de teste',
@@ -269,9 +270,5 @@ export class MinhaAssinaturaComponent implements OnInit {
   }
   dinheiro(v: number): string { return 'R$ ' + v.toFixed(2).replace('.', ','); }
   data(iso: string): string { const [a, m, d] = iso.split('-'); return `${d}/${m}/${a}`; }
-  dataHora(iso: string): string {
-    const dt = new Date(iso);
-    return dt.toLocaleDateString('pt-BR') + ', ' +
-           dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  }
+  dataHora(iso: string): string { return dataHoraLocal(iso); }
 }
