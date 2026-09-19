@@ -10,7 +10,11 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.db.session import get_db
 from app.modules.assinatura import armazenamento
-from app.modules.assinatura.deps import exigir_admin, get_assinatura_service
+from app.modules.assinatura.deps import (
+    eh_administrador,
+    exigir_admin,
+    get_assinatura_service,
+)
 from app.modules.assinatura.schemas import (
     MinhaAssinaturaOut,
     PagamentoOut,
@@ -35,15 +39,18 @@ router = APIRouter(tags=["assinatura"])
 def minha_assinatura(
     vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
     service: AssinaturaService = Depends(get_assinatura_service),
+    db: Session = Depends(get_db),
 ):
     """Situação da assinatura de quem está logado.
 
     Aberto a qualquer autenticado de propósito: é justamente quem está vencido
-    que precisa ver esta tela.
+    que precisa ver esta tela. Para a administração a situação é "isenta": a
+    validade gravada não se aplica, porque a trava nunca a bloqueia.
     """
     resumo = service.resumo(vendedor_id)
+    isenta = eh_administrador(db, vendedor_id)
     return MinhaAssinaturaOut(
-        situacao=resumo["situacao"],
+        situacao="isenta" if isenta else resumo["situacao"],
         valido_ate=resumo["valido_ate"],
         dias_restantes=resumo["dias_restantes"],
         tem_pendente=resumo["tem_pendente"],

@@ -23,15 +23,30 @@ def get_assinatura_service(db: Session = Depends(get_db)) -> AssinaturaService:
     return AssinaturaService(AssinaturaRepository(db))
 
 
+def eh_administrador(db: Session, vendedor_id: uuid.UUID) -> bool:
+    """O vendedor está em ADMIN_EMAILS? Comparação sem diferenciar maiúsculas.
+
+    Único lugar que responde isso: a conferência de comprovantes e a isenção
+    da assinatura perguntam a mesma coisa, e não podem discordar.
+    """
+    vendedor = VendedorRepository(db).buscar_por_id(vendedor_id)
+    email = (vendedor.google_email or "").lower() if vendedor else ""
+    return bool(email) and email in settings.administradores
+
+
 def exigir_assinatura_ativa(
     vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
     service: AssinaturaService = Depends(get_assinatura_service),
+    db: Session = Depends(get_db),
 ) -> uuid.UUID:
-    """Libera a escrita apenas para quem está em teste ou com assinatura ativa.
+    """Libera a escrita para quem está em teste, com assinatura ativa, ou é da
+    administração — quem administra o sistema não paga a si mesmo.
 
     Responde **402 Pagamento Necessário** — o código existe exatamente para
     este caso, e deixa o tratamento no frontend uniforme.
     """
+    if eh_administrador(db, vendedor_id):
+        return vendedor_id
     if not service.pode_escrever(vendedor_id):
         raise HTTPException(
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
@@ -45,9 +60,7 @@ def exigir_admin(
     db: Session = Depends(get_db),
 ) -> uuid.UUID:
     """Restringe a conferência de comprovantes aos e-mails de ADMIN_EMAILS."""
-    vendedor = VendedorRepository(db).buscar_por_id(vendedor_id)
-    email = (vendedor.google_email or "").lower() if vendedor else ""
-    if not email or email not in settings.administradores:
+    if not eh_administrador(db, vendedor_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acesso restrito à administração.",

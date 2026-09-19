@@ -345,3 +345,72 @@ class TestHistoricoDeComprovantes:
         for situacao in ("aprovado", "recusado"):
             r = self._listar(cliente_http, cabecalho_auth, situacao)
             assert r.status_code == 403
+
+
+class TestAdministracaoIsenta:
+    """Quem administra o sistema não paga a si mesmo: nunca é bloqueado."""
+
+    @pytest.fixture()
+    def admin_vencido(self, db, monkeypatch):
+        from app.core.config import settings
+        from app.core.security import criar_access_token
+        from tests.conftest import _criar_vendedor
+
+        v = _criar_vendedor(db, "dona@exemplo.com", "Dona do Sistema",
+                            dias_de_acesso=-30, origem="teste")
+        monkeypatch.setattr(settings, "ADMIN_EMAILS", "dona@exemplo.com")
+        return {"Authorization": f"Bearer {criar_access_token(v.id)}"}
+
+    @pytest.fixture()
+    def admin_sem_assinatura(self, db, monkeypatch):
+        """Conta de administração que nunca teve linha de assinatura."""
+        from app.core.config import settings
+        from app.core.security import criar_access_token
+        from tests.conftest import _criar_vendedor
+
+        v = _criar_vendedor(db, "dona2@exemplo.com", "Dona 2", dias_de_acesso=None)
+        monkeypatch.setattr(settings, "ADMIN_EMAILS", "dona2@exemplo.com")
+        return {"Authorization": f"Bearer {criar_access_token(v.id)}"}
+
+    def test_admin_vencida_continua_gravando(self, cliente_http, admin_vencido):
+        r = cliente_http.post(
+            "/clientes", json={"nome": "Cliente", "whatsapp_numero": "5547933330000"},
+            headers=admin_vencido)
+        assert r.status_code == 201
+
+    def test_admin_sem_assinatura_continua_gravando(self, cliente_http, admin_sem_assinatura):
+        r = cliente_http.post(
+            "/clientes", json={"nome": "Cliente", "whatsapp_numero": "5547933331111"},
+            headers=admin_sem_assinatura)
+        assert r.status_code == 201
+
+    def test_admin_conecta_o_whatsapp(self, cliente_http, admin_vencido):
+        assert cliente_http.get("/whatsapp/status", headers=admin_vencido).status_code == 200
+
+    def test_minha_assinatura_mostra_isenta(self, cliente_http, admin_vencido):
+        r = cliente_http.get("/assinatura", headers=admin_vencido)
+        assert r.status_code == 200
+        assert r.json()["situacao"] == "isenta"
+
+    def test_isencao_vale_so_para_a_lista(self, cliente_http, admin_vencido,
+                                          cabecalho_vencido):
+        """Ter um administrador configurado não libera os demais vencidos."""
+        r = cliente_http.post(
+            "/clientes", json={"nome": "Cliente", "whatsapp_numero": "5547933332222"},
+            headers=cabecalho_vencido)
+        assert r.status_code == 402
+
+    def test_email_com_maiusculas_tambem_e_isento(self, cliente_http, db, monkeypatch):
+        """O Google pode devolver o e-mail com maiúsculas; a lista é comparada sem caixa."""
+        from app.core.config import settings
+        from app.core.security import criar_access_token
+        from tests.conftest import _criar_vendedor
+
+        v = _criar_vendedor(db, "Dona.Maiuscula@Exemplo.com", "Dona",
+                            dias_de_acesso=-1, origem="pago")
+        monkeypatch.setattr(settings, "ADMIN_EMAILS", "dona.maiuscula@exemplo.com")
+        cab = {"Authorization": f"Bearer {criar_access_token(v.id)}"}
+        r = cliente_http.post(
+            "/clientes", json={"nome": "Cliente", "whatsapp_numero": "5547933333333"},
+            headers=cab)
+        assert r.status_code == 201

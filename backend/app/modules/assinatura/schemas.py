@@ -26,7 +26,7 @@ class ComprovanteAdminOut(PagamentoOut):
 
 
 class MinhaAssinaturaOut(BaseModel):
-    situacao: str  # em_teste | ativa | vencida
+    situacao: str  # em_teste | ativa | vencida | isenta (administração)
     valido_ate: date | None
     dias_restantes: int
     tem_pendente: bool

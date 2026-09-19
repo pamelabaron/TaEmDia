@@ -23,7 +23,8 @@ export interface ComprovanteAdmin extends Pagamento {
 }
 
 export interface MinhaAssinatura {
-  situacao: 'em_teste' | 'ativa' | 'vencida';
+  /** "isenta": conta da administração, que a trava nunca bloqueia. */
+  situacao: 'em_teste' | 'ativa' | 'vencida' | 'isenta';
   valido_ate: string | null;
   dias_restantes: number;
   tem_pendente: boolean;

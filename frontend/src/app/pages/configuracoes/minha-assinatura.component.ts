@@ -14,6 +14,7 @@ const ROTULOS: Record<string, string> = {
   em_teste: 'Período de teste',
   ativa: 'Assinatura ativa',
   vencida: 'Assinatura vencida',
+  isenta: 'Administração',
 };
 
 @Component({
@@ -36,6 +37,17 @@ const ROTULOS: Record<string, string> = {
         <div class="centro"><mat-spinner diameter="32"></mat-spinner></div>
       } @else {
         @if (dados(); as a) {
+          @if (a.situacao === 'isenta') {
+            <!-- Administração: sem validade, sem cobrança. Mostrar uma data aqui
+                 seria mentir, porque a trava nunca bloqueia esta conta. -->
+            <p class="aviso-isenta">
+              <mat-icon inline>verified_user</mat-icon>
+              <span>
+                Conta de administração: sem cobrança e sem bloqueio. Você usa o sistema
+                inteiro e confere os comprovantes em <strong>Comprovantes</strong>.
+              </span>
+            </p>
+          } @else {
           <div class="resumo">
             <div class="coluna">
               <span class="rotulo">
@@ -108,6 +120,8 @@ const ROTULOS: Record<string, string> = {
             </div>
           }
 
+          }
+
           <!-- Histórico ------------------------------------------------------>
           @if (a.historico.length > 0) {
             <div class="historico">
@@ -147,6 +161,21 @@ const ROTULOS: Record<string, string> = {
                      border-color: rgba(41, 148, 91, 0.22); }
     .selo.vencida  { background: var(--perigo-bg); color: var(--perigo);
                      border-color: rgba(192, 57, 43, 0.22); }
+    .selo.isenta   { background: var(--petroleo-800); color: var(--lima-400);
+                     border-color: rgba(168, 227, 74, 0.35); }
+
+    /* Nome próprio: "isenta" já é a variação da etiqueta (.selo.isenta), e
+       reaproveitar a classe fazia uma herdar o estilo da outra. O texto vai num
+       span único porque o contêiner é flexível: solto, cada trecho em negrito
+       virava um item separado. */
+    .aviso-isenta {
+      display: flex; align-items: flex-start; gap: 8px; margin: 0;
+      padding: 11px 13px; border-radius: var(--raio-interno);
+      background: var(--verde-50); color: var(--texto);
+      border: 1px solid rgba(31, 130, 77, 0.18);
+      font-size: 0.9rem; line-height: 1.5;
+    }
+    .aviso-isenta mat-icon { color: var(--verde-800); flex-shrink: 0; margin-top: 2px; }
 
     .resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
               gap: 12px; margin-bottom: 14px; }
