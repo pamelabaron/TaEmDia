@@ -89,7 +89,7 @@ ssh -i caminho/para/sua-chave.pem ubuntu@taemdia.duckdns.org
 Já dentro do servidor, instale o Docker:
 
 ```bash
-sudo apt update && sudo apt install -y docker.io docker-compose-plugin git
+sudo apt update && sudo apt install -y docker.io docker-compose-v2 git
 sudo usermod -aG docker ubuntu
 ```
 
