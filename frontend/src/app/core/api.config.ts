@@ -1,2 +1,4 @@
-// Endereço base da API (backend FastAPI).
-export const API_URL = 'http://localhost:8000';
+import { environment } from '../../environments/environment';
+
+/** Endereço base da API. Vem do ambiente: vazio em produção (mesmo domínio). */
+export const API_URL = environment.apiUrl;
