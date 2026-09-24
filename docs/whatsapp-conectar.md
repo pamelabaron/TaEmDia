@@ -7,12 +7,12 @@ O sistema funciona em **dois modos**:
 | **Simulador** (padrão) | As mensagens são geradas e registradas no histórico, mas **não são enviadas**. | Para desenvolver, testar e demonstrar sem depender do celular. |
 | **Real** (Evolution API) | As mensagens são enviadas de verdade pelo seu número. | Quando quiser usar com clientes reais. |
 
-Hoje o projeto está em **modo simulador** — tudo funciona, só não sai mensagem.
+Hoje o projeto está em **modo simulador**. Tudo funciona, só não sai mensagem.
 Para ligar o modo real, siga os passos abaixo.
 
 ---
 
-## Passo 1 — Escolher uma chave de segurança
+## Passo 1. Escolher uma chave de segurança
 Abra o arquivo `.env` e preencha a linha `EVOLUTION_API_KEY` com uma senha
 qualquer inventada por você (só serve para o sistema conversar com o WhatsApp):
 
@@ -23,7 +23,7 @@ EVOLUTION_API_KEY=uma-chave-secreta-que-voce-inventar
 > ⚠️ Enquanto essa linha estiver **vazia**, o sistema continua no modo simulador.
 > É esse campo que liga o modo real.
 
-## Passo 2 — Subir o serviço do WhatsApp
+## Passo 2. Subir o serviço do WhatsApp
 Na pasta do projeto:
 
 ```bash
@@ -33,17 +33,17 @@ docker compose --profile whatsapp up -d
 Isso sobe um serviço a mais (a Evolution API), além do banco, da API e da interface.
 Na primeira vez ele baixa a imagem, o que leva alguns minutos.
 
-## Passo 3 — Criar a instância e escanear o QR Code
+## Passo 3. Criar a instância e escanear o QR Code
 1. Abra o sistema em http://localhost:4200 e vá em **Configurações**.
 2. O card **WhatsApp** vai mostrar "Não conectado" e exibir um **QR Code**.
 3. No celular: abra o **WhatsApp → Configurações → Aparelhos conectados →
    Conectar um aparelho** e escaneie o QR Code da tela.
 4. Recarregue a página. O status deve mudar para **Conectado** (bolinha verde).
 
-> Se o QR Code não aparecer, aguarde alguns segundos e recarregue — a Evolution
+> Se o QR Code não aparecer, aguarde alguns segundos e recarregue. A Evolution
 > API leva um instante para iniciar.
 
-## Passo 4 — Testar
+## Passo 4. Testar
 No perfil de um cliente, clique em **Cobrar** em uma parcela. A mensagem deve
 chegar no WhatsApp do número cadastrado naquele cliente.
 

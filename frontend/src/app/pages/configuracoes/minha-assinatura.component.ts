@@ -53,7 +53,7 @@ const ROTULOS: Record<string, string> = {
               <span class="rotulo">
                 @if (a.situacao === 'vencida') { Venceu em } @else { Válida até }
               </span>
-              <span class="valor">{{ a.valido_ate ? data(a.valido_ate) : '—' }}</span>
+              <span class="valor">{{ a.valido_ate ? data(a.valido_ate) : 'não definida' }}</span>
               @if (a.situacao !== 'vencida' && a.dias_restantes > 0) {
                 <span class="descricao">
                   {{ a.dias_restantes }} {{ a.dias_restantes === 1 ? 'dia' : 'dias' }} restantes

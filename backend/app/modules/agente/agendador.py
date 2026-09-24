@@ -1,4 +1,4 @@
-"""Agendador de tarefas em segundo plano (APScheduler) — RFC 5.3.5.
+"""Agendador de tarefas em segundo plano (APScheduler). RFC 5.3.5.
 
 Dois jobs:
   (a) varredura de parcelas para envio automático, de hora em hora dentro do

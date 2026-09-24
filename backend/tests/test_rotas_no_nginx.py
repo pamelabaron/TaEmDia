@@ -2,7 +2,7 @@
 
 Em produção o Nginx é a porta de entrada: ele decide o que vai para a API e o
 que vai para a interface. A decisão é uma lista de prefixos escrita à mão. Rota
-nova que não entra nessa lista não chega ao backend — o visitante recebe a
+nova que não entra nessa lista não chega ao backend. O visitante recebe a
 página do Angular no lugar da resposta, e o erro só aparece depois de publicar.
 
 Foi o que aconteceu com /assinatura e /admin: existiam no código, funcionavam no

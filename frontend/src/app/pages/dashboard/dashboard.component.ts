@@ -95,12 +95,12 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     .kpis { grid-template-columns: 1fr; }
 
     /* Tablet: 2x2 exatos. Dar a linha inteira ao principal deixaria o quarto
-       cartão sozinho ao lado de um vão — órfão numa grade lê como erro. */
+       cartão sozinho ao lado de um vão: órfão numa grade lê como erro. */
     @media (min-width: 620px) {
       .kpis { grid-template-columns: repeat(2, 1fr); }
     }
 
-    /* Computador: os quatro em linha, e o principal mais largo que os demais —
+    /* Computador: os quatro em linha, e o principal mais largo que os demais -
        é a largura, além da cor, que diz qual número manda. */
     @media (min-width: 960px) {
       .kpis { grid-template-columns: 1.5fr 1fr 1fr 1fr; }
@@ -127,7 +127,7 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
                   letter-spacing: -0.02em; }
 
     /* O cartão principal: petróleo com o lima acendendo no canto. É a única
-       superfície escura do painel — se houvesse duas, nenhuma seria o destaque. */
+       superfície escura do painel. Se houvesse duas, nenhuma seria o destaque. */
     .kpi.receber {
       --tom: var(--lima-400); --tom-rgb: 168, 227, 74;
       background-color: var(--petroleo-900) !important;
@@ -156,7 +156,7 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     .grafico { display: flex; align-items: flex-end; gap: 16px; height: 160px; padding-top: 20px; }
     .coluna { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; height: 100%; }
     .cifra { font-size: 0.7rem; color: var(--texto-suave); margin-bottom: 4px; }
-    /* Barra com volume: mais clara no topo, como se a luz viesse de cima —
+    /* Barra com volume: mais clara no topo, como se a luz viesse de cima -
        a mesma direção que as sombras dos cartões pressupõem. */
     .barra {
       width: 70%; max-width: 48px; min-height: 2px;

@@ -72,7 +72,7 @@ export class AssinaturaService {
     });
   }
 
-  /** O arquivo sai por endpoint autenticado — nunca por caminho público. */
+  /** O arquivo sai por endpoint autenticado. Nunca por caminho público. */
   baixarComprovante(id: string): Observable<Blob> {
     return this.http.get(`${API_URL}/admin/comprovantes/${id}/arquivo`, {
       responseType: 'blob',

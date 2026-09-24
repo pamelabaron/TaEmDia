@@ -43,7 +43,7 @@ const VAZIO: Record<SituacaoComprovante, { icone: string; titulo: string; texto:
 };
 
 /**
- * Conferência de comprovantes — visível apenas para quem está em ADMIN_EMAILS.
+ * Conferência de comprovantes. Visível apenas para quem está em ADMIN_EMAILS.
  *
  * Esconder a tela é conforto: quem não é administrador recebe 403 do servidor
  * mesmo chamando os endpoints direto.
@@ -322,7 +322,7 @@ export class AssinaturasComponent implements OnInit {
 
   confirmarRecusa(p: ComprovanteAdmin): void {
     if (this.motivo.trim().length < 3) {
-      this.aviso.open('Escreva o motivo — a pessoa vai ler.', 'OK', { duration: 3000 });
+      this.aviso.open('Escreva o motivo. A pessoa vai ler.', 'OK', { duration: 3000 });
       return;
     }
     this.service.recusar(p.id, this.motivo.trim()).subscribe({

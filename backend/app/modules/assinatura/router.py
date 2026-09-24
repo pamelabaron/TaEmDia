@@ -68,7 +68,7 @@ async def enviar_comprovante(
     vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
     service: AssinaturaService = Depends(get_assinatura_service),
 ):
-    """Envio do comprovante do Pix. Aberto a vencidos — é como se volta a ter acesso."""
+    """Envio do comprovante do Pix. Aberto a vencidos. É como se volta a ter acesso."""
     conteudo = await arquivo.read()
     try:
         tipo = armazenamento.validar(conteudo)
@@ -127,7 +127,7 @@ def baixar_comprovante(
     _admin: uuid.UUID = Depends(exigir_admin),
     service: AssinaturaService = Depends(get_assinatura_service),
 ):
-    """Entrega o arquivo. Único caminho de saída — a pasta não é servida como estática."""
+    """Entrega o arquivo. Único caminho de saída. A pasta não é servida como estática."""
     pagamento = service.pagamento_por_id(pagamento_id)
     if pagamento is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Comprovante não encontrado.")

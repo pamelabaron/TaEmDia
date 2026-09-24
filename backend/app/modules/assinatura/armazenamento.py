@@ -3,7 +3,7 @@
 Três cuidados que valem a pena explicar:
 
 1. O nome do arquivo salvo é gerado pelo sistema (UUID). O nome digitado pelo
-   usuário **nunca** entra na formação do caminho — é assim que se evita que
+   usuário **nunca** entra na formação do caminho. É assim que se evita que
    alguém envie "../../etc/algo" e escreva fora da pasta.
 2. O tipo é validado pelos **primeiros bytes** do arquivo, não pela extensão.
    Renomear "virus.exe" para "comprovante.png" não engana a assinatura binária.

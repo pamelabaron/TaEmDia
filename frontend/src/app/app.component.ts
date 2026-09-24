@@ -37,7 +37,7 @@ const MENU: ItemMenu[] = [
         <!-- ============================================ navegação lateral
              No computador a navegação fica na lateral: cabe ícone e rótulo
              lado a lado, e o menu não compete com o título da página.
-             No celular ela vira a barra de cima com menu sanduíche — uma
+             No celular ela vira a barra de cima com menu sanduíche. Uma
              coluna fixa comeria metade de uma tela de 375px. -->
         <aside class="lateral">
           <a class="marca" routerLink="/painel">

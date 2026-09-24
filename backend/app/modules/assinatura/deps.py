@@ -40,9 +40,9 @@ def exigir_assinatura_ativa(
     db: Session = Depends(get_db),
 ) -> uuid.UUID:
     """Libera a escrita para quem está em teste, com assinatura ativa, ou é da
-    administração — quem administra o sistema não paga a si mesmo.
+    administração. Quem administra o sistema não paga a si mesmo.
 
-    Responde **402 Pagamento Necessário** — o código existe exatamente para
+    Responde **402 Pagamento Necessário**. O código existe exatamente para
     este caso, e deixa o tratamento no frontend uniforme.
     """
     if eh_administrador(db, vendedor_id):

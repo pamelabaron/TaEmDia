@@ -87,7 +87,7 @@ def cliente_http(db):
 def _criar_vendedor(db, email: str, nome: str, dias_de_acesso: int | None, origem: str = "teste"):
     """Cria um vendedor e, quando pedido, a vigência da assinatura dele.
 
-    `dias_de_acesso=None` cria um vendedor sem nenhuma assinatura — o estado de
+    `dias_de_acesso=None` cria um vendedor sem nenhuma assinatura. O estado de
     quem já venceu e nunca pagou.
     """
     from datetime import date, timedelta
@@ -109,7 +109,7 @@ def _criar_vendedor(db, email: str, nome: str, dias_de_acesso: int | None, orige
 
 @pytest.fixture()
 def vendedor(db):
-    """Vendedor com acesso liberado — é o estado de quem acabou de se cadastrar
+    """Vendedor com acesso liberado. É o estado de quem acabou de se cadastrar
     (o login cria 7 dias de teste, RN-A01)."""
     return _criar_vendedor(db, "teste@exemplo.com", "Vendedor Teste", dias_de_acesso=7)
 

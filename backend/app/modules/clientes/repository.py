@@ -1,5 +1,5 @@
 """Repository: única camada que fala com o banco. Todo acesso filtra por vendedor_id
-(isolamento entre contas — RNF07/RN02)."""
+(isolamento entre contas. RNF07/RN02)."""
 import uuid
 
 from sqlalchemy import select

@@ -37,7 +37,7 @@ configuração for desfeita (`backend/tests/test_topologia_producao.py`).
 
 ---
 
-## Passo 1 — Criar o servidor
+## Passo 1. Criar o servidor
 
 1. Acesse **https://aws.amazon.com** e crie sua conta.
 2. No console, vá em **EC2 → Executar instância**.
@@ -47,7 +47,7 @@ configuração for desfeita (`backend/tests/test_topologia_producao.py`).
    - **Tipo:** `t3.micro`
    - **Armazenamento:** aumente para **20 GB** (o padrão de 8 GB fica apertado
      com as imagens do Docker)
-   - **Par de chaves:** crie um novo e **guarde o arquivo `.pem`** — é ele que
+   - **Par de chaves:** crie um novo e **guarde o arquivo `.pem`**. É ele que
      dá acesso ao servidor. Não dá para baixar de novo depois.
    - **Regras de firewall:** libere as portas **22** (SSH), **80** e **443**.
 4. Anote o **IP público** da instância.
@@ -57,7 +57,7 @@ configuração for desfeita (`backend/tests/test_topologia_producao.py`).
 > associe à instância. Enquanto ele estiver associado a uma instância ligada,
 > não há cobrança.
 
-## Passo 2 — Criar o endereço (DuckDNS)
+## Passo 2. Criar o endereço (DuckDNS)
 
 1. Acesse **https://www.duckdns.org** e entre com uma conta Google ou GitHub.
 2. Crie um subdomínio, por exemplo `taemdia` → o endereço fica
@@ -74,7 +74,7 @@ ping taemdia.duckdns.org
 O IP que responder precisa ser o da instância. Se ainda não for, aguarde alguns
 minutos.
 
-## Passo 3 — Preparar o servidor
+## Passo 3. Preparar o servidor
 
 Conecte via SSH (no PowerShell do seu computador):
 
@@ -117,14 +117,14 @@ free -h
 
 A troca continua valendo depois de reiniciar, por causa da última linha.
 
-## Passo 4 — Baixar o projeto
+## Passo 4. Baixar o projeto
 
 ```bash
 git clone https://github.com/pamelabaron/TaEmDia.git
 cd TaEmDia
 ```
 
-## Passo 5 — Configurar os segredos
+## Passo 5. Configurar os segredos
 
 ```bash
 cp .env.example .env
@@ -161,7 +161,7 @@ Para salvar no `nano`: `Ctrl+O`, `Enter`, `Ctrl+X`.
 > redirecionamento autorizados*, e o endereço `https://taemdia.duckdns.org` nas
 > *origens JavaScript autorizadas* (ver `docs/google-oauth-setup.md`).
 
-## Passo 6 — Emitir o certificado HTTPS
+## Passo 6. Emitir o certificado HTTPS
 
 ```bash
 sudo apt install -y certbot
@@ -174,7 +174,7 @@ sudo chown $USER docker/nginx/certs/*.pem
 
 O Let's Encrypt emite certificado para endereço do DuckDNS normalmente.
 
-## Passo 7 — Subir o sistema
+## Passo 7. Subir o sistema
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d --build
@@ -192,9 +192,9 @@ docker compose -f docker-compose.prod.yml logs -f backend
 ```
 
 > Se a configuração estiver insegura, o backend **não sobe** e informa o que
-> falta corrigir — é a validação descrita em `docs/checklist-seguranca.md`.
+> falta corrigir. É a validação descrita em `docs/checklist-seguranca.md`.
 
-## Passo 8 — Conferir
+## Passo 8. Conferir
 
 ```bash
 docker compose -f docker-compose.prod.yml ps
@@ -203,7 +203,7 @@ docker compose -f docker-compose.prod.yml ps
 Devem aparecer, no ar: `db`, `backend`, `agendador`, `frontend` e `nginx`.
 
 - `https://taemdia.duckdns.org/health` deve responder `{"status":"ok"}`.
-- Abra `https://taemdia.duckdns.org` — deve aparecer a página de apresentação.
+- Abra `https://taemdia.duckdns.org`. Deve aparecer a página de apresentação.
 - Faça login com Google e confira o painel.
 - Confirme que o agendador está vivo:
 
@@ -213,7 +213,7 @@ docker compose -f docker-compose.prod.yml logs agendador | tail -5
 
 Deve aparecer "Agendador em processo dedicado".
 
-## Passo 9 — WhatsApp (opcional)
+## Passo 9. WhatsApp (opcional)
 
 ```bash
 docker compose -f docker-compose.prod.yml --profile whatsapp up -d
@@ -268,6 +268,6 @@ mês, que cobrem o mês inteiro ligado). O endereço do DuckDNS é gratuito. For
 franquia, a instância fica em torno de US$ 7 a 9 por mês.
 
 Para economizar depois da franquia, é possível manter o servidor ligado apenas
-nos dias necessários e parar a instância no console da AWS — mas note que, com o
+nos dias necessários e parar a instância no console da AWS. Mas note que, com o
 servidor desligado, **as cobranças automáticas não são enviadas**, porque o
 agendador depende de um servidor ligado.

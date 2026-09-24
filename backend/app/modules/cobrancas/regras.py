@@ -1,4 +1,4 @@
-"""Regras puras do motor de cobrança (sem banco e sem HTTP) — fáceis de testar."""
+"""Regras puras do motor de cobrança (sem banco e sem HTTP). Fáceis de testar."""
 from datetime import date, datetime, time
 from zoneinfo import ZoneInfo
 

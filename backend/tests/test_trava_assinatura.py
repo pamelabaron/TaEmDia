@@ -2,7 +2,7 @@
 
 Este é o teste que sustenta a decisão de aplicar a trava por dependência em vez
 de middleware. Se alguém criar um endpoint de escrita amanhã e esquecer de
-protegê-lo, a suíte quebra aqui — não em produção.
+protegê-lo, a suíte quebra aqui. Não em produção.
 
 Ver docs/superpowers/specs/2026-09-13-assinatura-design.md, seção 2.
 """
@@ -14,7 +14,7 @@ from app.modules.assinatura.deps import exigir_assinatura_ativa
 METODOS_DE_ESCRITA = {"POST", "PUT", "PATCH", "DELETE"}
 
 #: Endpoints de escrita deliberadamente abertos, com o motivo de cada um.
-#: Mexer nesta lista é uma decisão de segurança — não a use para calar o teste.
+#: Mexer nesta lista é uma decisão de segurança. Não a use para calar o teste.
 EXCECOES = {
     ("/whatsapp/webhook", "POST"): "é a resposta do devedor, não do assinante",
     ("/templates/preview", "POST"): "só monta o texto, não grava",
@@ -75,7 +75,7 @@ def test_toda_rota_de_escrita_exige_assinatura():
 
 def test_excecoes_ainda_existem():
     """Se um endpoint da lista de exceções sumiu ou mudou de caminho, a lista
-    ficou mentindo — e uma exceção esquecida é uma porta aberta."""
+    ficou mentindo. E uma exceção esquecida é uma porta aberta."""
     registradas = {(caminho, metodo) for caminho, metodo, _ in _rotas_de_escrita()}
     fantasmas = [f"{m} {c}" for (c, m) in EXCECOES if (c, m) not in registradas]
     assert not fantasmas, (

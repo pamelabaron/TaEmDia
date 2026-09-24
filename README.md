@@ -1,6 +1,6 @@
-# TáEmDia — Sistema de Cobrança Automatizada
+# TáEmDia. Sistema de Cobrança Automatizada
 
-> Projeto de Portfólio — Engenharia de Software | Católica SC
+> Projeto de Portfólio. Engenharia de Software | Católica SC
 > Autora: Pâmela Baron | 2026
 
 ---
@@ -32,7 +32,7 @@ O problema foi identificado a partir de um caso real e validado com pesquisa com
 
 - Envio automático apenas em **horário comercial** (08h–20h, horário de Brasília).
 - No máximo **3 mensagens automáticas** por cliente por dia.
-- A resposta **"1 — Já paguei" não confirma o pagamento**: a parcela fica *aguardando confirmação* e somente o vendedor dá a baixa no sistema.
+- A resposta **"1. Já paguei" não confirma o pagamento**: a parcela fica *aguardando confirmação* e somente o vendedor dá a baixa no sistema.
 - Canal **unidirecional**: mensagens de texto livre do devedor são ignoradas, com resposta automática padrão.
 - **Isolamento total entre contas**: cada vendedor acessa apenas os próprios dados.
 
@@ -112,7 +112,7 @@ O passo a passo completo está em **[COMO-RODAR.md](COMO-RODAR.md)**.
 docker compose exec backend pytest
 ```
 
-**218 testes** cobrindo **90%** do backend — acima da meta de 75% definida no RFC.
+**218 testes** cobrindo **90%** do backend. Acima da meta de 75% definida no RFC.
 Detalhes em [docs/testes.md](docs/testes.md).
 
 ---
@@ -165,11 +165,11 @@ As soluções existentes no mercado (Asaas, Conta Azul, Bling) são voltadas par
 
 ## Status do Projeto
 
-Em desenvolvimento — módulos principais implementados e testados.
+Em desenvolvimento. Módulos principais implementados e testados.
 
 ---
 
 ## Autora
 
 **Pâmela Baron**
-Projeto de Portfólio — Engenharia de Software, Católica SC — 2026
+Projeto de Portfólio. Engenharia de Software, Católica SC. 2026

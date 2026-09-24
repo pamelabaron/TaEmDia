@@ -170,7 +170,7 @@ const PASSOS: Passo[] = [
       </section>
 
       <footer class="rodape">
-        <span><strong>TáEmDia</strong> — Cobrança automatizada via WhatsApp</span>
+        <span><strong>TáEmDia</strong> · Cobrança automatizada via WhatsApp</span>
         <span class="rodape-fraco">© {{ ano }} TáEmDia</span>
       </footer>
     </div>
@@ -211,7 +211,7 @@ const PASSOS: Passo[] = [
       padding: 84px 28px 104px; max-width: 1100px; margin: 0 auto;
     }
     /* Aurora atrás da capa: três luzes em posições diferentes, uma delas lima.
-       Sangra para fora do container de propósito — luz contida numa caixa
+       Sangra para fora do container de propósito. Luz contida numa caixa
        parece adesivo. */
     .capa::before {
       content: "";
@@ -229,7 +229,7 @@ const PASSOS: Passo[] = [
       padding: 6px 14px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
       margin-bottom: 18px;
     }
-    /* O título estava em 2.7rem — tamanho de subtítulo. Numa página que existe
+    /* O título estava em 2.7rem, tamanho de subtítulo. Numa página que existe
        para convencer, o título é o elemento; cresce até caber na largura e
        fecha o espacejamento, que é o que faz texto grande parecer desenhado em
        vez de apenas ampliado. */
@@ -331,7 +331,7 @@ const PASSOS: Passo[] = [
     /* dados da pesquisa */
     /* A faixa da pesquisa é o pico da página: fundo petróleo, muito mais
        profundo que o verde, com o lima acendendo de baixo. É o contraste que
-       faltava — verde sobre verde não brilha. */
+       faltava. Verde sobre verde não brilha. */
     .problema {
       position: relative; overflow: hidden; max-width: none;
       background-color: var(--petroleo-900);
@@ -356,7 +356,7 @@ const PASSOS: Passo[] = [
     /* passos
        Quatro cartões iguais lado a lado não dizem que existe uma ordem: dizem
        que existem quatro coisas. Aqui os passos ficam enfileirados sobre um
-       trilho, com os números apoiados nele — a linha é que conta a sequência,
+       trilho, com os números apoiados nele. A linha é que conta a sequência,
        e as caixas somem. */
     .passos {
       position: relative;
@@ -446,7 +446,7 @@ const PASSOS: Passo[] = [
     .garantia p { font-size: 0.88rem; color: var(--texto-suave); margin: 0; line-height: 1.55; }
 
     /* Chamada final: luzes radiais sobre o verde escuro, em vez do degradê
-       linear de 45° — que é a assinatura mais reconhecível de tela gerada por IA. */
+       linear de 45°, que é a assinatura mais reconhecível de tela gerada por IA. */
     .chamada {
       position: relative; overflow: hidden;
       background-color: var(--petroleo-900);

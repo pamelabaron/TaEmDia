@@ -20,7 +20,7 @@ class AssinaturaService:
         return regras.Vigencia(valido_ate=linha.valido_ate, origem=linha.origem)
 
     def iniciar_teste(self, vendedor_id: uuid.UUID, hoje: date | None = None) -> Assinatura:
-        """RN-A01 — chamado uma vez, quando a conta é criada."""
+        """RN-A01. Chamado uma vez, quando a conta é criada."""
         hoje = hoje or date.today()
         existente = self.repo.buscar(vendedor_id)
         if existente is not None:
@@ -63,7 +63,7 @@ class AssinaturaService:
         arquivo_caminho: str,
         arquivo_tipo: str,
     ) -> PagamentoAssinatura:
-        """RN-A04 — recusa um segundo envio enquanto houver um em análise."""
+        """RN-A04. Recusa um segundo envio enquanto houver um em análise."""
         if self.repo.pendente_do_vendedor(vendedor_id) is not None:
             raise ComprovanteJaPendente()
         return self.repo.criar_pagamento(
@@ -80,7 +80,7 @@ class AssinaturaService:
     def aprovar(
         self, pagamento_id: uuid.UUID, admin_id: uuid.UUID, hoje: date | None = None
     ) -> PagamentoAssinatura:
-        """RN-A02 — soma 30 dias a max(hoje, validade atual)."""
+        """RN-A02. Soma 30 dias a max(hoje, validade atual)."""
         hoje = hoje or date.today()
         pagamento = self._pendente(pagamento_id)
 
@@ -103,7 +103,7 @@ class AssinaturaService:
     def recusar(
         self, pagamento_id: uuid.UUID, admin_id: uuid.UUID, motivo: str
     ) -> PagamentoAssinatura:
-        """RN-A03 — recusar não mexe na vigência."""
+        """RN-A03. Recusar não mexe na vigência."""
         pagamento = self._pendente(pagamento_id)
         pagamento.situacao = "recusado"
         pagamento.avaliado_em = datetime.utcnow()

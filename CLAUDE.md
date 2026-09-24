@@ -1,7 +1,7 @@
-# TáEmDia — instruções para o Claude
+# TáEmDia. Instruções para o Claude
 
 Sistema web de cobrança automatizada via WhatsApp e gestão de carteira de clientes.
-Projeto de TCC — Engenharia de Software, Católica SC. Autora: Pâmela Baron.
+Projeto de TCC. Engenharia de Software, Católica SC. Autora: Pâmela Baron.
 
 O **RFC é a fonte de verdade** dos requisitos. Ao implementar algo, cite o
 requisito correspondente (RF, RNF ou RN) nos comentários e na mensagem de commit.
@@ -10,7 +10,7 @@ requisito correspondente (RF, RNF ou RN) nos comentários e na mensagem de commi
 
 ## Use as skills do superpowers
 
-**Antes de responder ou agir**, verifique se alguma skill se aplica e invoque-a —
+**Antes de responder ou agir**, verifique se alguma skill se aplica e invoque-a -
 inclusive antes de fazer perguntas de esclarecimento ou explorar o código.
 Anuncie "Usando [skill] para [objetivo]" e siga a skill.
 
@@ -36,7 +36,7 @@ você está racionalizando para pular a skill.
 ## Interface e design
 
 Para qualquer trabalho visual (telas, responsividade, tipografia, cor, layout,
-acessibilidade), use `impeccable:impeccable` — cobre `adapt`, `polish`,
+acessibilidade), use `impeccable:impeccable`. Cobre `adapt`, `polish`,
 `critique`, `audit`, entre outros.
 
 ---
@@ -61,7 +61,7 @@ docker compose exec backend pytest
 ```
 
 Meta do RFC: **75% de cobertura** no backend (hoje em 91%, 262 testes).
-Escreva as regras de negócio como **funções puras** sempre que possível — é o que
+Escreva as regras de negócio como **funções puras** sempre que possível. É o que
 mantém a suíte rápida e a cobertura alta. Ver [docs/testes.md](docs/testes.md).
 
 ## Frontend
@@ -80,12 +80,16 @@ No Git Bash, prefixe com `MSYS_NO_PATHCONV=1` para o `-w /app` não ser converti
   (única camada que toca o banco). Nunca pule uma camada.
 - **Isolamento entre contas**: toda consulta filtra por `vendedor_id`. É requisito
   de segurança (RNF07), não detalhe de implementação.
-- **Status da parcela é derivado**, nunca armazenado — calculado a partir das datas.
+- **Status da parcela é derivado**, nunca armazenado. Calculado a partir das datas.
 - **Cores com significado**: verde = pago, laranja = atraso, vermelho =
   inadimplente, cinza neutro = pendente. Não use verde para "pendente".
 - **Tamanho de alvo de toque** é decidido por `@media (pointer: coarse)`, não por
   largura de tela.
 - Código, comentários e mensagens de commit **em português**.
+- **Nunca use travessão** (o traço longo) em texto nenhum: nem na interface, nem
+  em comentário, nem em documento, nem em resposta à autora. Use ponto, vírgula,
+  dois-pontos ou parênteses. É pedido explícito dela, por ser marca de texto
+  gerado por IA.
 
 ## Ao terminar
 
@@ -107,21 +111,21 @@ Consulte antes de agir na área correspondente.
 | Heredoc grande no Bash quebra com aspas e acentos (`unexpected EOF`) | Escreva o arquivo com a ferramenta de escrita, não com `cat <<EOF` |
 | `perl -pi -e` com `\n` na substituição insere **quebra de linha real** e corrompe o arquivo | Use `sed`/`awk`, ou reescreva o arquivo inteiro |
 | `docker run -w /app` no Git Bash vira `C:/Program Files/Git/app` | Prefixe `MSYS_NO_PATHCONV=1` |
-| Terminal mostra `OlÃ¡` e quadradinho no lugar de emoji | É só exibição do console. **Não "conserte" o dado** — confira no navegador |
+| Terminal mostra `OlÃ¡` e quadradinho no lugar de emoji | É só exibição do console. **Não "conserte" o dado**. Confira no navegador |
 | Captura de tela do navegador embutido congela num quadro antigo | Meça com `getBoundingClientRect()` via JS antes de concluir que há bug |
 | No navegador embutido, `transform` **não renderiza** (nem inline com `!important`), mas `margin` funciona | Se um deslocamento "não aplica", teste com margem antes de supor que o CSS está errado |
 | `getComputedStyle` durante uma transição devolve o **valor inicial**, não o final | Meça posição real com `getBoundingClientRect()` |
-| Varrer `querySelectorAll('*')` atrás de quem passa da borda **não enxerga pseudo-elementos** (`::before`/`::after`) — a varredura voltou vazia com a página rolando 279px para o lado | Compare `scrollWidth` com `clientWidth`; para achar o culpado, desligue o suspeito com um `<style>` injetado e meça de novo |
+| Varrer `querySelectorAll('*')` atrás de quem passa da borda **não enxerga pseudo-elementos** (`::before`/`::after`). A varredura voltou vazia com a página rolando 279px para o lado | Compare `scrollWidth` com `clientWidth`; para achar o culpado, desligue o suspeito com um `<style>` injetado e meça de novo |
 | `docker compose restart frontend` pode deixar o `ng serve` morto | Use `up -d --force-recreate frontend` e aguarde ~45s |
 
 ## Angular e Material
 
 | Armadilha | O que fazer |
 |---|---|
-| `as` em `@else if` **não compila** (`NG5002`) — quebrou o build duas vezes | O alias só vale no `@if` principal: use `@else { @if (x; as y) { … } }` |
+| `as` em `@else if` **não compila** (`NG5002`). Quebrou o build duas vezes | O alias só vale no `@if` principal: use `@else { @if (x; as y) { … } }` |
 | O tema `azure-blue` **não existe** no Material 17 (só do 18 em diante) | Confira `node_modules/@angular/material/prebuilt-themes/` antes de escolher |
 | Rota nova acessada direto cai no `/painel` | Espere o `ng serve` recompilar; o curinga `**` engole rota que ainda não existe |
-| Tema próprio e páginas maiores estouram o limite de tamanho do build | Ajuste `budgets` no `angular.json` — não é erro de código |
+| Tema próprio e páginas maiores estouram o limite de tamanho do build | Ajuste `budgets` no `angular.json`. Não é erro de código |
 | Crase dentro de comentário nos `styles` inline do componente (que já estão entre crases) **fecha a string** e quebra o build (`TS2304: Cannot find name`) | Nos estilos inline, cite código entre aspas, nunca entre crases |
 | Luz ou brilho que sangra para fora do container (`inset` negativo) alarga o documento e a página rola para os lados | Recorte na raiz da página com `overflow-x: clip`. **Não use `hidden`**: ele cria área de rolagem própria e o cabeçalho `sticky` para de grudar |
 
@@ -132,12 +136,12 @@ Foi assim que os alvos de toque de todas as telas foram corrigidos de um lugar s
 
 | Armadilha | O que fazer |
 |---|---|
-| Chave estrangeira `NOT NULL` numa coluna que às vezes não tem dono (o resumo diário não pertence a um cliente) | Deixe `nullable` e use **OUTER JOIN** — com `JOIN` normal a linha some da listagem |
+| Chave estrangeira `NOT NULL` numa coluna que às vezes não tem dono (o resumo diário não pertence a um cliente) | Deixe `nullable` e use **OUTER JOIN**. Com `JOIN` normal a linha some da listagem |
 | `TestClient.get()` não aceita `json=` | Só `post`/`patch`/`put` aceitam |
 | Substring traiçoeira: a URL `connectionState` **contém** `connect` | Compare o caminho completo (`/instance/connect/`) |
 | Texto de exemplo longo passa em validação de tamanho (`gere_uma_chave...` tem 40 caracteres) | Valide contra uma **lista de valores de exemplo**, não só pelo comprimento |
 
-## Sinais de alerta — pare e verifique
+## Sinais de alerta. Pare e verifique
 
 Estes são os erros que mais custaram, porque passaram por "pronto":
 

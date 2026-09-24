@@ -3,7 +3,7 @@
 Funções puras: recebem datas, devolvem datas. Nenhuma toca no banco, o que
 mantém a suíte rápida e permite cobrir as bordas de data com facilidade.
 
-A situação da assinatura é **derivada**, nunca gravada — mesma convenção do
+A situação da assinatura é **derivada**, nunca gravada. Mesma convenção do
 status da parcela. Gravar status significa mantê-lo sincronizado com a
 passagem do tempo, e é assim que um sistema passa a mentir.
 """
@@ -36,7 +36,7 @@ def inicio_do_teste(hoje: date) -> Vigencia:
 def situacao(vigencia: Vigencia | None, hoje: date) -> str:
     """Situação atual: ``em_teste``, ``ativa`` ou ``vencida``.
 
-    Quem nunca teve assinatura conta como vencida — é o estado mais restritivo,
+    Quem nunca teve assinatura conta como vencida. É o estado mais restritivo,
     e portanto o seguro para se errar.
     """
     if vigencia is None:

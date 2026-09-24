@@ -38,7 +38,7 @@ produção (`AMBIENTE=producao`), que se recusa a iniciar se algo estiver insegu
 | # | Item | Situação |
 |---|---|---|
 | 15 | Validação de tipos e faixas em toda a API (Pydantic) | ✅ testado |
-| 16 | Consultas parametrizadas via ORM — sem concatenação de SQL | ✅ |
+| 16 | Consultas parametrizadas via ORM. Sem concatenação de SQL | ✅ |
 | 17 | Conteúdo do usuário é escapado no relatório PDF | ✅ testado |
 | 18 | Limite de tamanho de requisição no Nginx (5 MB) | ✅ |
 

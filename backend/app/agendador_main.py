@@ -2,7 +2,7 @@
 
 Em produção a API sobe com vários workers, e cada worker é um processo
 separado. Se o agendador subisse dentro dela, cada processo criaria o seu, e o
-mesmo cliente receberia a mesma cobrança uma vez por worker — furando também o
+mesmo cliente receberia a mesma cobrança uma vez por worker, furando também o
 limite diário da RN10, porque os processos contariam as mensagens em paralelo.
 
 Por isso o agendador roda aqui: um container, um processo, um agendador. A API

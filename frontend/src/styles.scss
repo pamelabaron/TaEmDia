@@ -1,5 +1,5 @@
 // ============================================================================
-// Tema do TáEmDia — verde e branco.
+// Tema do TáEmDia. Verde e branco.
 // Uma paleta própria (o Angular Material não traz um verde adequado pronto).
 // ============================================================================
 @use '@angular/material' as mat;
@@ -84,7 +84,7 @@ $tema: mat.define-light-theme((
   //
   // IMPORTANTE: o lima NUNCA entra no sistema de status (verde=pago,
   // laranja=atraso, vermelho=inadimplente, cinza=pendente). É cor de marca, não
-  // de dado — usá-lo num estado quebraria a leitura rápida do painel.
+  // de dado. Usá-lo num estado quebraria a leitura rápida do painel.
   //
   // Contraste: lima sobre branco reprova em texto. Só sobre superfície escura,
   // ou como elemento gráfico (traço, brilho, borda), nunca como texto no claro.
@@ -100,7 +100,7 @@ $tema: mat.define-light-theme((
   // --- Profundidade ---------------------------------------------------------
   // Uma escala, não uma sombra só. Toda sombra tem deslocamento E desfoque:
   // halo sem deslocamento é adesivo, não profundidade. O tom vem do verde da
-  // marca — sombra preta genérica é a marca de design apressado.
+  // marca. Sombra preta genérica é a marca de design apressado.
   --elev-1: 0 1px 2px rgba(15, 98, 52, 0.06),
             0 2px 6px rgba(15, 98, 52, 0.05);
   --elev-2: 0 2px 4px rgba(15, 98, 52, 0.07),
@@ -157,7 +157,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-// Títulos com fonte própria, peso alto e entrelinha curta — é o que dá presença.
+// Títulos com fonte própria, peso alto e entrelinha curta. É o que dá presença.
 h1, h2, h3, .fonte-titulo {
   font-family: "Outfit", "Hanken Grotesk", sans-serif;
   font-weight: 600;
@@ -179,7 +179,7 @@ table td, table th, .valor-atraso, .percentual, input[type="number"] {
 //
 // Degradê linear de 45° em bloco chapado é a assinatura visual mais óbvia de
 // interface gerada por IA. Aqui usamos degradês RADIAIS em camadas, com pouca
-// diferença entre as paradas, mais um grão fino por cima — que é o que quebra a
+// diferença entre as paradas, mais um grão fino por cima. Que é o que quebra a
 // sensação de "vetor plano".
 // ============================================================================
 
@@ -196,7 +196,7 @@ table td, table th, .valor-atraso, .percentual, input[type="number"] {
 
 body {
   // Luz de verdade nos cantos. A versão anterior ficava em 7% de opacidade e
-  // simplesmente não era vista — degradê que ninguém percebe não está lá.
+  // simplesmente não era vista. Degradê que ninguém percebe não está lá.
   background-color: var(--fundo);
   background-image:
     radial-gradient(58rem 40rem at 10% -12%, rgba(168, 227, 74, 0.30), transparent 58%),
@@ -208,7 +208,7 @@ body {
 // Cartões: degradê quase imperceptível do topo para a base, borda e sombra
 // esverdeadas (sombra preta genérica é outra marca de design apressado).
 //
-// A linha clara no topo é luz batendo na borda superior — a mesma fonte de luz
+// A linha clara no topo é luz batendo na borda superior. A mesma fonte de luz
 // que as sombras abaixo pressupõem. É o que faz a superfície parecer ter
 // espessura em vez de ser um retângulo pintado.
 .mat-mdc-card {
@@ -253,7 +253,7 @@ body {
 }
 
 // Barra superior fixa: o conteúdo desliza por baixo dela. A transparência com
-// desfoque existe para mostrar esse movimento — sem conteúdo passando atrás,
+// desfoque existe para mostrar esse movimento. Sem conteúdo passando atrás,
 // seria só enfeite. O fundo opaco fica de reserva onde backdrop-filter não há.
 .mat-toolbar.mat-primary {
   position: sticky;
@@ -323,7 +323,7 @@ body {
 }
 
 // Campo de texto: o miolo afunda um fio em relação ao cartão. É o inverso da
-// sombra do cartão — mesma fonte de luz, superfície para dentro.
+// sombra do cartão. Mesma fonte de luz, superfície para dentro.
 .mat-mdc-form-field .mat-mdc-text-field-wrapper {
   border-radius: var(--raio-interno) !important;
 }
@@ -338,7 +338,7 @@ body {
   transform: scale(0.975);
 }
 
-// Foco visível para quem navega pelo teclado — exigência de acessibilidade.
+// Foco visível para quem navega pelo teclado. Exigência de acessibilidade.
 :focus-visible {
   outline: 2px solid var(--verde-700);
   outline-offset: 2px;

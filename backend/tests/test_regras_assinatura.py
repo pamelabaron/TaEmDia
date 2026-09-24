@@ -20,7 +20,7 @@ HOJE = date(2026, 9, 13)
 
 
 class TestInicioDoTeste:
-    """RN-A01 — conta nova nasce com 7 dias de teste."""
+    """RN-A01. Conta nova nasce com 7 dias de teste."""
 
     def test_vale_por_sete_dias(self):
         v = inicio_do_teste(HOJE)
@@ -60,7 +60,7 @@ class TestSituacao:
 
 
 class TestRenovar:
-    """RN-A02 — aprovar soma 30 dias a max(hoje, valido_ate)."""
+    """RN-A02. Aprovar soma 30 dias a max(hoje, valido_ate)."""
 
     def test_renovar_sem_assinatura_conta_de_hoje(self):
         nova = renovar(None, HOJE)

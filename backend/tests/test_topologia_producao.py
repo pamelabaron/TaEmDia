@@ -2,7 +2,7 @@
 
 A API sobe com vários workers, e cada worker é um processo separado: se o
 agendador subisse junto com ela, cada processo criaria o seu, e o mesmo cliente
-receberia a mesma cobrança uma vez por worker — furando também o limite diário
+receberia a mesma cobrança uma vez por worker. Furando também o limite diário
 da RN10, porque os processos contam as mensagens em paralelo.
 
 Este teste lê o arquivo de produção e trava essa decisão. É o mesmo espírito da

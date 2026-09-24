@@ -56,7 +56,7 @@ def cenario(db, vendedor):
 
 class TestRespostasDoDevedor:
     def test_opcao_1_registra_e_marca_aguardando(self, agente, cenario, db):
-        """RN: 'já paguei' NÃO confirma o pagamento — só sinaliza para o vendedor."""
+        """RN: 'já paguei' NÃO confirma o pagamento. Só sinaliza para o vendedor."""
         r = agente.processar_resposta(NUMERO, "1")
         assert r.processada is True
         assert r.opcao == "1_ja_paguei"

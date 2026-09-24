@@ -12,7 +12,7 @@ Data: 13/09/2026 · Situação: aprovado, pronto para implementar
 ## Problema
 
 Hoje qualquer pessoa com uma conta Google entra no TáEmDia e usa tudo. Para o
-sistema se sustentar como produto, só quem paga deve conseguir **gravar** —
+sistema se sustentar como produto, só quem paga deve conseguir **gravar**,
 e isso não pode depender do navegador, que o usuário controla.
 
 ## Decisões tomadas
@@ -30,7 +30,7 @@ e isso não pode depender do navegador, que o usuário controla.
 
 ## 1. Modelo de dados
 
-### `assinatura` — uma linha por vendedor
+### `assinatura`. Uma linha por vendedor
 
 | Campo | Tipo | Observação |
 |---|---|---|
@@ -41,7 +41,7 @@ e isso não pode depender do navegador, que o usuário controla.
 | `criado_em` | timestamp | |
 | `atualizado_em` | timestamp | |
 
-### `pagamento_assinatura` — histórico de comprovantes
+### `pagamento_assinatura`. Histórico de comprovantes
 
 | Campo | Tipo | Observação |
 |---|---|---|
@@ -70,11 +70,11 @@ sem linha de assinatura                  ->  vencida
 
 ### Regras de vigência
 
-- **RN-A01** — Conta nova nasce com `valido_ate = hoje + 7 dias`, origem `teste`.
-- **RN-A02** — Comprovante aprovado soma **30 dias** a `max(hoje, valido_ate)`.
+- **RN-A01**. Conta nova nasce com `valido_ate = hoje + 7 dias`, origem `teste`.
+- **RN-A02**. Comprovante aprovado soma **30 dias** a `max(hoje, valido_ate)`.
   Quem paga adiantado não perde os dias que ainda tinha.
-- **RN-A03** — Comprovante recusado não altera a vigência.
-- **RN-A04** — Um vendedor tem no máximo **um** comprovante pendente por vez.
+- **RN-A03**. Comprovante recusado não altera a vigência.
+- **RN-A04**. Um vendedor tem no máximo **um** comprovante pendente por vez.
 
 ---
 
@@ -132,7 +132,7 @@ dependência num endpoint futuro.
 ## 3. Administradora
 
 A lista de administradores fica em `ADMIN_EMAILS` (variável de ambiente,
-separada por vírgula). Não existe coluna `administrador` no banco — assim
+separada por vírgula). Não existe coluna `administrador` no banco. Assim
 ninguém vira admin por gravação, e não há bit para inverter.
 
 Valor inicial: `p.baron@catolicasc.edu.br`.
@@ -149,7 +149,7 @@ Fora dela, **403**.
 ### Armazenamento dos comprovantes
 
 - Volume do Docker (`uploads-data`), fora de qualquer pasta servida como
-  estática — nenhum arquivo enviado é alcançável por URL pública.
+  estática. Nenhum arquivo enviado é alcançável por URL pública.
 - Download só pelo endpoint `GET /admin/comprovantes/{id}/arquivo`, autenticado
   e restrito a admin.
 - Aceitos: `image/jpeg`, `image/png`, `application/pdf`. Máximo **5 MB**.
@@ -188,7 +188,7 @@ envio em análise (RN-A04) em vez de aceitar outro.
 
 | O quê | Como |
 |---|---|
-| Derivação do status | função pura, sem banco — casos de borda em `valido_ate` |
+| Derivação do status | função pura, sem banco. Casos de borda em `valido_ate` |
 | RN-A02 (soma de 30 dias) | função pura, incluindo pagamento adiantado |
 | Cobertura da trava | varredura de todas as rotas registradas |
 | 402 para vencido | cliente de teste em cada endpoint protegido |

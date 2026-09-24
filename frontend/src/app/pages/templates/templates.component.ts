@@ -36,7 +36,7 @@ const TIPO_LABEL: Record<string, string> = {
     <div class="pagina">
       <h2>Mensagens de cobrança</h2>
       <p class="ajuda">
-        Personalize as mensagens que o sistema enviará. Use as variáveis abaixo — elas
+        Personalize as mensagens que o sistema enviará. Use as variáveis abaixo. Elas
         serão trocadas pelos dados reais de cada cliente na hora do envio.
       </p>
 

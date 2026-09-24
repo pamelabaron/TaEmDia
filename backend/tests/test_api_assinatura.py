@@ -1,6 +1,6 @@
 """Comportamento da assinatura pela API.
 
-O ponto central: quem venceu **continua lendo** e **não consegue gravar** — e
+O ponto central: quem venceu **continua lendo** e **não consegue gravar**. E
 isso vale mesmo chamando o endpoint direto, sem passar pela interface.
 """
 import io
@@ -71,7 +71,7 @@ class TestEscritaBloqueada:
         assert r.status_code == 402
 
     def test_nao_conecta_whatsapp(self, cliente_http, cabecalho_vencido):
-        """Ver o QR Code é conectar o WhatsApp — fica atrás da assinatura."""
+        """Ver o QR Code é conectar o WhatsApp. Fica atrás da assinatura."""
         r = cliente_http.get("/whatsapp/status", headers=cabecalho_vencido)
         assert r.status_code == 402
 
@@ -82,7 +82,7 @@ class TestEscritaBloqueada:
         assert r.status_code == 402
 
     def test_bloqueio_vem_antes_da_validacao(self, cliente_http, cabecalho_vencido):
-        """Mesmo com dados inválidos, responde 402 — nada chega ao serviço."""
+        """Mesmo com dados inválidos, responde 402. Nada chega ao serviço."""
         r = cliente_http.post("/clientes", json={"nome": ""}, headers=cabecalho_vencido)
         assert r.status_code == 402
 
@@ -114,7 +114,7 @@ class TestEnvioDeComprovante:
         assert r.json()["situacao"] == "pendente"
 
     def test_recusa_segundo_envio_pendente(self, cliente_http, cabecalho_vencido):
-        """RN-A04 — um comprovante em análise por vez."""
+        """RN-A04. Um comprovante em análise por vez."""
         cliente_http.post("/assinatura/comprovante", data={"valor": "19.90"},
                           files=_arquivo(), headers=cabecalho_vencido)
         r = cliente_http.post("/assinatura/comprovante", data={"valor": "19.90"},

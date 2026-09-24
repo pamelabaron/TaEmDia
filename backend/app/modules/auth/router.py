@@ -46,7 +46,7 @@ async def callback_google(code: str, db: Session = Depends(get_db)):
 
     service = AuthService(VendedorRepository(db))
     _, token = service.login_ou_cadastro(email=email, nome=nome)
-    # O token vai no "fragmento" da URL (#), que não é enviado a servidores — o
+    # O token vai no "fragmento" da URL (#), que não é enviado a servidores. O
     # Angular lê e guarda localmente.
     return RedirectResponse(f"{settings.FRONTEND_URL}/auth/callback#token={token}")
 

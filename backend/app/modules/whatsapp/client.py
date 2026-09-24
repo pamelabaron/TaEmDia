@@ -142,7 +142,7 @@ _simulador = SimuladorWhatsAppClient()
 def get_whatsapp_client() -> WhatsAppClient:
     """Escolhe a implementação conforme a configuração.
 
-    Sem `EVOLUTION_API_KEY` preenchida, o sistema roda em modo simulador — o que
+    Sem `EVOLUTION_API_KEY` preenchida, o sistema roda em modo simulador. O que
     permite usar e demonstrar todo o fluxo sem um número conectado.
     """
     if settings.EVOLUTION_API_URL and settings.EVOLUTION_API_KEY:

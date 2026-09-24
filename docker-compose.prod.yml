@@ -30,7 +30,7 @@ services:
     environment:
       AMBIENTE: producao
       # A API roda com vários workers, e cada worker é um processo separado.
-      # Quem agenda é o serviço "agendador", com um processo só — senão a mesma
+      # Quem agenda é o serviço "agendador", com um processo só. Senão a mesma
       # cobrança sairia uma vez por worker.
       AGENDADOR_ATIVO: "false"
     volumes:

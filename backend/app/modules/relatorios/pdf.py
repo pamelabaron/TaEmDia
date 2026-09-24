@@ -31,7 +31,7 @@ def _dinheiro(valor) -> str:
 
 
 def _data(d: date | None) -> str:
-    return d.strftime("%d/%m/%Y") if d else "—"
+    return d.strftime("%d/%m/%Y") if d else "-"
 
 
 def _status(vencimento: date, pagamento: date | None, hoje: date) -> str:
@@ -102,7 +102,7 @@ def montar_html(
     return f"""<!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8"><style>{ESTILO}</style></head>
 <body>
-  <h1>TáEmDia — Relatório Financeiro</h1>
+  <h1>TáEmDia. Relatório Financeiro</h1>
   <div class="periodo">Período: {_data(desde)} a {_data(ate)}</div>
   <div class="vendedor">{escape(str(vendedor_nome))} · emitido em {_data(hoje)}</div>
 

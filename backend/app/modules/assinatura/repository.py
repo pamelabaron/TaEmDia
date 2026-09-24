@@ -1,6 +1,6 @@
 """Acesso ao banco para assinatura e comprovantes.
 
-Única camada que toca o banco — o serviço nunca consulta direto.
+Única camada que toca o banco. O serviço nunca consulta direto.
 """
 import uuid
 
@@ -39,7 +39,7 @@ class AssinaturaRepository:
         return self.db.get(PagamentoAssinatura, pagamento_id)
 
     def pendente_do_vendedor(self, vendedor_id: uuid.UUID) -> PagamentoAssinatura | None:
-        """RN-A04 — no máximo um comprovante pendente por vez."""
+        """RN-A04. No máximo um comprovante pendente por vez."""
         return self.db.execute(
             select(PagamentoAssinatura).where(
                 PagamentoAssinatura.vendedor_id == vendedor_id,

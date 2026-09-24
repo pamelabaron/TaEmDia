@@ -14,7 +14,7 @@ from app.db.session import Base
 
 
 class Assinatura(Base):
-    """Vigência atual do acesso de escrita — uma linha por vendedor."""
+    """Vigência atual do acesso de escrita. Uma linha por vendedor."""
 
     __tablename__ = "assinatura"
 

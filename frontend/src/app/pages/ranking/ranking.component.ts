@@ -71,7 +71,7 @@ const ROTULO: Record<string, string> = {
                   <div class="barra-wrap" [title]="c.percentual_em_dia + '% das parcelas pagas em dia'">
                     <div class="barra" [class]="c.classificacao" [style.width.%]="c.percentual_em_dia"></div>
                   </div>
-                  <span class="perc">{{ c.total_avaliadas > 0 ? c.percentual_em_dia + '%' : '—' }}</span>
+                  <span class="perc">{{ c.total_avaliadas > 0 ? c.percentual_em_dia + '%' : '-' }}</span>
                 </div>
               }
             }

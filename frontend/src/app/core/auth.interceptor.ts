@@ -12,7 +12,7 @@ let dialogoAberto = false;
 /**
  * Anexa o token JWT em toda requisição e trata duas respostas de forma única:
  *
- * - **401**: a sessão caiu — encerra e volta para a apresentação.
+ * - **401**: a sessão caiu. Encerra e volta para a apresentação.
  * - **402**: a assinatura venceu. Quem decide isso é o servidor; aqui só
  *   traduzimos a recusa em uma mensagem com o caminho para resolver.
  */

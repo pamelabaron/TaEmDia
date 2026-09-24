@@ -107,7 +107,7 @@ def test_fluxo_completo_de_ponta_a_ponta(cliente_http, db, whatsapp):
     assert resposta["processada"] is True
     assert resposta["opcao"] == "1_ja_paguei"
 
-    # A parcela fica aguardando conferência — o pagamento NÃO foi dado como certo.
+    # A parcela fica aguardando conferência. O pagamento NÃO foi dado como certo.
     perfil = cliente_http.get(f"/clientes/{cliente['id']}/perfil", headers=auth).json()
     parcela = perfil["vendas"][0]["parcelas"][0]
     assert parcela["status"] == "aguardando_confirmacao"
