@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
-import { API_URL } from './api.config';
+import { API_URL, LOGIN_URL } from './api.config';
 
 export interface Vendedor {
   id: string;
@@ -37,7 +37,7 @@ export class AuthService {
 
   /** Inicia o login: envia o navegador ao fluxo OAuth do backend. */
   entrarComGoogle(): void {
-    window.location.href = `${API_URL}/auth/google/login`;
+    window.location.href = LOGIN_URL;
   }
 
   /** Só decide o que mostrar no menu. A porta de verdade é o 403 do servidor. */

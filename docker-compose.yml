@@ -29,6 +29,7 @@ services:
       # Só para os testes conferirem a topologia de produção. Somente leitura.
       - ./docker-compose.prod.yml:/app/docker-compose.prod.yml:ro
       - ./docker/nginx/taemdia.conf:/app/docker/nginx/taemdia.conf:ro
+      - ./frontend/src/app/app.routes.ts:/app/frontend/src/app/app.routes.ts:ro
       # Comprovantes de assinatura. Fica fora de qualquer pasta pública: os
       # arquivos só saem pelo endpoint autenticado da administradora.
       - uploads-data:/app/uploads

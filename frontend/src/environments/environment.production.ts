@@ -1,10 +1,13 @@
-/** Produção: o Nginx serve a interface e a API no mesmo endereço.
+/** Produção: o Nginx serve o site e a API no mesmo endereço.
  *
- * Por isso o endereço da API fica vazio: as chamadas saem relativas e vão para
- * o mesmo domínio que abriu a página. Fixar "localhost:8000" aqui faria o site
- * publicado chamar o computador de quem está visitando. Que foi exatamente o
- * defeito que motivou esta separação.
+ * A API fica sob /api para não colidir com as telas do site: havia rotas com o
+ * mesmo nome nos dois lados (/clientes, /cobrancas, /configuracoes), e atualizar
+ * a página devolvia JSON no lugar do sistema.
+ *
+ * O login do Google é a exceção e continua na raiz, porque o endereço de
+ * retorno já está cadastrado no Google Cloud.
  */
 export const environment = {
-  apiUrl: '',
+  apiUrl: '/api',
+  loginUrl: '/auth/google/login',
 };
