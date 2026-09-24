@@ -25,3 +25,11 @@ postgres-data/
 .idea/
 Thumbs.db
 .DS_Store
+
+# Relatorios de cobertura de testes
+backend/htmlcov/
+backend/coverage.xml
+backend/.coverage
+
+# Certificados TLS (nunca versionar)
+docker/nginx/certs/*.pem

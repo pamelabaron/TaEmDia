@@ -10,6 +10,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Cliente, ClientesService } from '../../core/clientes.service';
+import { bloqueadoPorAssinatura } from '../../core/erros';
 
 @Component({
   selector: 'app-clientes',
@@ -88,9 +89,9 @@ import { Cliente, ClientesService } from '../../core/clientes.service';
     .campo, .busca { width: 100%; }
     .busca { margin-bottom: 8px; }
     .centro { display: flex; justify-content: center; padding: 32px; }
-    .vazio { text-align: center; color: #888; padding: 24px; }
+    .vazio { text-align: center; color: var(--texto-fraco); padding: 24px; }
     .clicavel { cursor: pointer; }
-    .clicavel:hover { background: #f5f5f5; }
+
   `],
 })
 export class ClientesComponent implements OnInit {
@@ -147,7 +148,7 @@ export class ClientesComponent implements OnInit {
       endereco: this.novo.endereco.trim() || null,
     }).subscribe({
       next: () => {
-        this.snack.open('Cliente cadastrado!', 'OK', { duration: 3000 });
+        this.snack.open('Cliente cadastrado', 'OK', { duration: 3000 });
         this.novo = { nome: '', whatsapp_numero: '', cpf: '', endereco: '' };
         this.mostrarForm.set(false);
         this.salvando.set(false);
@@ -155,6 +156,7 @@ export class ClientesComponent implements OnInit {
       },
       error: (erro) => {
         this.salvando.set(false);
+        if (bloqueadoPorAssinatura(erro)) return;
         const msg = erro.status === 409
           ? 'Já existe um cliente com esse número de WhatsApp.'
           : 'Erro ao cadastrar cliente.';

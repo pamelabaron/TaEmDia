@@ -46,7 +46,7 @@ async def callback_google(code: str, db: Session = Depends(get_db)):
 
     service = AuthService(VendedorRepository(db))
     _, token = service.login_ou_cadastro(email=email, nome=nome)
-    # O token vai no "fragmento" da URL (#), que não é enviado a servidores — o
+    # O token vai no "fragmento" da URL (#), que não é enviado a servidores. O
     # Angular lê e guarda localmente.
     return RedirectResponse(f"{settings.FRONTEND_URL}/auth/callback#token={token}")
 
@@ -60,4 +60,6 @@ def dados_do_vendedor_logado(
     vendedor = db.get(Vendedor, vendedor_id)
     if vendedor is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vendedor não encontrado.")
-    return vendedor
+    saida = VendedorOut.model_validate(vendedor)
+    saida.administrador = (vendedor.google_email or "").lower() in settings.administradores
+    return saida

@@ -17,3 +17,7 @@ class VendedorOut(BaseModel):
     google_email: str
     nome: str
     whatsapp_numero: str | None
+    # Derivado de ADMIN_EMAILS no servidor, nunca gravado no banco. Serve só
+    # para o frontend decidir se mostra o item de menu: a porta de verdade é o
+    # 403 que exigir_admin devolve.
+    administrador: bool = False

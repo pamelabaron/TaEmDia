@@ -1,4 +1,418 @@
-/* You can add global styles to this file, and also import other style files */
+// ============================================================================
+// Tema do TáEmDia. Verde e branco.
+// Uma paleta própria (o Angular Material não traz um verde adequado pronto).
+// ============================================================================
+@use '@angular/material' as mat;
+@use 'sass:map';
+
+@include mat.core();
+
+// --------------------------------------------------------------- paleta verde
+$taemdia-verde: (
+  50:  #e9f6ef,
+  100: #c8e9d7,
+  200: #a3dbbc,
+  300: #7ccda0,
+  400: #5cc18b,
+  500: #3cb676,
+  600: #34a76a,
+  700: #29945b,
+  800: #1f824d,
+  900: #0f6234,
+  contrast: (
+    50: rgba(0, 0, 0, 0.87), 100: rgba(0, 0, 0, 0.87), 200: rgba(0, 0, 0, 0.87),
+    300: rgba(0, 0, 0, 0.87), 400: rgba(0, 0, 0, 0.87), 500: #ffffff,
+    600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff,
+  ),
+);
+
+$primaria: mat.define-palette($taemdia-verde, 800, 400, 900);
+$destaque: mat.define-palette($taemdia-verde, 500, 300, 700);
+$aviso:    mat.define-palette(mat.$red-palette, 700);
+
+// Hanken Grotesk no corpo: humanista, com mais caráter que as grotescas que
+// aparecem em toda interface gerada, e desenhada para tamanho pequeno.
+// Os títulos usam Outfit (definida mais abaixo).
+$fonte-corpo: '"Hanken Grotesk", "Segoe UI", Roboto, sans-serif';
+
+$tema: mat.define-light-theme((
+  color: (primary: $primaria, accent: $destaque, warn: $aviso),
+  typography: mat.define-typography-config($font-family: $fonte-corpo),
+  density: 0,
+));
+
+@include mat.all-component-themes($tema);
+
+// ------------------------------------------------- variáveis usadas nas telas
+:root {
+  // Marca
+  --verde-900: #0f6234;
+  --verde-800: #1f824d;
+  --verde-700: #29945b;
+  --verde-600: #34a76a;
+  --verde-500: #3cb676;
+  --verde-100: #c8e9d7;
+  --verde-50:  #e9f6ef;
+
+  // Superfícies e texto
+  --fundo:        #f6faf7;
+  --superficie:   #ffffff;
+  --borda:        #e3ebe6;
+  --texto:        #1c2b23;
+  --texto-suave:  #5f7369;
+  --texto-fraco:  #8ba095;
+
+  // Cores com significado (mantidas para leitura rápida do status)
+  --sucesso:      #1f824d;
+  --sucesso-bg:   #e9f6ef;
+  --alerta:       #b26a00;
+  --alerta-bg:    #fff5e5;
+  --perigo:       #c0392b;
+  --perigo-bg:    #fdecea;
+  --info:         #29945b;
+  --info-bg:      #eef7f2;
+
+  // Neutro: para o que ainda nao aconteceu (ex.: parcela pendente).
+  // Fica proposital fora da familia verde, para nao se confundir com "pago".
+  --neutro:       #546b60;
+  --neutro-bg:    #eef1ef;
+
+  // --- Acento e profundidade da marca ---------------------------------------
+  // Verde sozinho não tem contra o que brilhar. O lima é adjacente e muito mais
+  // claro: contra o verde escuro ele acende, e é o que tira a paleta do
+  // monocromático. O petróleo é o fundo profundo onde esse brilho aparece.
+  //
+  // IMPORTANTE: o lima NUNCA entra no sistema de status (verde=pago,
+  // laranja=atraso, vermelho=inadimplente, cinza=pendente). É cor de marca, não
+  // de dado. Usá-lo num estado quebraria a leitura rápida do painel.
+  //
+  // Contraste: lima sobre branco reprova em texto. Só sobre superfície escura,
+  // ou como elemento gráfico (traço, brilho, borda), nunca como texto no claro.
+  --lima-300: #d7f98a;
+  --lima-400: #c3f25e;
+  --lima-500: #a8e34a;
+  --lima-600: #8bc734;
+
+  --petroleo-900: #04231f;
+  --petroleo-800: #06302b;
+  --petroleo-700: #0a4239;
+
+  // --- Profundidade ---------------------------------------------------------
+  // Uma escala, não uma sombra só. Toda sombra tem deslocamento E desfoque:
+  // halo sem deslocamento é adesivo, não profundidade. O tom vem do verde da
+  // marca. Sombra preta genérica é a marca de design apressado.
+  --elev-1: 0 1px 2px rgba(15, 98, 52, 0.06),
+            0 2px 6px rgba(15, 98, 52, 0.05);
+  --elev-2: 0 2px 4px rgba(15, 98, 52, 0.07),
+            0 8px 20px -6px rgba(15, 98, 52, 0.12);
+  --elev-3: 0 4px 8px rgba(15, 98, 52, 0.08),
+            0 18px 40px -12px rgba(15, 98, 52, 0.20);
+  --sombra: var(--elev-1); // nome antigo, mantido para não quebrar telas
+
+  --raio: 12px;
+  --raio-interno: 8px; // elementos dentro de cartões: raio menor que o container
+}
+
+// ============================================================================
+// Superfícies do navegador.
+//
+// Seleção, cursor de texto e barra de rolagem vêm com o padrão do sistema e
+// não pertencem a design nenhum. Vestir essas peças é barato e é o que separa
+// uma página construída de uma montada.
+// ============================================================================
+::selection {
+  background: var(--verde-100);
+  color: var(--verde-900);
+}
+
+input, textarea {
+  caret-color: var(--verde-700);
+}
+
+// Firefox
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(31, 130, 77, 0.35) transparent;
+}
+
+// WebKit / Blink
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(31, 130, 77, 0.28);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(31, 130, 77, 0.45); background-clip: content-box; }
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: "Hanken Grotesk", "Segoe UI", Roboto, sans-serif;
+  background: var(--fundo);
+  color: var(--texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+// Títulos com fonte própria, peso alto e entrelinha curta. É o que dá presença.
+h1, h2, h3, .fonte-titulo {
+  font-family: "Outfit", "Hanken Grotesk", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  text-wrap: balance; // evita palavra órfã sozinha na última linha
+}
+
+// Sistema financeiro: todo número precisa alinhar coluna a coluna.
+// Sem isso, "R$ 1.250,00" e "R$ 947,90" dançam na tabela.
+.valor, .cifra, .kpi .valor, .saldo .valor, .numero strong,
+table td, table th, .valor-atraso, .percentual, input[type="number"] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+// ============================================================================
+// Superfícies: degradês sutis e textura.
+//
+// Degradê linear de 45° em bloco chapado é a assinatura visual mais óbvia de
+// interface gerada por IA. Aqui usamos degradês RADIAIS em camadas, com pouca
+// diferença entre as paradas, mais um grão fino por cima. Que é o que quebra a
+// sensação de "vetor plano".
+// ============================================================================
+
+// Grão: SVG embutido, sem arquivo nem biblioteca. Aplique a classe `com-grao`
+// em qualquer bloco colorido. Fica por cima, sem capturar cliques.
+.com-grao { position: relative; }
+.com-grao::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)' opacity='0.06'/%3E%3C/svg%3E");
+}
+
+body {
+  // Luz de verdade nos cantos. A versão anterior ficava em 7% de opacidade e
+  // simplesmente não era vista. Degradê que ninguém percebe não está lá.
+  background-color: var(--fundo);
+  background-image:
+    radial-gradient(58rem 40rem at 10% -12%, rgba(168, 227, 74, 0.30), transparent 58%),
+    radial-gradient(52rem 38rem at 100% 2%, rgba(60, 182, 118, 0.24), transparent 56%),
+    radial-gradient(46rem 34rem at 50% 108%, rgba(31, 130, 77, 0.16), transparent 60%);
+  background-attachment: fixed;
+}
+
+// Cartões: degradê quase imperceptível do topo para a base, borda e sombra
+// esverdeadas (sombra preta genérica é outra marca de design apressado).
+//
+// A linha clara no topo é luz batendo na borda superior. A mesma fonte de luz
+// que as sombras abaixo pressupõem. É o que faz a superfície parecer ter
+// espessura em vez de ser um retângulo pintado.
+.mat-mdc-card {
+  position: relative;
+  border-radius: var(--raio) !important;
+  // Borda clara em cima, mais fechada embaixo: a luz vem de cima, então a
+  // aresta superior brilha e a inferior recolhe. Borda de cor única em volta
+  // é desenho plano.
+  border: 1px solid rgba(31, 130, 77, 0.14);
+  border-top-color: rgba(255, 255, 255, 0.9);
+  // Vidro: o fundo com as luzes verdes atravessa o cartão em vez de ser tapado
+  // por um branco chapado. É isto que faz a superfície ter material.
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  background-image: linear-gradient(
+    158deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.72) 42%,
+    rgba(233, 246, 239, 0.62) 100%
+  ) !important;
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    var(--elev-2) !important;
+  transition: box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+// Sem backdrop-filter o vidro vira um cartão lavado: devolve o branco cheio.
+@supports not (backdrop-filter: blur(1px)) {
+  .mat-mdc-card { background-color: #ffffff !important; }
+}
+
+// Cartão que leva a algum lugar sobe ao passar o mouse. Só onde há mouse:
+// em tela de toque o :hover gruda depois do toque.
+@media (hover: hover) and (pointer: fine) {
+  .mat-mdc-card.clicavel:hover,
+  .mat-mdc-card:has(.clicavel:hover) {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      var(--elev-2) !important;
+  }
+}
+
+// Barra superior fixa: o conteúdo desliza por baixo dela. A transparência com
+// desfoque existe para mostrar esse movimento. Sem conteúdo passando atrás,
+// seria só enfeite. O fundo opaco fica de reserva onde backdrop-filter não há.
+.mat-toolbar.mat-primary {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-image:
+    radial-gradient(34rem 16rem at 4% 120%, rgba(168, 227, 74, 0.38), transparent 66%),
+    radial-gradient(40rem 18rem at 72% -30%, rgba(60, 182, 118, 0.40), transparent 64%),
+    linear-gradient(100deg, var(--petroleo-800) 0%, var(--verde-700) 100%);
+  box-shadow:
+    inset 0 -1px 0 rgba(168, 227, 74, 0.28),
+    0 1px 0 rgba(15, 98, 52, 0.25),
+    0 6px 24px -12px rgba(15, 98, 52, 0.45);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .mat-toolbar.mat-primary {
+    background-color: rgba(10, 66, 57, 0.80);
+    background-image:
+      radial-gradient(34rem 16rem at 4% 120%, rgba(168, 227, 74, 0.42), transparent 66%),
+      radial-gradient(40rem 18rem at 72% -30%, rgba(60, 182, 118, 0.45), transparent 64%),
+      linear-gradient(100deg, rgba(6, 48, 43, 0.94) 0%, rgba(31, 130, 77, 0.90) 100%);
+    backdrop-filter: blur(18px) saturate(165%);
+  }
+}
+
+// Botões um pouco mais arredondados, combinando com os cartões.
+.mat-mdc-raised-button, .mat-mdc-outlined-button, .mat-mdc-button,
+.mat-mdc-unelevated-button {
+  border-radius: 10px !important;
+  font-weight: 600;
+  letter-spacing: 0;
+  transition: transform 120ms ease,
+              box-shadow 240ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 200ms ease,
+              filter 200ms ease;
+}
+
+// O botão principal é a única superfície verde cheia da tela: ganha o degradê
+// e a luz na borda de cima, como os cartões. Sem isso ele é um retângulo
+// chapado ao lado de superfícies que têm espessura.
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  background-image: linear-gradient(180deg, var(--verde-700) 0%, var(--verde-800) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 1px 2px rgba(15, 98, 52, 0.24),
+    0 6px 16px -6px rgba(15, 98, 52, 0.45) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mat-mdc-raised-button.mat-primary:hover,
+  .mat-mdc-unelevated-button.mat-primary:hover {
+    filter: saturate(108%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 2px 4px rgba(15, 98, 52, 0.26),
+      0 12px 26px -8px rgba(15, 98, 52, 0.5) !important;
+  }
+}
+
+.mat-mdc-raised-button.mat-primary:active,
+.mat-mdc-unelevated-button.mat-primary:active {
+  box-shadow:
+    inset 0 1px 2px rgba(15, 98, 52, 0.35),
+    0 1px 2px rgba(15, 98, 52, 0.2) !important;
+}
+
+// Campo de texto: o miolo afunda um fio em relação ao cartão. É o inverso da
+// sombra do cartão. Mesma fonte de luz, superfície para dentro.
+.mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  border-radius: var(--raio-interno) !important;
+}
+.mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper {
+  background-color: rgba(233, 246, 239, 0.35);
+}
+
+// Retorno físico ao clicar: sem isso o botão parece "morto".
+// Usa transform (acelerado pela placa de vídeo), não width/height.
+.mat-mdc-raised-button:active, .mat-mdc-outlined-button:active,
+.mat-mdc-button:active, .mat-mdc-unelevated-button:active {
+  transform: scale(0.975);
+}
+
+// Foco visível para quem navega pelo teclado. Exigência de acessibilidade.
+:focus-visible {
+  outline: 2px solid var(--verde-700);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+// ============================================================================
+// Adaptação por tipo de entrada (toque x mouse) e por dispositivo.
+//
+// O que decide o tamanho dos alvos não é a largura da tela, e sim o tipo de
+// ponteiro: um notebook com tela sensível ao toque precisa de alvos grandes
+// mesmo tendo tela larga. Por isso usamos `pointer` e `hover` em vez de só
+// `max-width`.
+// ============================================================================
+
+// --------------------------------------------------- dedo (toque / caneta)
+@media (pointer: coarse) {
+  // Alvo mínimo de 44x44px: o menor toque confortável com o polegar.
+  .mat-mdc-button,
+  .mat-mdc-raised-button,
+  .mat-mdc-outlined-button,
+  .mat-mdc-unelevated-button {
+    min-height: 44px !important;
+  }
+
+  .mat-mdc-icon-button {
+    width: 48px !important;
+    height: 48px !important;
+    padding: 12px !important;
+  }
+
+  // Itens de lista e de menu ficam mais altos e mais fáceis de acertar.
+  .mat-mdc-list-item { min-height: 56px !important; }
+  .mat-mdc-menu-item { min-height: 48px !important; }
+  .mat-mdc-tab { min-height: 48px !important; }
+
+  // O interruptor desenha um trilho de apenas 14px. O Material já cria uma área
+  // tocável de 40px em volta; aqui ela cresce para 44px sem mexer no desenho.
+  .mat-mdc-slide-toggle button.mdc-switch {
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  // Mais respiro entre controles, para reduzir toque errado.
+  .mat-mdc-card .mat-mdc-button-base + .mat-mdc-button-base { margin-left: 8px; }
+}
+
+// ------------------------------------------------------ mouse / trackpad
+// Efeitos de passar o mouse só existem onde há mouse de verdade: em telas de
+// toque o `:hover` "gruda" depois do toque e confunde.
+@media (hover: hover) and (pointer: fine) {
+  .clicavel:hover { background: var(--verde-50); }
+  .cliente:hover { text-decoration: underline; }
+}
+
+// ------------------------------------------- celulares com entalhe (notch)
+// Evita que conteúdo fique embaixo do entalhe ou da barra inferior do sistema.
+@supports (padding: max(0px)) {
+  .mat-toolbar {
+    padding-left: max(16px, env(safe-area-inset-left)) !important;
+    padding-right: max(16px, env(safe-area-inset-right)) !important;
+  }
+  .pagina {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+// ------------------------------------------------------ telas bem estreitas
+// Em 320px cada pixel conta: reduz o respiro lateral e evita títulos quebrados.
+@media (max-width: 360px) {
+  .pagina { padding-left: 12px; padding-right: 12px; }
+  h2 { font-size: 1.35rem; }
+  h3 { font-size: 1rem; }
+}

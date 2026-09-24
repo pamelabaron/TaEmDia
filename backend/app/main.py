@@ -1,4 +1,6 @@
 """Ponto de entrada da API TáEmDia."""
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -8,17 +10,39 @@ from app.modules.vendas.router import router as vendas_router
 from app.modules.relatorios.router import router as relatorios_router
 from app.modules.templates.router import router as templates_router
 from app.modules.configuracoes.router import router as configuracoes_router
+from app.modules.cobrancas.router import router as cobrancas_router
+from app.modules.assinatura.router import router as assinatura_router
+
+from app.core.config import settings
+from app.modules.agente.agendador import iniciar_agendador, parar_agendador
+
+
+@asynccontextmanager
+async def ciclo_de_vida(app: FastAPI):
+    """Valida a configuração, liga o agendador ao subir a API e desliga ao encerrar."""
+    if settings.em_producao:
+        problemas = settings.validar_para_producao()
+        if problemas:
+            raise RuntimeError(
+                "Configuração insegura para produção: " + "; ".join(problemas)
+            )
+    if settings.AGENDADOR_ATIVO:
+        iniciar_agendador()
+    yield
+    parar_agendador()
+
 
 app = FastAPI(
     title="TáEmDia API",
     description="Cobrança automatizada via WhatsApp e gestão de carteira de clientes.",
     version="0.1.0",
+    lifespan=ciclo_de_vida,
 )
 
 # Libera o frontend Angular (localhost:4200) a chamar a API durante o desenvolvimento.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],
+    allow_origins=settings.origens_permitidas,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,3 +62,5 @@ app.include_router(vendas_router)
 app.include_router(relatorios_router)
 app.include_router(templates_router)
 app.include_router(configuracoes_router)
+app.include_router(cobrancas_router)
+app.include_router(assinatura_router)

@@ -8,7 +8,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { CobrancasService } from '../../core/cobrancas.service';
 import { PerfilCliente, VendasService } from '../../core/vendas.service';
+import { bloqueadoPorAssinatura } from '../../core/erros';
 
 @Component({
   selector: 'app-cliente-perfil',
@@ -82,6 +84,7 @@ import { PerfilCliente, VendasService } from '../../core/vendas.service';
                   </button>
                 }
               </div>
+              <div class="tabela-rolavel">
               <table class="parcelas">
                 <tr>
                   <th>#</th><th>Valor</th><th>Vencimento</th><th>Situação</th><th></th>
@@ -95,11 +98,13 @@ import { PerfilCliente, VendasService } from '../../core/vendas.service';
                     <td>
                       @if (parc.status !== 'paga' && v.status === 'ativa') {
                         <button mat-button color="primary" (click)="pagar(parc.id)">Marcar como pago</button>
+                        <button mat-button (click)="cobrar(parc.id)" [disabled]="cobrando()"><mat-icon inline>send</mat-icon> Cobrar</button>
                       }
                     </td>
                   </tr>
                 }
               </table>
+              </div>
             </mat-card>
           }
         }
@@ -111,28 +116,29 @@ import { PerfilCliente, VendasService } from '../../core/vendas.service';
     .pagina { max-width: 760px; margin: 0 auto; padding: 16px; }
     .topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
     .topo h2 { margin: 8px 0 4px; }
-    .whats { display: flex; align-items: center; gap: 6px; color: #555; margin: 0; }
+    .whats { display: flex; align-items: center; gap: 6px; color: var(--texto-suave); margin: 0; }
     .whats mat-icon { font-size: 18px; height: 18px; width: 18px; }
-    .saldo { display: flex; flex-direction: column; padding: 12px 20px; text-align: right; background: #fff3e0; }
-    .saldo.zerado { background: #e8f5e9; }
-    .saldo .rotulo { font-size: 0.75rem; color: #777; }
-    .saldo .valor { font-size: 1.6rem; font-weight: 600; color: #e65100; }
-    .saldo.zerado .valor { color: #2e7d32; }
+    .saldo { display: flex; flex-direction: column; padding: 12px 20px; text-align: right; background: var(--alerta-bg); }
+    .saldo.zerado { background: var(--sucesso-bg); }
+    .saldo .rotulo { font-size: 0.75rem; color: var(--texto-suave); }
+    .saldo .valor { font-size: 1.6rem; font-weight: 600; color: var(--alerta); }
+    .saldo.zerado .valor { color: var(--sucesso); }
     .acoes { margin: 16px 0; }
     .form-card, .venda-card { margin-bottom: 16px; }
     .campo { width: 100%; }
     .venda-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
     .venda-card.cancelada { opacity: 0.6; }
-    .tag-cancelada { color: #c62828; font-size: 0.75rem; margin-left: 8px; }
+    .tag-cancelada { color: var(--perigo); font-size: 0.75rem; margin-left: 8px; }
+    .tabela-rolavel { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table.parcelas { width: 100%; border-collapse: collapse; }
-    table.parcelas th, table.parcelas td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+    table.parcelas th, table.parcelas td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--borda); font-size: 0.9rem; }
     .chip { padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; }
-    .chip.paga { background: #e8f5e9; color: #2e7d32; }
-    .chip.atrasada { background: #ffebee; color: #c62828; }
-    .chip.pendente { background: #e3f2fd; color: #1565c0; }
-    .chip.aguardando_confirmacao { background: #fff8e1; color: #ef6c00; }
+    .chip.paga { background: var(--sucesso-bg); color: var(--sucesso); }
+    .chip.atrasada { background: var(--perigo-bg); color: var(--perigo); }
+    .chip.pendente { background: var(--neutro-bg); color: var(--neutro); }
+    .chip.aguardando_confirmacao { background: var(--alerta-bg); color: var(--alerta); }
     .centro { display: flex; justify-content: center; padding: 32px; }
-    .vazio { color: #888; }
+    .vazio { color: var(--texto-fraco); }
   `],
 })
 export class ClientePerfilComponent implements OnInit {
@@ -140,6 +146,8 @@ export class ClientePerfilComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private snack = inject(MatSnackBar);
+  private cobrancas = inject(CobrancasService);
+  readonly cobrando = signal<boolean>(false);
 
   readonly perfil = signal<PerfilCliente | null>(null);
   readonly carregando = signal<boolean>(true);
@@ -182,26 +190,54 @@ export class ClientePerfilComponent implements OnInit {
       data_primeira_parcela: this.nova.data_primeira_parcela,
     }).subscribe({
       next: () => {
-        this.snack.open('Venda registrada!', 'OK', { duration: 3000 });
+        this.snack.open('Venda registrada', 'OK', { duration: 3000 });
         this.nova = { valor_total: null, num_parcelas: 1, data_primeira_parcela: '' };
         this.mostrarForm.set(false); this.salvando.set(false);
         this.carregar();
       },
-      error: () => { this.salvando.set(false); this.snack.open('Erro ao registrar a venda.', 'OK', { duration: 4000 }); },
+      error: (erro) => {
+        this.salvando.set(false);
+        if (bloqueadoPorAssinatura(erro)) return;
+        this.snack.open('Erro ao registrar a venda.', 'OK', { duration: 4000 });
+      },
     });
   }
 
   pagar(parcelaId: string): void {
     this.service.pagarParcela(parcelaId).subscribe({
-      next: () => { this.snack.open('Pagamento confirmado!', 'OK', { duration: 3000 }); this.carregar(); },
-      error: () => this.snack.open('Erro ao confirmar pagamento.', 'OK', { duration: 4000 }),
+      next: () => { this.snack.open('Pagamento confirmado', 'OK', { duration: 3000 }); this.carregar(); },
+      error: (erro) => {
+        if (bloqueadoPorAssinatura(erro)) return;
+        this.snack.open('Erro ao confirmar pagamento.', 'OK', { duration: 4000 });
+      },
+    });
+  }
+
+  cobrar(parcelaId: string): void {
+    this.cobrando.set(true);
+    this.cobrancas.dispararManual(parcelaId).subscribe({
+      next: () => {
+        this.cobrando.set(false);
+        this.snack.open("Cobrança enviada pelo WhatsApp", "OK", { duration: 3000 });
+      },
+      error: (erro) => {
+        this.cobrando.set(false);
+        if (bloqueadoPorAssinatura(erro)) return;
+        const msg = erro.status === 502
+          ? "WhatsApp indisponível. A mensagem ficou na fila e será reenviada."
+          : "Não foi possível enviar a cobrança.";
+        this.snack.open(msg, "OK", { duration: 5000 });
+      },
     });
   }
 
   cancelar(vendaId: string): void {
     this.service.cancelarVenda(vendaId).subscribe({
       next: () => { this.snack.open('Venda cancelada.', 'OK', { duration: 3000 }); this.carregar(); },
-      error: () => this.snack.open('Erro ao cancelar a venda.', 'OK', { duration: 4000 }),
+      error: (erro) => {
+        if (bloqueadoPorAssinatura(erro)) return;
+        this.snack.open('Erro ao cancelar a venda.', 'OK', { duration: 4000 });
+      },
     });
   }
 

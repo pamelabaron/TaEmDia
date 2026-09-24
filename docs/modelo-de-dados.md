@@ -1,10 +1,10 @@
-# Modelo de Dados — TáEmDia
+# Modelo de Dados. TáEmDia
 
 > Este documento preenche a Seção 5.2 do RFC (que estava sem detalhamento).
 > Banco relacional **PostgreSQL**. Valores monetários em `DECIMAL(10,2)`.
 > Regra transversal de segurança: **toda** tabela de dados operacionais carrega
 > (direta ou indiretamente) o `vendedor_id`, e toda consulta filtra por ele
-> (isolamento entre contas — RNF07 / RN02).
+> (isolamento entre contas. RNF07 / RN02).
 
 ## Visão geral das entidades
 
@@ -64,7 +64,7 @@ parcela  (1) ─── (N) resposta_devedor
 | endereco             | VARCHAR null  | opcional                                            |
 | envio_auto_ativo     | BOOLEAN       | envio automático por cliente (RF / RN11)            |
 | interacao_habilitada | BOOLEAN       | permite opções de resposta 1/2/3 (RF)               |
-| ativo                | BOOLEAN       | soft delete — preserva histórico                    |
+| ativo                | BOOLEAN       | soft delete. Preserva histórico                    |
 | criado_em            | TIMESTAMP     |                                                     |
 
 **Restrição:** `UNIQUE (vendedor_id, whatsapp_numero)`.
@@ -131,7 +131,7 @@ parcela  (1) ─── (N) resposta_devedor
 | opcao       | ENUM      | `1_ja_paguei`, `2_pago_hoje`, `3_nao_consigo`            |
 | recebido_em | TIMESTAMP |                                                          |
 
-> **Ranking (Bom Pagador / Regular / Inadimplente)** é **derivado** — calculado
+> **Ranking (Bom Pagador / Regular / Inadimplente)** é **derivado**. Calculado
 > pelo Ranking Service a partir de parcelas/pagamentos dos últimos 12 meses
 > (RN15/RN16). Pode ser recalculado a cada confirmação de pagamento e,
 > opcionalmente, cacheado numa coluna `classificacao` em `cliente` no futuro.

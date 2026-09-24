@@ -10,6 +10,9 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Configuracao, ConfiguracoesService } from '../../core/configuracoes.service';
+import { CobrancasService, StatusWhatsApp } from '../../core/cobrancas.service';
+import { MinhaAssinaturaComponent } from './minha-assinatura.component';
+import { bloqueadoPorAssinatura } from '../../core/erros';
 
 // Horários possíveis para o resumo diário (fim do dia, conforme o RFC).
 const HORARIOS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00'];
@@ -20,11 +23,53 @@ const HORARIOS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00',
   imports: [
     FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule,
     MatButtonModule, MatIconModule, MatSlideToggleModule, MatProgressSpinnerModule,
+    MinhaAssinaturaComponent,
   ],
   template: `
     <div class="pagina">
       <h2>Configurações</h2>
       <p class="ajuda">Ajuste como o sistema cobra seus clientes e como você recebe os avisos.</p>
+
+      <app-minha-assinatura />
+
+      <mat-card class="bloco">
+        <h3>WhatsApp</h3>
+        @if (whatsBloqueado()) {
+          <div class="linha">
+            <div class="texto">
+              <span class="rotulo">Disponível com assinatura ativa</span>
+              <span class="descricao">
+                Renove para conectar seu número e voltar a enviar cobranças.
+              </span>
+            </div>
+          </div>
+        } @else {
+          @if (whats(); as w) {
+          <div class="linha">
+            <div class="texto">
+              <span class="rotulo">
+                @if (w.modo_simulador) { Modo simulador }
+                @else if (w.conectado) { Conectado }
+                @else { Não conectado }
+              </span>
+              <span class="descricao">{{ w.detalhe }}</span>
+            </div>
+            <span class="bolinha" [class.on]="w.conectado"></span>
+          </div>
+          @if (w.qrcode) {
+            <div class="qr">
+              <p class="descricao">Abra o WhatsApp no celular, toque em Aparelhos conectados e escaneie:</p>
+              <img [src]="w.qrcode" alt="QR Code do WhatsApp" />
+            </div>
+          }
+          @if (w.conectado && !w.modo_simulador) {
+            <button mat-stroked-button color="warn" (click)="desconectar()">Desconectar</button>
+          }
+          } @else {
+            <p class="descricao">Verificando conexão…</p>
+          }
+        }
+      </mat-card>
 
       @if (carregando()) {
         <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
@@ -102,38 +147,53 @@ const HORARIOS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00',
   `,
   styles: [`
     .pagina { max-width: 720px; margin: 0 auto; padding: 16px; }
-    .ajuda { color: #666; margin-bottom: 16px; }
+    .ajuda { color: var(--texto-suave); margin-bottom: 16px; }
     .centro { display: flex; justify-content: center; padding: 32px; }
     .bloco { padding: 16px 20px; margin-bottom: 16px; }
-    .bloco h3 { margin: 0 0 8px; color: #1565c0; }
+    .bloco h3 { margin: 0 0 8px; color: var(--verde-800); }
     .linha {
       display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; padding: 14px 0; border-bottom: 1px solid #eee;
+      gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--borda);
     }
     .linha:last-of-type { border-bottom: none; }
     .texto { display: flex; flex-direction: column; }
     .rotulo { font-weight: 500; }
-    .descricao { font-size: 0.8rem; color: #777; margin-top: 2px; }
+    .descricao { font-size: 0.8rem; color: var(--texto-suave); margin-top: 2px; }
     .campo-curto { width: 110px; margin-bottom: -1.25em; }
-    .nota { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #777; margin: 12px 0 0; }
+    .nota { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--texto-suave); margin: 12px 0 0; }
     .acoes { display: flex; justify-content: flex-end; }
     @media (max-width: 600px) {
       .linha { flex-direction: column; align-items: flex-start; }
-      .acoes button { width: 100%; }
+      .bolinha { width: 12px; height: 12px; border-radius: 50%; background: var(--perigo); flex: none; }
+    .bolinha.on { background: var(--sucesso); }
+    .qr { text-align: center; padding: 12px 0; }
+    .qr img { max-width: 240px; width: 100%; }
+    .acoes button { width: 100%; }
     }
   `],
 })
 export class ConfiguracoesComponent implements OnInit {
   private service = inject(ConfiguracoesService);
   private snack = inject(MatSnackBar);
+  private cobrancas = inject(CobrancasService);
 
   config: Configuracao | null = null;
   horario = '20:00';
   readonly horarios = HORARIOS;
   readonly carregando = signal<boolean>(true);
   readonly salvando = signal<boolean>(false);
+  readonly whats = signal<StatusWhatsApp | null>(null);
+  /** O WhatsApp respondeu 402: depende de assinatura ativa. */
+  readonly whatsBloqueado = signal<boolean>(false);
 
   ngOnInit(): void {
+    this.cobrancas.statusWhatsApp().subscribe({
+      next: (w) => { this.whats.set(w); this.whatsBloqueado.set(false); },
+      error: (erro) => {
+        this.whats.set(null);
+        this.whatsBloqueado.set(bloqueadoPorAssinatura(erro));
+      },
+    });
     this.service.obter().subscribe({
       next: (c) => {
         this.config = c;
@@ -143,6 +203,19 @@ export class ConfiguracoesComponent implements OnInit {
       error: () => {
         this.carregando.set(false);
         this.snack.open('Erro ao carregar as configurações.', 'OK', { duration: 4000 });
+      },
+    });
+  }
+
+  desconectar(): void {
+    this.cobrancas.desconectarWhatsApp().subscribe({
+      next: () => {
+        this.snack.open("WhatsApp desconectado.", "OK", { duration: 3000 });
+        this.cobrancas.statusWhatsApp().subscribe((w) => this.whats.set(w));
+      },
+      error: (erro) => {
+        if (bloqueadoPorAssinatura(erro)) return;
+        this.snack.open("Erro ao desconectar.", "OK", { duration: 4000 });
       },
     });
   }
@@ -158,10 +231,11 @@ export class ConfiguracoesComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.salvando.set(false);
-        this.snack.open('Configurações salvas!', 'OK', { duration: 3000 });
+        this.snack.open('Configurações salvas', 'OK', { duration: 3000 });
       },
-      error: () => {
+      error: (erro) => {
         this.salvando.set(false);
+        if (bloqueadoPorAssinatura(erro)) return;
         this.snack.open('Erro ao salvar. Confira os valores e tente de novo.', 'OK', { duration: 4000 });
       },
     });

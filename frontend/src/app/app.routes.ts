@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth.guard';
+import { authGuard, visitanteGuard } from './core/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'painel', pathMatch: 'full' },
@@ -10,6 +10,7 @@ export const routes: Routes = [
   },
   {
     path: 'login',
+    canActivate: [visitanteGuard],
     loadComponent: () => import('./pages/login/login.component').then((m) => m.LoginComponent),
   },
   {
@@ -37,9 +38,19 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/ranking/ranking.component').then((m) => m.RankingComponent),
   },
   {
+    path: 'cobrancas',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/cobrancas/cobrancas.component').then((m) => m.CobrancasComponent),
+  },
+  {
     path: 'configuracoes',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/configuracoes/configuracoes.component').then((m) => m.ConfiguracoesComponent),
+  },
+  {
+    path: 'assinaturas',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/assinaturas/assinaturas.component').then((m) => m.AssinaturasComponent),
   },
   { path: '**', redirectTo: 'painel' },
 ];

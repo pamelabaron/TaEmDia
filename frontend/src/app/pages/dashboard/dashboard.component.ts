@@ -2,6 +2,8 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Dashboard, DashboardService } from '../../core/dashboard.service';
 
@@ -12,10 +14,15 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [MatCardModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [MatCardModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule],
   template: `
     <div class="pagina">
-      <h2>Painel</h2>
+      <div class="cabecalho">
+        <h2>Painel</h2>
+        <button mat-stroked-button (click)="exportarPdf()" [disabled]="exportando()">
+          <mat-icon>picture_as_pdf</mat-icon> Exportar PDF
+        </button>
+      </div>
 
       @if (carregando()) {
         <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
@@ -60,7 +67,7 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
         <mat-card class="bloco">
           <h3>Clientes em atraso</h3>
           @if (d.clientes_em_atraso.length === 0) {
-            <p class="vazio">Nenhum cliente em atraso. 🎉</p>
+            <p class="vazio">Nenhum cliente em atraso.</p>
           } @else {
             @for (c of d.clientes_em_atraso; track c.id) {
               <div class="linha-atraso clicavel" (click)="abrirPerfil(c.id)">
@@ -76,35 +83,112 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
   `,
   styles: [`
     .pagina { max-width: 820px; margin: 0 auto; padding: 16px; }
+    .cabecalho { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .cabecalho h2 { margin: 0; }
     .centro { display: flex; justify-content: center; padding: 32px; }
-    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .kpi { display: flex; flex-direction: column; padding: 16px; border-left: 4px solid #1565c0; }
-    .kpi .rotulo { font-size: 0.8rem; color: #777; }
-    .kpi .valor { font-size: 1.5rem; font-weight: 600; margin-top: 4px; }
-    .kpi.receber { border-color: #1565c0; } .kpi.receber .valor { color: #1565c0; }
-    .kpi.recebido { border-color: #2e7d32; } .kpi.recebido .valor { color: #2e7d32; }
-    .kpi.atraso { border-color: #e65100; } .kpi.atraso .valor { color: #e65100; }
-    .kpi.inadimplentes { border-color: #c62828; } .kpi.inadimplentes .valor { color: #c62828; }
+    /* Quatro caixas de peso igual dizem que os quatro números importam igual.
+       "Total a receber" é o que a pessoa abre o sistema para ver: ocupa duas
+       colunas e é o único cartão escuro da tela. Os outros três recuam. */
+    .kpis { display: grid; gap: 14px; margin-bottom: 18px; }
+
+    /* Celular: um embaixo do outro. */
+    .kpis { grid-template-columns: 1fr; }
+
+    /* Tablet: 2x2 exatos. Dar a linha inteira ao principal deixaria o quarto
+       cartão sozinho ao lado de um vão: órfão numa grade lê como erro. */
+    @media (min-width: 620px) {
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* Computador: os quatro em linha, e o principal mais largo que os demais -
+       é a largura, além da cor, que diz qual número manda. */
+    @media (min-width: 960px) {
+      .kpis { grid-template-columns: 1.5fr 1fr 1fr 1fr; }
+      .kpi.receber { grid-column: auto; }
+    }
+
+    /* A cor do estado vem de uma luz no canto do cartão e do próprio número,
+       não de uma tarja na lateral: a tarja é adesivo colado numa caixa branca,
+       a luz pertence à superfície. */
+    .kpi {
+      display: flex; flex-direction: column; padding: 18px 16px 16px;
+      overflow: hidden;
+      --tom: var(--verde-800);
+      --tom-rgb: 31, 130, 77;
+    }
+    .kpi::before {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(14rem 8rem at 100% 0%, rgba(var(--tom-rgb), 0.13), transparent 70%);
+    }
+    .kpi > * { position: relative; }
+    .kpi .rotulo { font-size: 0.8rem; color: var(--texto-suave); letter-spacing: 0.01em; }
+    .kpi .valor { font-size: 1.6rem; font-weight: 600; margin-top: 4px; color: var(--tom);
+                  letter-spacing: -0.02em; }
+
+    /* O cartão principal: petróleo com o lima acendendo no canto. É a única
+       superfície escura do painel. Se houvesse duas, nenhuma seria o destaque. */
+    .kpi.receber {
+      --tom: var(--lima-400); --tom-rgb: 168, 227, 74;
+      background-color: var(--petroleo-900) !important;
+      background-image:
+        radial-gradient(18rem 12rem at 108% 118%, rgba(168, 227, 74, 0.42), transparent 64%),
+        linear-gradient(148deg, var(--petroleo-800) 0%, var(--petroleo-900) 72%) !important;
+      border-color: rgba(168, 227, 74, 0.22) !important;
+      border-top-color: rgba(168, 227, 74, 0.34) !important;
+      backdrop-filter: none;
+      box-shadow:
+        inset 0 1px 0 rgba(168, 227, 74, 0.18),
+        var(--elev-3) !important;
+      padding: 22px 20px 20px;
+    }
+    .kpi.receber::before { display: none; }
+    .kpi.receber .rotulo { color: rgba(255, 255, 255, 0.72); }
+    .kpi.receber .valor {
+      font-size: 2.1rem; color: var(--lima-400);
+      text-shadow: 0 0 30px rgba(168, 227, 74, 0.30);
+    }
+    .kpi.recebido      { --tom: var(--sucesso);   --tom-rgb: 31, 130, 77; }
+    .kpi.atraso        { --tom: var(--alerta);    --tom-rgb: 178, 106, 0; }
+    .kpi.inadimplentes { --tom: var(--perigo);    --tom-rgb: 192, 57, 43; }
     .bloco { padding: 16px; margin-bottom: 16px; }
     .bloco h3 { margin: 0 0 16px; }
     .grafico { display: flex; align-items: flex-end; gap: 16px; height: 160px; padding-top: 20px; }
     .coluna { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; height: 100%; }
-    .cifra { font-size: 0.7rem; color: #555; margin-bottom: 4px; }
-    .barra { width: 70%; max-width: 48px; background: #2e7d32; border-radius: 4px 4px 0 0; min-height: 2px; transition: height .3s; }
-    .mes { font-size: 0.75rem; color: #777; margin-top: 6px; }
-    .vazio { color: #888; }
-    .linha-atraso { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid #eee; }
+    .cifra { font-size: 0.7rem; color: var(--texto-suave); margin-bottom: 4px; }
+    /* Barra com volume: mais clara no topo, como se a luz viesse de cima -
+       a mesma direção que as sombras dos cartões pressupõem. */
+    .barra {
+      width: 70%; max-width: 48px; min-height: 2px;
+      border-radius: 6px 6px 2px 2px;
+      background-image: linear-gradient(180deg,
+        var(--lima-500) 0%, var(--verde-500) 42%, var(--verde-800) 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28),
+                  0 2px 6px -2px rgba(15, 98, 52, 0.35);
+      transform-origin: bottom;
+      /* Sem transição em height: animar altura obriga o navegador a refazer o
+         layout a cada quadro. Quem faz a revelação é o scaleY abaixo, que roda
+         na placa de vídeo. */
+      animation: subir 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes subir { from { transform: scaleY(0.02); } to { transform: scaleY(1); } }
+    @media (prefers-reduced-motion: reduce) { .barra { animation: none; } }
+    .mes { font-size: 0.75rem; color: var(--texto-suave); margin-top: 6px; }
+    .vazio { color: var(--texto-fraco); }
+    .linha-atraso { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--borda); }
     .linha-atraso span { display: flex; align-items: center; gap: 6px; }
-    .valor-atraso { color: #c62828; font-weight: 500; }
-    .clicavel { cursor: pointer; } .clicavel:hover { background: #f5f5f5; }
+    .valor-atraso { color: var(--perigo); font-weight: 500; }
+    .clicavel { cursor: pointer; }
   `],
 })
 export class DashboardComponent implements OnInit {
   private service = inject(DashboardService);
   private router = inject(Router);
+  private snack = inject(MatSnackBar);
 
   readonly dados = signal<Dashboard | null>(null);
   readonly carregando = signal<boolean>(true);
+  readonly exportando = signal<boolean>(false);
 
   readonly barras = computed<Barra[]>(() => {
     const d = this.dados();
@@ -122,6 +206,30 @@ export class DashboardComponent implements OnInit {
       next: (d) => { this.dados.set(d); this.carregando.set(false); },
       error: () => this.carregando.set(false),
     });
+  }
+
+  exportarPdf(): void {
+    this.exportando.set(true);
+    this.service.exportarPdf().subscribe({
+      next: (arquivo) => {
+        this.exportando.set(false);
+        this.baixar(arquivo);
+      },
+      error: () => {
+        this.exportando.set(false);
+        this.snack.open('Não foi possível gerar o relatório.', 'OK', { duration: 4000 });
+      },
+    });
+  }
+
+  /** Entrega o arquivo ao navegador para download. */
+  private baixar(arquivo: Blob): void {
+    const url = URL.createObjectURL(arquivo);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'taemdia-relatorio.pdf';
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   abrirPerfil(id: string): void { this.router.navigate(['/clientes', id]); }
