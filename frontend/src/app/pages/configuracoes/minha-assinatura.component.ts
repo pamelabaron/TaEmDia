@@ -100,8 +100,8 @@ const ROTULOS: Record<string, string> = {
               <div class="envio">
                 <mat-form-field appearance="outline" class="campo-valor">
                   <mat-label>Valor pago (R$)</mat-label>
-                  <input matInput type="number" step="0.01" min="0.01" [(ngModel)]="valor"
-                         name="valor" />
+                  <input matInput type="number" step="0.01" min="0.01" max="10000"
+                         [(ngModel)]="valor" name="valor" />
                 </mat-form-field>
 
                 <button mat-stroked-button type="button" (click)="seletor.click()">
@@ -145,7 +145,7 @@ const ROTULOS: Record<string, string> = {
     .topo { display: flex; align-items: center; justify-content: space-between; gap: 12px;
             flex-wrap: wrap; margin-bottom: 14px; }
     /* Mesmo verde dos demais títulos de bloco das Configurações. */
-    .topo h3 { margin: 0; color: var(--verde-800); }
+    .topo h3 { margin: 0; color: var(--lilas-300); }
     .centro { display: flex; justify-content: center; padding: 24px; }
 
     /* A etiqueta de situação é o dado mais consultado deste cartão: ganha
@@ -156,13 +156,13 @@ const ROTULOS: Record<string, string> = {
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
     }
     .selo.ativa    { background: var(--sucesso-bg); color: var(--sucesso);
-                     border-color: rgba(31, 130, 77, 0.22); }
+                     border-color: rgba(93, 64, 128, 0.22); }
     .selo.em_teste { background: var(--info-bg); color: var(--info);
-                     border-color: rgba(41, 148, 91, 0.22); }
+                     border-color: rgba(116, 82, 159, 0.22); }
     .selo.vencida  { background: var(--perigo-bg); color: var(--perigo);
-                     border-color: rgba(192, 57, 43, 0.22); }
+                     border-color: rgba(255, 122, 133, 0.22); }
     .selo.isenta   { background: var(--petroleo-800); color: var(--lima-400);
-                     border-color: rgba(168, 227, 74, 0.35); }
+                     border-color: rgba(201, 169, 255, 0.35); }
 
     /* Nome próprio: "isenta" já é a variação da etiqueta (.selo.isenta), e
        reaproveitar a classe fazia uma herdar o estilo da outra. O texto vai num
@@ -171,11 +171,11 @@ const ROTULOS: Record<string, string> = {
     .aviso-isenta {
       display: flex; align-items: flex-start; gap: 8px; margin: 0;
       padding: 11px 13px; border-radius: var(--raio-interno);
-      background: var(--verde-50); color: var(--texto);
-      border: 1px solid rgba(31, 130, 77, 0.18);
+      background: rgba(201, 169, 255, 0.10); color: var(--texto);
+      border: 1px solid rgba(93, 64, 128, 0.18);
       font-size: 0.9rem; line-height: 1.5;
     }
-    .aviso-isenta mat-icon { color: var(--verde-800); flex-shrink: 0; margin-top: 2px; }
+    .aviso-isenta mat-icon { color: var(--lilas-300); flex-shrink: 0; margin-top: 2px; }
 
     .resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
               gap: 12px; margin-bottom: 14px; }
@@ -192,9 +192,9 @@ const ROTULOS: Record<string, string> = {
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
     }
     .alerta { margin: 0 0 14px; background: var(--perigo-bg); color: var(--perigo);
-              border-color: rgba(192, 57, 43, 0.18); }
+              border-color: rgba(255, 122, 133, 0.18); }
     .pendente { align-items: center; background: var(--alerta-bg); color: var(--alerta);
-                border-color: rgba(178, 106, 0, 0.20); }
+                border-color: rgba(245, 169, 74, 0.20); }
 
     .pagar { display: flex; flex-direction: column; gap: 6px; }
     .rotulo.segundo { margin-top: 14px; }
@@ -202,10 +202,10 @@ const ROTULOS: Record<string, string> = {
        "isto é conteúdo", não "isto é um botão". */
     .chave {
       display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-      background-image: linear-gradient(180deg, #eef8f2 0%, #e6f4ec 100%);
-      border: 1px solid rgba(31, 130, 77, 0.18);
+      background-image: linear-gradient(180deg, var(--superficie-2) 0%, var(--superficie) 100%);
+      border: 1px solid rgba(93, 64, 128, 0.18);
       border-radius: var(--raio-interno);
-      box-shadow: inset 0 1px 3px rgba(15, 98, 52, 0.10);
+      box-shadow: inset 0 1px 3px rgba(39, 26, 56, 0.10);
       padding: 6px 6px 6px 12px;
     }
     .chave code { font-size: 0.95rem; word-break: break-all; }

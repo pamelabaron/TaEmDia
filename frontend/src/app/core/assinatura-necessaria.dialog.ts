@@ -51,6 +51,6 @@ export class AssinaturaNecessariaDialog {
 
   irParaAssinatura(): void {
     this.ref.close();
-    this.router.navigate(['/configuracoes'], { fragment: 'assinatura' });
+    this.router.navigate(['/minha-assinatura']);
   }
 }
