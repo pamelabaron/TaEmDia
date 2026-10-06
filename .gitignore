@@ -33,3 +33,19 @@ backend/.coverage
 
 # Certificados TLS (nunca versionar)
 docker/nginx/certs/*.pem
+
+# Pontos de montagem do Docker.
+# Os testes do backend leem arquivos que vivem fora da pasta backend/ (as rotas
+# do Angular, a configuracao do Nginx, a pasta docs/). O Docker monta cada um
+# dentro de /app, que e a propria pasta backend/, e ao fazer isso cria no disco
+# um arquivo vazio no lugar. Sao restos de montagem, nao codigo.
+backend/docs/
+backend/scripts/
+backend/frontend/
+backend/docker/
+backend/README.md
+backend/COMO-RODAR.md
+backend/docker-compose.prod.yml
+
+# Estado das ferramentas de design
+.impeccable/

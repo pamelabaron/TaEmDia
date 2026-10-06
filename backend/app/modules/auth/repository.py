@@ -15,9 +15,12 @@ class VendedorRepository:
     def buscar_por_email(self, email: str) -> Vendedor | None:
         return self.db.scalar(select(Vendedor).where(Vendedor.google_email == email))
 
-    def criar(self, email: str, nome: str) -> Vendedor:
-        vendedor = Vendedor(google_email=email, nome=nome)
+    def criar(self, email: str, nome: str, foto_url: str | None = None) -> Vendedor:
+        vendedor = Vendedor(google_email=email, nome=nome, foto_url=foto_url)
         self.db.add(vendedor)
         self.db.commit()
         self.db.refresh(vendedor)
         return vendedor
+
+    def salvar(self) -> None:
+        self.db.commit()
