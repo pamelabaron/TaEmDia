@@ -60,7 +60,16 @@ Detalhes em [COMO-RODAR.md](COMO-RODAR.md).
 docker compose exec backend pytest
 ```
 
-Meta do RFC: **75% de cobertura** no backend (hoje em 91%, 262 testes).
+No frontend (roda num container com navegador, não precisa instalar nada):
+
+```bash
+docker compose --profile testes run --rm frontend-testes
+```
+
+Metas de cobertura: **75% no backend** (exigência do RFC) e **25% no frontend**
+(exigência do playbook do portfólio). O comando do frontend **falha** abaixo de
+25%, então a meta é conferida, não prometida.
+
 Escreva as regras de negócio como **funções puras** sempre que possível. É o que
 mantém a suíte rápida e a cobertura alta. Ver [docs/testes.md](docs/testes.md).
 
@@ -81,8 +90,14 @@ No Git Bash, prefixe com `MSYS_NO_PATHCONV=1` para o `-w /app` não ser converti
 - **Isolamento entre contas**: toda consulta filtra por `vendedor_id`. É requisito
   de segurança (RNF07), não detalhe de implementação.
 - **Status da parcela é derivado**, nunca armazenado. Calculado a partir das datas.
+- **Tema escuro ameixa** em todo o sistema, inclusive na página de entrada.
+  As cores vivem em tokens no `styles.scss`; nenhuma tela escreve cor fixa.
+  Os nomes antigos (`--verde-*`, `--lima-*`, `--petroleo-*`) são apelidos que
+  apontam para os novos (`--ameixa-*`, `--lilas-*`, `--fundo-*`).
 - **Cores com significado**: verde = pago, laranja = atraso, vermelho =
   inadimplente, cinza neutro = pendente. Não use verde para "pendente".
+  No escuro essas cores são **claras**, então o que for pintado com elas leva
+  texto escuro (`var(--fundo-900)`), nunca branco.
 - **Tamanho de alvo de toque** é decidido por `@media (pointer: coarse)`, não por
   largura de tela.
 - Código, comentários e mensagens de commit **em português**.
@@ -131,6 +146,29 @@ Consulte antes de agir na área correspondente.
 
 Use a favor: **estilos globais no `styles.scss` alcançam classes de componente**.
 Foi assim que os alvos de toque de todas as telas foram corrigidos de um lugar só.
+
+## Tema escuro
+
+| Armadilha | O que fazer |
+|---|---|
+| Trocar o tema sem trocar `define-light-theme` por `define-dark-theme` deixa menu, campo e diálogo com texto escuro sobre fundo escuro | A troca é no `styles.scss`, junto da paleta |
+| Cor de estado clara com texto branco em cima. As quatro etiquetas do ranking ficaram abaixo de 2,6 de contraste | No escuro, superfície de estado leva texto escuro |
+| Branco sobre o tom 400 da paleta dá 3,44, abaixo do mínimo de 4,5 | A cor principal do Material precisa ser 500 ou mais escura para aguentar texto branco |
+| Trio de cor solto (`--tom-rgb: 168, 227, 74`) escapa de qualquer busca por `rgb(` | Procure também por `-rgb:` ao trocar paleta |
+| `var(--verde-300)` não existia entre os apelidos e virou valor vazio, sem erro de compilação | Ao criar apelidos, cubra **todos** os tons em uso |
+
+Conferência: `tema-escuro.spec.ts` monta cada tela e **mede** o contraste de
+todo texto. Foi ele que achou os problemas acima. Olhar não acha.
+
+## Cobertura e testes do frontend
+
+| Armadilha | O que fazer |
+|---|---|
+| `karma.conf.js` criado na raiz do frontend é **ignorado**. O `ChromeHeadlessCI` "não existe" e nada roda | Declare `"karmaConfig": "karma.conf.js"` em `architect.test.options` no `angular.json` |
+| A cobertura do Karma só conta arquivo que **algum teste importa**. A primeira medição deu 72%, mas o total eram 9 arquivos de 35 | `src/app/cobertura.spec.ts` importa todos. `test_cobertura_frontend.py` confere que a lista continua completa |
+| `npm ci` num container que compartilha `node_modules` com o `ng serve` apaga as dependências do site em desenvolvimento | Instale só se faltar: `[ -d node_modules/@angular/cli ] || npm install` (com as duas barras verticais) |
+| `TestBed.createComponent()` **não dispara o `ngOnInit`** | Chame `fixture.detectChanges()` antes de esperar a chamada HTTP |
+| Canalizar a saída para o `tail` faz `$?` devolver o estado do `tail`, não o do comando. Pareceu que o CI passava com 10 testes falhando | Redirecione para arquivo e leia `$?`, ou use `PIPESTATUS` |
 
 ## Backend e testes
 
