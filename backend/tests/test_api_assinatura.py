@@ -201,7 +201,7 @@ class TestAprovacao:
     def test_aprovar_libera_a_escrita(self, cliente_http, cabecalho_vencido, cabecalho_admin):
         """O caminho completo: vencido → envia → admin aprova → volta a gravar."""
         bloqueado = cliente_http.post(
-            "/clientes", json={"nome": "A", "whatsapp_numero": "5547911110000"},
+            "/clientes", json={"nome": "Ana", "whatsapp_numero": "5547911110000"},
             headers=cabecalho_vencido)
         assert bloqueado.status_code == 402
 
@@ -212,7 +212,7 @@ class TestAprovacao:
         assert r.json()["situacao"] == "aprovado"
 
         liberado = cliente_http.post(
-            "/clientes", json={"nome": "A", "whatsapp_numero": "5547911110000"},
+            "/clientes", json={"nome": "Ana", "whatsapp_numero": "5547911110000"},
             headers=cabecalho_vencido)
         assert liberado.status_code == 201
 
@@ -231,7 +231,7 @@ class TestAprovacao:
                               headers=cabecalho_admin)
         assert r.status_code == 200
         bloqueado = cliente_http.post(
-            "/clientes", json={"nome": "A", "whatsapp_numero": "5547911110000"},
+            "/clientes", json={"nome": "Ana", "whatsapp_numero": "5547911110000"},
             headers=cabecalho_vencido)
         assert bloqueado.status_code == 402
 

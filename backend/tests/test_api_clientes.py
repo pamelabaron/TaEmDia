@@ -52,9 +52,11 @@ class TestCadastro:
         assert lista[0]["whatsapp_numero"] == NOVO["whatsapp_numero"]
 
     def test_campos_opcionais(self, cliente_http, cabecalho_auth):
-        dados = {**NOVO, "cpf": "12345678900", "endereco": "Rua A, 100"}
+        # CPF válido de verdade: desde a RN-C02 a API confere os dígitos
+        # verificadores, e o "12345678900" que estava aqui não passa na conta.
+        dados = {**NOVO, "cpf": "12345678909", "endereco": "Rua A, 100"}
         resp = cliente_http.post("/clientes", json=dados, headers=cabecalho_auth)
-        assert resp.json()["cpf"] == "12345678900"
+        assert resp.json()["cpf"] == "12345678909"
         assert resp.json()["endereco"] == "Rua A, 100"
 
     def test_novo_cliente_ja_vem_com_envio_automatico_ligado(self, cliente_http, cabecalho_auth):
@@ -99,7 +101,9 @@ class TestEdicaoERemocao:
         assert cliente_http.get("/clientes", headers=cabecalho_auth).json() == []
 
     def test_cliente_inexistente_retorna_404(self, cliente_http, cabecalho_auth):
-        resp = cliente_http.patch(f"/clientes/{uuid.uuid4()}", json={"nome": "X"},
+        # Nome com duas letras: desde a RN-L01 o nome tem mínimo, e um "X"
+        # pararia na validação antes de chegar na busca, devolvendo 422.
+        resp = cliente_http.patch(f"/clientes/{uuid.uuid4()}", json={"nome": "Ana"},
                                   headers=cabecalho_auth)
         assert resp.status_code == 404
 
@@ -145,3 +149,57 @@ class TestIsolamentoEntreContas:
         resp = cliente_http.patch(f"/clientes/{cid}", json={"nome": "Invadido"},
                                   headers=cabecalho_outro)
         assert resp.status_code == 404
+
+
+class TestValidacaoPelaApi:
+    """A regra de CPF e telefone vale mesmo sem passar pelo formulário.
+
+    O formulário do site também confere, para avisar na hora. Estes testes
+    cobrem quem chama a API direto, que é onde a tela não alcança. Os casos
+    da regra em si estão em test_regras_cliente.py; aqui só se confirma que
+    a API aplica a regra e responde 422, e não 201 com dado ruim.
+    """
+
+    def test_numero_sem_ddd_e_recusado(self, cliente_http, cabecalho_auth):
+        dados = {**NOVO, "whatsapp_numero": "999990000"}
+        resp = cliente_http.post("/clientes", json=dados, headers=cabecalho_auth)
+        assert resp.status_code == 422
+        assert "DDD" in resp.text
+
+    def test_numero_sem_codigo_do_pais_ganha_o_55(self, cliente_http, cabecalho_auth):
+        """O que a pessoa digita não precisa ter o 55; o que é guardado, sim."""
+        dados = {**NOVO, "whatsapp_numero": "(47) 98888-0000"}
+        resp = cliente_http.post("/clientes", json=dados, headers=cabecalho_auth)
+        assert resp.status_code == 201
+        assert resp.json()["whatsapp_numero"] == "5547988880000"
+
+    def test_a_tela_recebe_o_numero_formatado(self, cliente_http, cabecalho_auth):
+        """RN-C01: "55 (47) 99999-0000"."""
+        resp = cliente_http.post("/clientes", json=NOVO, headers=cabecalho_auth)
+        assert resp.json()["whatsapp_formatado"] == "55 (47) 99999-0001"
+
+    def test_codigo_de_pais_diferente_e_respeitado(self, cliente_http, cabecalho_auth):
+        dados = {**NOVO, "whatsapp_numero": "912345678", "codigo_pais": "351"}
+        resp = cliente_http.post("/clientes", json=dados, headers=cabecalho_auth)
+        assert resp.status_code == 201
+        assert resp.json()["whatsapp_numero"] == "351912345678"
+
+    def test_cpf_invalido_e_recusado(self, cliente_http, cabecalho_auth):
+        dados = {**NOVO, "cpf": "11111111111"}
+        resp = cliente_http.post("/clientes", json=dados, headers=cabecalho_auth)
+        assert resp.status_code == 422
+
+    def test_cpf_com_pontuacao_e_guardado_so_com_digitos(self, cliente_http, cabecalho_auth):
+        dados = {**NOVO, "cpf": "529.982.247-25"}
+        resp = cliente_http.post("/clientes", json=dados, headers=cabecalho_auth)
+        assert resp.status_code == 201
+        assert resp.json()["cpf"] == "52998224725"
+
+    def test_cpf_invalido_na_edicao_tambem_e_recusado(self, cliente_http, cabecalho_auth):
+        """A trava não pode valer só no cadastro."""
+        criado = cliente_http.post("/clientes", json=NOVO, headers=cabecalho_auth)
+        cid = criado.json()["id"]
+
+        resp = cliente_http.patch(f"/clientes/{cid}", json={"cpf": "00000000000"},
+                                  headers=cabecalho_auth)
+        assert resp.status_code == 422

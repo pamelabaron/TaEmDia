@@ -30,7 +30,7 @@ import { bloqueadoPorAssinatura } from '../../core/erros';
         <div class="topo">
           <div>
             <h2>{{ p.nome }}</h2>
-            <p class="whats"><mat-icon>chat</mat-icon> {{ p.whatsapp_numero }}</p>
+            <p class="whats"><mat-icon>chat</mat-icon> {{ p.whatsapp_formatado }}</p>
           </div>
           <mat-card class="saldo" [class.zerado]="p.saldo_devedor === 0">
             <span class="rotulo">Saldo devedor</span>
@@ -50,7 +50,8 @@ import { bloqueadoPorAssinatura } from '../../core/erros';
             <mat-card-content>
               <mat-form-field appearance="outline" class="campo">
                 <mat-label>Valor total (R$)</mat-label>
-                <input matInput type="number" min="1" step="0.01" [(ngModel)]="nova.valor_total" name="valor" />
+                <input matInput type="number" min="0.01" max="1000000" step="0.01"
+                       [(ngModel)]="nova.valor_total" name="valor" />
               </mat-form-field>
               <mat-form-field appearance="outline" class="campo">
                 <mat-label>Número de parcelas (1 a 60)</mat-label>
@@ -58,7 +59,8 @@ import { bloqueadoPorAssinatura } from '../../core/erros';
               </mat-form-field>
               <mat-form-field appearance="outline" class="campo">
                 <mat-label>Data da 1ª parcela</mat-label>
-                <input matInput type="date" [(ngModel)]="nova.data_primeira_parcela" name="data" />
+                <input matInput type="date" [min]="dataMinima" [max]="dataMaxima"
+                       [(ngModel)]="nova.data_primeira_parcela" name="data" />
               </mat-form-field>
               <button mat-raised-button color="primary" [disabled]="salvando()" (click)="salvarVenda()">
                 Registrar venda
@@ -156,6 +158,19 @@ export class ClientePerfilComponent implements OnInit {
   private clienteId = '';
   nova = { valor_total: null as number | null, num_parcelas: 1, data_primeira_parcela: '' };
 
+  /** Teto do valor de uma venda, igual ao da API (RN-L01). */
+  readonly VALOR_MAXIMO = 1_000_000;
+  /** Faixa da data da primeira parcela: um ano para trás, cinco para a frente. */
+  readonly dataMinima = this.anosDeHoje(-1);
+  readonly dataMaxima = this.anosDeHoje(5);
+
+  /** A data no formato que o campo do navegador entende ("2026-10-06"). */
+  private anosDeHoje(anos: number): string {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() + anos);
+    return d.toISOString().slice(0, 10);
+  }
+
   ngOnInit(): void {
     this.clienteId = this.route.snapshot.paramMap.get('id') ?? '';
     this.carregar();
@@ -176,11 +191,23 @@ export class ClientePerfilComponent implements OnInit {
     if (!this.nova.valor_total || this.nova.valor_total < 1) {
       this.snack.open('Informe um valor de pelo menos R$ 1,00.', 'OK', { duration: 3000 }); return;
     }
+    // O "max" do campo não impede digitar: ele só marca como inválido, e o
+    // site mandava assim mesmo. Quem barra de verdade é esta conferência.
+    if (this.nova.valor_total > this.VALOR_MAXIMO) {
+      this.snack.open('O valor passa do máximo de R$ 1.000.000,00.', 'OK', { duration: 4000 });
+      return;
+    }
     if (!this.nova.num_parcelas || this.nova.num_parcelas < 1 || this.nova.num_parcelas > 60) {
       this.snack.open('Número de parcelas deve ser entre 1 e 60.', 'OK', { duration: 3000 }); return;
     }
     if (!this.nova.data_primeira_parcela) {
       this.snack.open('Informe a data da 1ª parcela.', 'OK', { duration: 3000 }); return;
+    }
+    if (this.nova.data_primeira_parcela < this.dataMinima
+        || this.nova.data_primeira_parcela > this.dataMaxima) {
+      this.snack.open('A data precisa ficar entre um ano atrás e cinco anos à frente.',
+                      'OK', { duration: 4000 });
+      return;
     }
     this.salvando.set(true);
     this.service.registrarVenda({

@@ -30,6 +30,10 @@ from app.modules.assinatura.service import (
 from app.modules.auth.deps import get_current_vendedor_id
 from app.modules.auth.repository import VendedorRepository
 
+#: Teto do valor de um comprovante. É a mensalidade do sistema, não uma
+#: transferência qualquer: valor em outra ordem de grandeza é erro de digitação.
+VALOR_MAXIMO_DO_COMPROVANTE = 10_000.0
+
 router = APIRouter(tags=["assinatura"])
 
 
@@ -63,7 +67,7 @@ def minha_assinatura(
 
 @router.post("/assinatura/comprovante", response_model=PagamentoOut, status_code=201)
 async def enviar_comprovante(
-    valor: float = Form(...),
+    valor: float = Form(..., gt=0, le=VALOR_MAXIMO_DO_COMPROVANTE),
     arquivo: UploadFile = File(...),
     vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
     service: AssinaturaService = Depends(get_assinatura_service),
@@ -74,9 +78,6 @@ async def enviar_comprovante(
         tipo = armazenamento.validar(conteudo)
     except armazenamento.ArquivoInvalido as erro:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(erro))
-
-    if valor <= 0:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Informe o valor pago.")
 
     caminho = armazenamento.guardar(conteudo, tipo)
     try:

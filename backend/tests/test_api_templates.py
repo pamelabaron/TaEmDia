@@ -70,8 +70,10 @@ class TestTemplates:
         assert resp.json()["ativo"] is False
 
     def test_template_inexistente(self, cliente_http, cabecalho_auth):
+        # Título com mais de duas letras: desde a RN-L01 ele tem mínimo, e um
+        # "X" pararia na validação antes de chegar na busca.
         resp = cliente_http.patch("/templates/" + str(uuid.uuid4()), headers=cabecalho_auth,
-                                  json={"titulo": "X"})
+                                  json={"titulo": "Aviso"})
         assert resp.status_code == 404
 
     def test_nao_edita_template_de_outra_conta(self, cliente_http, cabecalho_auth, db):
