@@ -8,25 +8,13 @@ da RN10, porque os processos contam as mensagens em paralelo.
 Este teste lê o arquivo de produção e trava essa decisão. É o mesmo espírito da
 varredura de rotas: uma configuração errada quebra a suíte, não a produção.
 """
-from pathlib import Path
 
 import pytest
+
+from .caminhos import achar
 import yaml
 
-def _achar_arquivo() -> Path | None:
-    """Procura o compose de produção subindo a partir deste arquivo.
-
-    Nos testes em container só a pasta backend é montada, então o arquivo entra
-    num nível diferente do que ele ocupa no repositório.
-    """
-    for pasta in Path(__file__).resolve().parents:
-        candidato = pasta / "docker-compose.prod.yml"
-        if candidato.is_file():
-            return candidato
-    return None
-
-
-ARQUIVO = _achar_arquivo()
+ARQUIVO = achar("docker-compose.prod.yml")
 
 
 @pytest.fixture(scope="module")

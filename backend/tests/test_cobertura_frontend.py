@@ -14,21 +14,14 @@ Vive no pytest, e não no Karma, porque é uma conferência de arquivos no disco
 o próprio arquivo que deveria listar tudo não é quem pode dizer se listou.
 """
 import re
-from pathlib import Path
 
 import pytest
 
-
-def _achar(*partes: str) -> Path | None:
-    for pasta in Path(__file__).resolve().parents:
-        candidato = pasta.joinpath(*partes)
-        if candidato.exists():
-            return candidato
-    return None
+from .caminhos import achar, achar_pasta
 
 
-FONTE = _achar("frontend", "src", "app")
-LISTA = _achar("frontend", "src", "app", "cobertura.spec.ts")
+FONTE = achar_pasta("frontend", "src", "app")
+LISTA = achar("frontend", "src", "app", "cobertura.spec.ts")
 
 #: Arquivos que não entram na conta e por quê.
 DISPENSADOS = {
@@ -85,7 +78,7 @@ def test_a_lista_nao_aponta_para_arquivo_que_sumiu(arquivos_do_site, importados)
 
 def test_a_meta_de_cobertura_esta_configurada():
     """25% no frontend é exigência do playbook. Meta que ninguém mede não vale."""
-    karma = _achar("frontend", "karma.conf.js")
+    karma = achar("frontend", "karma.conf.js")
     if karma is None:
         pytest.skip("karma.conf.js não encontrado")
 

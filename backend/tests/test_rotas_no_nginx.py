@@ -16,9 +16,10 @@ porque o endereço de retorno já está cadastrado no Google Cloud e mudá-lo
 exigiria reconfigurar lá fora.
 """
 import re
-from pathlib import Path
 
 import pytest
+
+from .caminhos import achar
 from fastapi.routing import APIRoute
 
 from app.main import app
@@ -27,16 +28,8 @@ from app.main import app
 RAIZ_DA_API = "/auth/google"
 
 
-def _achar(*partes: str) -> Path | None:
-    for pasta in Path(__file__).resolve().parents:
-        candidato = pasta.joinpath(*partes)
-        if candidato.is_file():
-            return candidato
-    return None
-
-
-CONF = _achar("docker", "nginx", "taemdia.conf")
-ROTAS_ANGULAR = _achar("frontend", "src", "app", "app.routes.ts")
+CONF = achar("docker", "nginx", "taemdia.conf")
+ROTAS_ANGULAR = achar("frontend", "src", "app", "app.routes.ts")
 
 
 @pytest.fixture(scope="module")

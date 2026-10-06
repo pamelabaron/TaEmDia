@@ -13,9 +13,10 @@ Este teste lê o arquivo do frontend como texto e compara com o do backend.
 Angular com a configuração do Nginx.
 """
 import re
-from pathlib import Path
 
 import pytest
+
+from .caminhos import achar
 
 from app.modules.clientes.regras import (
     CODIGO_PAIS_PADRAO,
@@ -24,15 +25,7 @@ from app.modules.clientes.regras import (
 )
 
 
-def _achar(*partes: str) -> Path | None:
-    for pasta in Path(__file__).resolve().parents:
-        candidato = pasta.joinpath(*partes)
-        if candidato.is_file():
-            return candidato
-    return None
-
-
-REGRAS_TS = _achar("frontend", "src", "app", "core", "regras-cliente.ts")
+REGRAS_TS = achar("frontend", "src", "app", "core", "regras-cliente.ts")
 
 
 @pytest.fixture(scope="module")

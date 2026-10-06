@@ -13,20 +13,13 @@ pytest, e não no Karma, porque é conferência de texto nos arquivos: o mesmo
 recurso já usado para comparar as rotas do Angular com o Nginx.
 """
 import re
-from pathlib import Path
 
 import pytest
 
-
-def _achar(*partes: str) -> Path | None:
-    for pasta in Path(__file__).resolve().parents:
-        candidato = pasta.joinpath(*partes)
-        if candidato.exists():
-            return candidato
-    return None
+from .caminhos import achar, achar_pasta
 
 
-TELAS = _achar("frontend", "src", "app", "pages")
+TELAS = achar_pasta("frontend", "src", "app", "pages")
 
 def _tem_faixa(marca: str) -> bool:
     """Declara mínimo e máximo?

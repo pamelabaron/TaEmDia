@@ -18,17 +18,11 @@ from pathlib import Path
 
 import pytest
 
-
-def _achar(*partes: str) -> Path | None:
-    for pasta in Path(__file__).resolve().parents:
-        candidato = pasta.joinpath(*partes)
-        if candidato.exists():
-            return candidato
-    return None
+from .caminhos import achar, achar_pasta
 
 
-GERADOR = _achar("scripts", "wiki.py")
-DOCS = _achar("docs")
+GERADOR = achar("scripts", "wiki.py")
+DOCS = achar_pasta("docs")
 
 
 def _carregar_gerador():
