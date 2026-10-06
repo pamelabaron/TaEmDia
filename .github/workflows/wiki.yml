@@ -1,0 +1,70 @@
+name: Wiki
+
+# Publica a documentação na Wiki do repositório.
+#
+# A pasta docs/ é o original e a Wiki é a cópia publicada. Ninguém edita a
+# Wiki na mão: ela é reescrita a cada envio, a partir do repositório. Assim
+# não existem duas versões do mesmo texto envelhecendo em ritmos diferentes.
+#
+# O gerador vive em scripts/wiki.py e é coberto por backend/tests/test_wiki.py.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "README.md"
+      - "COMO-RODAR.md"
+      - "scripts/wiki.py"
+      - ".github/workflows/wiki.yml"
+  # Permite publicar na mão pelo site do GitHub, sem precisar mudar um arquivo.
+  workflow_dispatch:
+
+# Sem isto o robô entra sem permissão de escrita e o envio para a Wiki falha.
+permissions:
+  contents: write
+
+# Dois envios seguidos disputariam a Wiki. O segundo espera o primeiro.
+concurrency:
+  group: wiki
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    name: Publicar a documentação
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Gerar as páginas
+        run: python scripts/wiki.py paginas-da-wiki
+
+      - name: Baixar a Wiki
+        run: git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git wiki
+
+      - name: Trocar o conteúdo
+        run: |
+          # Apaga o que havia antes (menos o histórico) para que página
+          # renomeada ou removida não fique órfã na Wiki.
+          find wiki -maxdepth 1 -name '*.md' -delete
+          cp paginas-da-wiki/*.md wiki/
+
+      - name: Enviar
+        working-directory: wiki
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "A Wiki já está atualizada."
+            exit 0
+          fi
+          git commit -m "Atualiza a Wiki a partir de ${{ github.sha }}"
+          git push
