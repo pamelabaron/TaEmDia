@@ -17,11 +17,13 @@ from app.modules.cobrancas.repository import (
 )
 from app.modules.whatsapp.client import WhatsAppClient
 
-ROTULO_OPCAO = {
-    "1_ja_paguei": "Já paguei",
-    "2_pago_hoje": "Vou pagar hoje",
-    "3_nao_consigo": "Não consigo pagar",
-}
+# Rótulos e cálculo moram juntos, para tela, PDF e WhatsApp
+# usarem os mesmos nomes e os mesmos números.
+from app.modules.relatorios.resumo import (  # noqa: E402
+    ROTULO_OPCAO,
+    ResumoDoDia,
+    consolidar,
+)
 
 
 @dataclass
@@ -79,9 +81,13 @@ class AgenteService:
         return ResultadoResposta(True, "registrada", opcao)
 
     # ----------------------------------------------------- resumo analítico
-    def montar_resumo(self, vendedor_id: uuid.UUID, dia: date) -> str | None:
-        """Consolida os eventos do dia. Retorna None se não houve atividade
-        (RN: dia sem atividade não gera envio)."""
+    def dados_do_resumo(self, vendedor_id: uuid.UUID, dia: date) -> ResumoDoDia:
+        """Busca os eventos do dia e devolve os números já consolidados.
+
+        Quem escreve o texto é quem consome: a mensagem do WhatsApp, a tela e o
+        PDF partem daqui, então não há como um dizer um número e outro dizer
+        outro.
+        """
         inicio, fim = datetime.combine(dia, time.min), datetime.combine(dia, time.max)
         logs = [
             log for log, _nome in self.log_repo.listar(vendedor_id, desde=dia)
@@ -89,37 +95,32 @@ class AgenteService:
         ]
         respostas = self.resposta_repo.do_dia(vendedor_id, dia)
         pagamentos = self.parcela_repo.pagas_no_dia(vendedor_id, dia)
+        return consolidar(dia, logs, respostas, pagamentos)
 
-        if not logs and not respostas and not pagamentos:
+    def montar_resumo(self, vendedor_id: uuid.UUID, dia: date) -> str | None:
+        """Texto do resumo para o WhatsApp. Retorna None se o dia não teve
+        atividade (RN-R02: dia parado não gera envio)."""
+        r = self.dados_do_resumo(vendedor_id, dia)
+        if not r.houve_atividade:
             return None
-
-        enviadas = [l for l in logs if l.status == "enviado"]
-        falhas = [l for l in logs if l.status != "enviado"]
-        total_recebido = sum(float(p.valor) for p in pagamentos)
-
-        contagem = {chave: 0 for chave in ROTULO_OPCAO}
-        for r in respostas:
-            contagem[r.opcao] = contagem.get(r.opcao, 0) + 1
-
-        clientes_com_resposta = {r.cliente_id for r in respostas}
-        sem_resposta = len({l.cliente_id for l in enviadas} - clientes_com_resposta)
 
         linhas = [
             f"*Resumo do dia {dia.strftime('%d/%m/%Y')}*",
             "",
-            f"📤 Cobranças enviadas: {len(enviadas)}",
-            f"✅ Pagamentos confirmados: {len(pagamentos)}",
-            f"💰 Valor recebido: {formatar_dinheiro(total_recebido)}",
+            f"📤 Cobranças enviadas: {r.cobrancas_enviadas}",
+            f"✅ Pagamentos confirmados: {r.pagamentos}",
+            f"💰 Valor recebido: {formatar_dinheiro(r.valor_recebido)}",
             "",
             "*Respostas recebidas*",
         ]
         for chave, rotulo in ROTULO_OPCAO.items():
-            linhas.append(f"• {rotulo}: {contagem.get(chave, 0)}")
+            linhas.append(f"• {rotulo}: {r.respostas.get(chave, 0)}")
         linhas.append("")
-        linhas.append(f"🔕 Clientes sem resposta: {sem_resposta}")
-        if falhas:
-            linhas.append(f"⚠️ Mensagens não entregues: {len(falhas)}")
+        linhas.append(f"🔕 Clientes sem resposta: {r.sem_resposta}")
+        if r.cobrancas_falharam:
+            linhas.append(f"⚠️ Mensagens não entregues: {r.cobrancas_falharam}")
         return "\n".join(linhas)
+
 
     def enviar_resumo(
         self, vendedor_id: uuid.UUID, numero_vendedor: str, dia: date

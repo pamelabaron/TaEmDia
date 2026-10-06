@@ -22,6 +22,7 @@ from app.modules.cobrancas.repository import (
 from app.modules.cobrancas.service import CobrancaService
 from app.modules.configuracoes.repository import ConfiguracaoRepository
 from app.modules.configuracoes.service import ConfiguracaoService
+from app.modules.relatorios.resumo import numero_do_resumo
 from app.modules.templates.repository import TemplateRepository
 from app.modules.vendedores.models import Vendedor
 from app.modules.whatsapp.client import get_whatsapp_client
@@ -71,14 +72,18 @@ def job_resumo_diario() -> None:
         config_service = ConfiguracaoService(ConfiguracaoRepository(db))
         for vendedor in _vendedores_ativos(db):
             config = config_service.obter(vendedor.id)
-            if not config.resumo_ativo or not vendedor.whatsapp_numero:
+            if not config.resumo_ativo:
+                continue
+            # O resumo pode ir para outro número (RN-R03).
+            numero = numero_do_resumo(config.whatsapp_resumo, vendedor.whatsapp_numero)
+            if not numero:
                 continue
             # Envia quando a hora e o minuto configurados chegam (job roda a cada 15 min).
             if config.horario_resumo.hour != agora.hour:
                 continue
             if abs(config.horario_resumo.minute - agora.minute) > 7:
                 continue
-            enviado = agente.enviar_resumo(vendedor.id, vendedor.whatsapp_numero, date.today())
+            enviado = agente.enviar_resumo(vendedor.id, numero, date.today())
             if enviado:
                 logger.info("Resumo diário enviado para %s", vendedor.google_email)
     except Exception:
