@@ -17,7 +17,7 @@ import { AssinaturaService } from '../../core/assinatura.service';
   styles: [`
     .callback {
       display: flex; flex-direction: column; align-items: center;
-      justify-content: center; min-height: 60vh; gap: 16px; color: #555;
+      justify-content: center; min-height: 60vh; gap: 16px; color: var(--texto-suave);
     }
   `],
 })

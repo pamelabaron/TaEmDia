@@ -114,7 +114,7 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
       display: flex; flex-direction: column; padding: 18px 16px 16px;
       overflow: hidden;
       --tom: var(--verde-800);
-      --tom-rgb: 31, 130, 77;
+      --tom-rgb: 93, 64, 128;
     }
     .kpi::before {
       content: ""; position: absolute; inset: 0; pointer-events: none;
@@ -129,16 +129,16 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     /* O cartão principal: petróleo com o lima acendendo no canto. É a única
        superfície escura do painel. Se houvesse duas, nenhuma seria o destaque. */
     .kpi.receber {
-      --tom: var(--lima-400); --tom-rgb: 168, 227, 74;
+      --tom: var(--lilas-400); --tom-rgb: 201, 169, 255;
       background-color: var(--petroleo-900) !important;
       background-image:
-        radial-gradient(18rem 12rem at 108% 118%, rgba(168, 227, 74, 0.42), transparent 64%),
+        radial-gradient(18rem 12rem at 108% 118%, rgba(201, 169, 255, 0.42), transparent 64%),
         linear-gradient(148deg, var(--petroleo-800) 0%, var(--petroleo-900) 72%) !important;
-      border-color: rgba(168, 227, 74, 0.22) !important;
-      border-top-color: rgba(168, 227, 74, 0.34) !important;
+      border-color: rgba(201, 169, 255, 0.22) !important;
+      border-top-color: rgba(201, 169, 255, 0.34) !important;
       backdrop-filter: none;
       box-shadow:
-        inset 0 1px 0 rgba(168, 227, 74, 0.18),
+        inset 0 1px 0 rgba(201, 169, 255, 0.18),
         var(--elev-3) !important;
       padding: 22px 20px 20px;
     }
@@ -146,11 +146,11 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     .kpi.receber .rotulo { color: rgba(255, 255, 255, 0.72); }
     .kpi.receber .valor {
       font-size: 2.1rem; color: var(--lima-400);
-      text-shadow: 0 0 30px rgba(168, 227, 74, 0.30);
+      text-shadow: 0 0 30px rgba(201, 169, 255, 0.30);
     }
-    .kpi.recebido      { --tom: var(--sucesso);   --tom-rgb: 31, 130, 77; }
-    .kpi.atraso        { --tom: var(--alerta);    --tom-rgb: 178, 106, 0; }
-    .kpi.inadimplentes { --tom: var(--perigo);    --tom-rgb: 192, 57, 43; }
+    .kpi.recebido      { --tom: var(--sucesso);   --tom-rgb: 79, 217, 140; }
+    .kpi.atraso        { --tom: var(--alerta);    --tom-rgb: 245, 169, 74; }
+    .kpi.inadimplentes { --tom: var(--perigo);    --tom-rgb: 255, 122, 133; }
     .bloco { padding: 16px; margin-bottom: 16px; }
     .bloco h3 { margin: 0 0 16px; }
     .grafico { display: flex; align-items: flex-end; gap: 16px; height: 160px; padding-top: 20px; }
@@ -164,7 +164,7 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
       background-image: linear-gradient(180deg,
         var(--lima-500) 0%, var(--verde-500) 42%, var(--verde-800) 100%);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28),
-                  0 2px 6px -2px rgba(15, 98, 52, 0.35);
+                  0 2px 6px -2px rgba(39, 26, 56, 0.35);
       transform-origin: bottom;
       /* Sem transição em height: animar altura obriga o navegador a refazer o
          layout a cada quadro. Quem faz a revelação é o scaleY abaixo, que roda

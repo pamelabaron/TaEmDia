@@ -91,18 +91,24 @@ const ROTULO: Record<string, string> = {
     .card mat-icon { font-size: 36px; height: 36px; width: 36px; }
     .card .num { font-size: 2rem; font-weight: 700; }
     .card .rot { color: var(--texto-suave); font-size: 0.85rem; }
-    .card.bom { color: var(--sucesso); } .card.regular { color: #f9a825; } .card.inadimplente { color: var(--perigo); }
+    .card.bom { color: var(--sucesso); } .card.regular { color: var(--alerta); } .card.inadimplente { color: var(--perigo); }
     .lista { padding: 8px 16px; }
     .linha { display: flex; align-items: center; gap: 12px; padding: 12px 4px; border-bottom: 1px solid var(--borda); }
     .info { min-width: 180px; display: flex; flex-direction: column; gap: 4px; }
     .nome { font-weight: 500; }
-    .tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; width: fit-content; color: #fff; }
-    .tag.bom { background: var(--sucesso); } .tag.regular { background: #f9a825; }
-    .tag.inadimplente { background: var(--perigo); } .tag.sem_historico { background: #9e9e9e; }
+    /* Texto escuro, não branco: no tema escuro as cores de estado são claras
+       (é o que as faz aparecer sobre o fundo), e branco sobre elas dava menos
+       de 2,6 de contraste. A medição pegou as quatro etiquetas de uma vez. */
+    .tag {
+      font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; width: fit-content;
+      color: var(--fundo-900); font-weight: 600;
+    }
+    .tag.bom { background: var(--sucesso); } .tag.regular { background: var(--alerta); }
+    .tag.inadimplente { background: var(--perigo); } .tag.sem_historico { background: var(--neutro); }
     .barra-wrap { flex: 1; height: 10px; background: var(--borda); border-radius: 5px; overflow: hidden; }
     .barra { height: 100%; border-radius: 5px; }
-    .barra.bom { background: var(--sucesso); } .barra.regular { background: #f9a825; }
-    .barra.inadimplente { background: var(--perigo); } .barra.sem_historico { background: #bdbdbd; }
+    .barra.bom { background: var(--sucesso); } .barra.regular { background: var(--alerta); }
+    .barra.inadimplente { background: var(--perigo); } .barra.sem_historico { background: var(--neutro); }
     .perc { width: 44px; text-align: right; font-size: 0.85rem; color: var(--texto-suave); }
     .vazio { text-align: center; color: var(--texto-fraco); padding: 24px; }
     .clicavel { cursor: pointer; }

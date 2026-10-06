@@ -133,6 +133,7 @@ const VAZIO: Record<SituacaoComprovante, { icone: string; titulo: string; texto:
                     <mat-form-field appearance="outline" class="campo">
                       <mat-label>Motivo da recusa</mat-label>
                       <input matInput [(ngModel)]="motivo" name="motivo"
+                             maxlength="300"
                              placeholder="Ex.: valor diferente do combinado" />
                     </mat-form-field>
                     <button mat-button (click)="recusando.set(null)">Cancelar</button>
@@ -193,7 +194,7 @@ const VAZIO: Record<SituacaoComprovante, { icone: string; titulo: string; texto:
     }
     .vazio-card::before {
       content: ""; position: absolute; inset: 0; pointer-events: none;
-      background: radial-gradient(24rem 12rem at 50% 0%, rgba(60, 182, 118, 0.10), transparent 70%);
+      background: radial-gradient(24rem 12rem at 50% 0%, rgba(134, 99, 187, 0.10), transparent 70%);
     }
     .vazio-card > * { position: relative; }
     .vazio-card h3 { margin: 12px 0 4px; }
@@ -204,7 +205,7 @@ const VAZIO: Record<SituacaoComprovante, { icone: string; titulo: string; texto:
             gap: 12px; flex-wrap: wrap; }
     .quem > div:first-child { display: flex; flex-direction: column; }
     .email { font-size: 0.85rem; color: var(--texto-suave); }
-    .valor { font-size: 1.35rem; font-weight: 600; color: var(--verde-800);
+    .valor { font-size: 1.35rem; font-weight: 600; color: var(--lilas-300);
              letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 
     .meta { display: flex; align-items: center; justify-content: space-between;
@@ -220,7 +221,7 @@ const VAZIO: Record<SituacaoComprovante, { icone: string; titulo: string; texto:
     .motivo {
       margin: 10px 0 0; padding: 9px 12px; border-radius: var(--raio-interno);
       background: var(--perigo-bg); color: var(--texto); font-size: 0.9rem; line-height: 1.5;
-      border: 1px solid rgba(192, 57, 43, 0.18);
+      border: 1px solid rgba(255, 122, 133, 0.18);
     }
     .motivo strong { color: var(--perigo); }
 

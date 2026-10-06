@@ -52,12 +52,13 @@ const TIPO_LABEL: Record<string, string> = {
 
             <mat-form-field appearance="outline" class="campo">
               <mat-label>Título</mat-label>
-              <input matInput [(ngModel)]="t.titulo" [name]="'titulo-' + t.id" />
+              <input matInput [(ngModel)]="t.titulo" [name]="'titulo-' + t.id" maxlength="60" />
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="campo">
               <mat-label>Mensagem</mat-label>
-              <textarea matInput rows="3" [(ngModel)]="t.corpo" [name]="'corpo-' + t.id"></textarea>
+              <textarea matInput rows="3" [(ngModel)]="t.corpo" [name]="'corpo-' + t.id"
+                        maxlength="1000"></textarea>
             </mat-form-field>
 
             <div class="variaveis">
@@ -86,13 +87,13 @@ const TIPO_LABEL: Record<string, string> = {
     .centro { display: flex; justify-content: center; padding: 32px; }
     .tpl { padding: 16px; margin-bottom: 20px; }
     .tpl-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .tipo { font-weight: 600; color: var(--verde-800); }
+    .tipo { font-weight: 600; color: var(--lilas-300); }
     .campo { width: 100%; }
     .variaveis { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
     .variaveis .rot { color: var(--texto-suave); font-size: 0.85rem; }
     .chip-var { font-size: 0.75rem; min-width: 0; padding: 0 12px; }
-    .preview { background: var(--verde-50); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
-    .preview .rot { font-size: 0.75rem; color: var(--verde-800); font-weight: 500; }
+    .preview { background: rgba(201, 169, 255, 0.10); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+    .preview .rot { font-size: 0.75rem; color: var(--lilas-300); font-weight: 500; }
     .preview p { margin: 4px 0 0; white-space: pre-wrap; }
   `],
 })

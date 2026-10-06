@@ -195,13 +195,13 @@ const PASSOS: Passo[] = [
       position: sticky; top: 0; z-index: 10;
       display: flex; align-items: center; justify-content: space-between;
       padding: 12px 28px;
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(20, 15, 26, 0.86);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--borda);
     }
     .marca {
       display: flex; align-items: center; gap: 8px;
-      font-weight: 600; font-size: 1.15rem; color: var(--verde-800);
+      font-weight: 600; font-size: 1.15rem; color: var(--lilas-300);
     }
 
     /* apresentação */
@@ -218,14 +218,14 @@ const PASSOS: Passo[] = [
       position: absolute; inset: -10% -30% -20% -30%;
       pointer-events: none; z-index: 0;
       background:
-        radial-gradient(32rem 22rem at 18% 18%, rgba(168, 227, 74, 0.42), transparent 62%),
-        radial-gradient(28rem 20rem at 72% 8%, rgba(60, 182, 118, 0.32), transparent 60%),
-        radial-gradient(24rem 18rem at 88% 92%, rgba(10, 66, 57, 0.14), transparent 62%);
+        radial-gradient(32rem 22rem at 18% 18%, rgba(201, 169, 255, 0.42), transparent 62%),
+        radial-gradient(28rem 20rem at 72% 8%, rgba(134, 99, 187, 0.32), transparent 60%),
+        radial-gradient(24rem 18rem at 88% 92%, rgba(30, 23, 38, 0.14), transparent 62%);
       filter: blur(6px);
     }
     .capa > * { position: relative; z-index: 1; }
     .selo {
-      display: inline-block; background: var(--verde-50); color: var(--verde-800);
+      display: inline-block; background: rgba(201, 169, 255, 0.14); color: var(--lilas-300);
       padding: 6px 14px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
       margin-bottom: 18px;
     }
@@ -259,7 +259,9 @@ const PASSOS: Passo[] = [
     }
     /* Sem traço atrás: o destaque é a própria cor, no verde mais saturado da
        paleta, que já se separa do texto escuro em volta. */
-    .destaque { color: var(--verde-600); }
+    // Lilás, não ameixa: a ameixa média sobre o fundo escuro dava 2,9 de
+    // contraste, abaixo do mínimo de 3 para texto grande.
+    .destaque { color: var(--lilas-400); }
     .subtitulo { font-size: 1.1rem; color: var(--texto-suave); line-height: 1.6; margin: 0 0 28px; max-width: 30em; }
     .btn-grande { height: 50px; padding: 0 28px !important; font-size: 1rem; }
     .btn-grande mat-icon { margin-right: 8px; }
@@ -269,28 +271,28 @@ const PASSOS: Passo[] = [
     .capa-visual { display: flex; justify-content: center; }
     .celular {
       position: relative;
-      width: 300px; background: var(--verde-50); border: 1px solid var(--verde-100);
+      width: 300px; background: var(--superficie-2); border: 1px solid rgba(201, 169, 255, 0.16);
       border-radius: 22px; padding: 16px;
       /* Sombra em camadas: contato curto e escuro perto do objeto, difusa e
          clara longe. Uma sombra só, grande e uniforme, boia. */
       box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.8),
-        0 1px 2px rgba(15, 98, 52, 0.10),
-        0 8px 16px -6px rgba(15, 98, 52, 0.14),
-        0 28px 56px -20px rgba(15, 98, 52, 0.28);
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 1px 2px rgba(39, 26, 56, 0.10),
+        0 8px 16px -6px rgba(39, 26, 56, 0.14),
+        0 28px 56px -20px rgba(39, 26, 56, 0.28);
     }
     /* Reflexo no vidro: uma faixa clara na diagonal do canto superior. */
     .celular::after {
       content: ""; position: absolute; inset: 0; border-radius: 22px;
       pointer-events: none;
-      background: linear-gradient(152deg, rgba(255, 255, 255, 0.55) 0%,
+      background: linear-gradient(152deg, rgba(255, 255, 255, 0.07) 0%,
                                   rgba(255, 255, 255, 0) 38%);
     }
     .celular > * { position: relative; z-index: 1; }
     .celular-topo {
       display: flex; align-items: center; gap: 8px;
       font-size: 0.82rem; color: var(--texto-suave); font-weight: 600;
-      padding-bottom: 12px; border-bottom: 1px solid var(--verde-100); margin-bottom: 14px;
+      padding-bottom: 12px; border-bottom: 1px solid rgba(201, 169, 255, 0.16); margin-bottom: 14px;
     }
     .bolinha { width: 9px; height: 9px; border-radius: 50%; background: var(--verde-500); }
     .balao { font-size: 0.85rem; line-height: 1.5; padding: 11px 14px; border-radius: 14px; margin-bottom: 10px; }
@@ -316,10 +318,10 @@ const PASSOS: Passo[] = [
        senão vira o vão entre elas. Ganha luz própria, da mesma família. */
     .faixa.claro {
       position: relative; overflow: hidden;
-      background-color: #eef6f1; max-width: none;
+      background-color: var(--fundo-700); max-width: none;
       background-image:
-        radial-gradient(36rem 24rem at 88% -10%, rgba(168, 227, 74, 0.30), transparent 62%),
-        radial-gradient(30rem 22rem at 4% 108%, rgba(60, 182, 118, 0.22), transparent 60%);
+        radial-gradient(36rem 24rem at 88% -10%, rgba(201, 169, 255, 0.30), transparent 62%),
+        radial-gradient(30rem 22rem at 4% 108%, rgba(134, 99, 187, 0.22), transparent 60%);
     }
     .faixa.claro > * { max-width: 1060px; margin-left: auto; margin-right: auto; }
     .faixa h2 {
@@ -336,8 +338,8 @@ const PASSOS: Passo[] = [
       position: relative; overflow: hidden; max-width: none;
       background-color: var(--petroleo-900);
       background-image:
-        radial-gradient(40rem 26rem at 82% -6%, rgba(60, 182, 118, 0.50), transparent 62%),
-        radial-gradient(34rem 26rem at 10% 112%, rgba(168, 227, 74, 0.34), transparent 60%),
+        radial-gradient(40rem 26rem at 82% -6%, rgba(134, 99, 187, 0.50), transparent 62%),
+        radial-gradient(34rem 26rem at 10% 112%, rgba(201, 169, 255, 0.34), transparent 60%),
         linear-gradient(160deg, var(--petroleo-900) 0%, var(--petroleo-700) 100%);
     }
     .problema h2, .problema .secao-texto { color: #fff; }
@@ -349,7 +351,7 @@ const PASSOS: Passo[] = [
       font-size: clamp(2.9rem, 5.4vw, 4.6rem);
       color: var(--lima-400);
       line-height: 0.9; letter-spacing: -0.04em; margin-bottom: 14px;
-      text-shadow: 0 0 42px rgba(168, 227, 74, 0.35);
+      text-shadow: 0 0 42px rgba(201, 169, 255, 0.35);
     }
     .numero span { font-size: 0.92rem; opacity: 0.85; line-height: 1.5; display: block; }
 
@@ -372,7 +374,8 @@ const PASSOS: Passo[] = [
       top: 23px; left: calc(12.5% + 17px); right: calc(12.5% + 17px);
       height: 2px;
       background-image: linear-gradient(90deg,
-        var(--verde-100) 0%, var(--verde-300) 50%, var(--verde-100) 100%);
+        rgba(201, 169, 255, 0.10) 0%, rgba(201, 169, 255, 0.45) 50%,
+        rgba(201, 169, 255, 0.10) 100%);
     }
     .passo { position: relative; padding: 0 4px 0 0; }
     .passo-numero {
@@ -385,7 +388,7 @@ const PASSOS: Passo[] = [
       box-shadow:
         0 0 0 6px var(--fundo),
         inset 0 1px 0 rgba(255, 255, 255, 0.25),
-        0 2px 6px -1px rgba(15, 98, 52, 0.4);
+        0 2px 6px -1px rgba(39, 26, 56, 0.4);
     }
     .passo h3 { font-size: 1rem; margin: 0 0 6px; }
     .passo p { font-size: 0.88rem; color: var(--texto-suave); margin: 0; line-height: 1.55;
@@ -405,19 +408,19 @@ const PASSOS: Passo[] = [
       position: relative;
       /* Vidro: a luz da faixa atravessa o cartão. Branco chapado por cima de um
          fundo com luz apaga justamente o que se quer mostrar. */
-      background-color: rgba(255, 255, 255, 0.62);
+      background-color: rgba(39, 30, 49, 0.78);
       background-image: linear-gradient(158deg,
-        rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.58) 100%);
+        rgba(48, 37, 60, 0.88) 0%, rgba(30, 23, 38, 0.76) 100%);
       backdrop-filter: blur(16px) saturate(150%);
-      border: 1px solid rgba(255, 255, 255, 0.85);
-      border-bottom-color: rgba(31, 130, 77, 0.14);
+      border: 1px solid rgba(201, 169, 255, 0.13);
+      border-bottom-color: rgba(93, 64, 128, 0.14);
       border-radius: var(--raio); padding: 30px 28px;
       box-shadow: var(--elev-2);
       transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1),
                   box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1);
     }
     @supports not (backdrop-filter: blur(1px)) {
-      .recurso { background-color: rgba(255, 255, 255, 0.94); }
+      .recurso { background-color: var(--superficie-2); }
     }
     @media (hover: hover) and (pointer: fine) {
       .recurso:hover { transform: translateY(-4px); box-shadow: var(--elev-3); }
@@ -432,8 +435,8 @@ const PASSOS: Passo[] = [
         var(--lima-400) 0%, var(--verde-500) 55%, var(--verde-700) 100%);
       color: var(--petroleo-900); margin-bottom: 18px;
       box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.55),
-        0 6px 14px -4px rgba(60, 182, 118, 0.55);
+        inset 0 1px 0 rgba(255, 255, 255, 0.10),
+        0 6px 14px -4px rgba(134, 99, 187, 0.55);
     }
     .recurso h3 { font-size: 1.05rem; margin: 0 0 8px; }
     .recurso p { font-size: 0.9rem; color: var(--texto-suave); margin: 0; line-height: 1.6; }
@@ -441,7 +444,7 @@ const PASSOS: Passo[] = [
     /* garantias */
     .garantias { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; text-align: left; }
     .garantia { display: flex; gap: 14px; }
-    .garantia mat-icon { color: var(--verde-700); flex: none; }
+    .garantia mat-icon { color: var(--lilas-300); flex: none; }
     .garantia h3 { font-size: 1rem; margin: 0 0 6px; }
     .garantia p { font-size: 0.88rem; color: var(--texto-suave); margin: 0; line-height: 1.55; }
 
@@ -451,14 +454,14 @@ const PASSOS: Passo[] = [
       position: relative; overflow: hidden;
       background-color: var(--petroleo-900);
       background-image:
-        radial-gradient(36rem 24rem at 24% -8%, rgba(168, 227, 74, 0.34), transparent 62%),
-        radial-gradient(32rem 24rem at 86% 112%, rgba(60, 182, 118, 0.44), transparent 60%),
+        radial-gradient(36rem 24rem at 24% -8%, rgba(201, 169, 255, 0.34), transparent 62%),
+        radial-gradient(32rem 24rem at 86% 112%, rgba(134, 99, 187, 0.44), transparent 60%),
         linear-gradient(200deg, var(--petroleo-800) 0%, var(--petroleo-900) 100%);
       padding: 92px 28px; text-align: center;
     }
     .chamada h2 { color: #fff; font-size: 1.9rem; margin: 0 0 10px; }
     .chamada p { color: #fff; opacity: 0.85; margin: 0 0 28px; }
-    .botao-claro { background: #fff !important; color: var(--verde-900) !important; }
+    .botao-claro { background: var(--lilas-300) !important; color: var(--fundo-900) !important; }
 
     /* rodapé */
     .rodape {

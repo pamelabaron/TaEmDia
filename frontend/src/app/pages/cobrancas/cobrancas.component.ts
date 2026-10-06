@@ -73,9 +73,9 @@ const ROTULO_TIPO: Record<string, string> = {
     .direita { display: flex; align-items: center; gap: 8px; }
     .etiqueta { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: var(--borda); color: var(--texto); }
     .tipo-atraso { background: var(--perigo-bg); color: var(--perigo); }
-    .tipo-lembrete { background: var(--info-bg); color: var(--verde-800); }
+    .tipo-lembrete { background: var(--info-bg); color: var(--lilas-300); }
     .tipo-vencimento { background: var(--alerta-bg); color: var(--alerta); }
-    .tipo-manual { background: var(--verde-50); color: var(--verde-700); }
+    .tipo-manual { background: rgba(201, 169, 255, 0.10); color: var(--lilas-300); }
     .tipo-resumo { background: var(--sucesso-bg); color: var(--sucesso); }
     .status { font-size: 0.75rem; color: var(--sucesso); }
     .status.falhou { color: var(--alerta); }

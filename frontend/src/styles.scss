@@ -1,24 +1,34 @@
 // ============================================================================
-// Tema do TáEmDia. Verde e branco.
-// Uma paleta própria (o Angular Material não traz um verde adequado pronto).
+// Tema do TáEmDia. Ameixa escuro.
+//
+// Escuro em toda parte: a página de entrada, o login e o sistema. Quem cobra
+// abre isto várias vezes por dia, muitas delas à noite, e um fundo claro em
+// tela cheia é a parte que mais cansa.
+//
+// As cores de estado continuam significando o mesmo (verde pago, laranja
+// atraso, vermelho inadimplente, cinza pendente). Só o brilho mudou, para que
+// continuem se distinguindo de relance sobre o escuro.
 // ============================================================================
 @use '@angular/material' as mat;
 @use 'sass:map';
 
 @include mat.core();
 
-// --------------------------------------------------------------- paleta verde
-$taemdia-verde: (
-  50:  #e9f6ef,
-  100: #c8e9d7,
-  200: #a3dbbc,
-  300: #7ccda0,
-  400: #5cc18b,
-  500: #3cb676,
-  600: #34a76a,
-  700: #29945b,
-  800: #1f824d,
-  900: #0f6234,
+// -------------------------------------------------------------- paleta ameixa
+// O Angular Material não traz um roxo adequado pronto: os roxos de prateleira
+// puxam para o violeta elétrico, que cansa a vista numa tela cheia de números.
+// Esta escala é uma ameixa dessaturada, com um resto de vermelho no tom.
+$taemdia-ameixa: (
+  50:  #f3eefa,
+  100: #e0d4ef,
+  200: #c9b5e2,
+  300: #b095d4,
+  400: #9b7cc8,
+  500: #8663bb,
+  600: #74529f,
+  700: #5d4080,
+  800: #3f2a59,
+  900: #271a38,
   contrast: (
     50: rgba(0, 0, 0, 0.87), 100: rgba(0, 0, 0, 0.87), 200: rgba(0, 0, 0, 0.87),
     300: rgba(0, 0, 0, 0.87), 400: rgba(0, 0, 0, 0.87), 500: #ffffff,
@@ -26,16 +36,18 @@ $taemdia-verde: (
   ),
 );
 
-$primaria: mat.define-palette($taemdia-verde, 800, 400, 900);
-$destaque: mat.define-palette($taemdia-verde, 500, 300, 700);
-$aviso:    mat.define-palette(mat.$red-palette, 700);
+$primaria: mat.define-palette($taemdia-ameixa, 600, 300, 800);
+$destaque: mat.define-palette($taemdia-ameixa, 300, 100, 500);
+$aviso:    mat.define-palette(mat.$red-palette, 300);
 
 // Hanken Grotesk no corpo: humanista, com mais caráter que as grotescas que
 // aparecem em toda interface gerada, e desenhada para tamanho pequeno.
 // Os títulos usam Outfit (definida mais abaixo).
 $fonte-corpo: '"Hanken Grotesk", "Segoe UI", Roboto, sans-serif';
 
-$tema: mat.define-light-theme((
+// Tema escuro: o Material precisa saber, senão ele pinta menu, campo e diálogo
+// com texto escuro sobre o nosso fundo escuro, e nada se lê.
+$tema: mat.define-dark-theme((
   color: (primary: $primaria, accent: $destaque, warn: $aviso),
   typography: mat.define-typography-config($font-family: $fonte-corpo),
   density: 0,
@@ -45,69 +57,101 @@ $tema: mat.define-light-theme((
 
 // ------------------------------------------------- variáveis usadas nas telas
 :root {
-  // Marca
-  --verde-900: #0f6234;
-  --verde-800: #1f824d;
-  --verde-700: #29945b;
-  --verde-600: #34a76a;
-  --verde-500: #3cb676;
-  --verde-100: #c8e9d7;
-  --verde-50:  #e9f6ef;
+  // --- Marca: ameixa ---------------------------------------------------------
+  --ameixa-900: #271a38;
+  --ameixa-800: #3f2a59;
+  --ameixa-700: #5d4080;
+  --ameixa-600: #74529f;
+  --ameixa-500: #8663bb;
+  --ameixa-400: #9b7cc8;
+  --ameixa-100: #e0d4ef;
+  --ameixa-50:  #f3eefa;
+
+  // --- Fundos: o escuro onde tudo acontece -----------------------------------
+  // Não é preto. Preto puro com conteúdo colorido em cima vibra e cansa; o
+  // fundo leva um resto de ameixa, e é ele que faz a tela parecer de uma peça.
+  --fundo-900: #0f0b14;
+  --fundo-800: #140f1a;
+  --fundo-700: #1e1726;
 
   // Superfícies e texto
-  --fundo:        #f6faf7;
-  --superficie:   #ffffff;
-  --borda:        #e3ebe6;
-  --texto:        #1c2b23;
-  --texto-suave:  #5f7369;
-  --texto-fraco:  #8ba095;
+  --fundo:        #140f1a;
+  --superficie:   #1e1726;
+  --superficie-2: #271e31;
+  --borda:        #332a40;
+  --texto:        #ece7f2;
+  --texto-suave:  #b9adc9;
+  --texto-fraco:  #9b8fae;
 
-  // Cores com significado (mantidas para leitura rápida do status)
-  --sucesso:      #1f824d;
-  --sucesso-bg:   #e9f6ef;
-  --alerta:       #b26a00;
-  --alerta-bg:    #fff5e5;
-  --perigo:       #c0392b;
-  --perigo-bg:    #fdecea;
-  --info:         #29945b;
-  --info-bg:      #eef7f2;
-
-  // Neutro: para o que ainda nao aconteceu (ex.: parcela pendente).
-  // Fica proposital fora da familia verde, para nao se confundir com "pago".
-  --neutro:       #546b60;
-  --neutro-bg:    #eef1ef;
-
-  // --- Acento e profundidade da marca ---------------------------------------
-  // Verde sozinho não tem contra o que brilhar. O lima é adjacente e muito mais
-  // claro: contra o verde escuro ele acende, e é o que tira a paleta do
-  // monocromático. O petróleo é o fundo profundo onde esse brilho aparece.
+  // --- Cores com significado -------------------------------------------------
+  // Os significados não mudaram com o tema: verde é pago, laranja é atraso,
+  // vermelho é inadimplente, cinza é o que ainda não aconteceu. O que mudou
+  // foi o brilho: os tons do tema claro ficavam escuros demais sobre o fundo
+  // escuro e os estados deixavam de se distinguir de relance.
   //
-  // IMPORTANTE: o lima NUNCA entra no sistema de status (verde=pago,
-  // laranja=atraso, vermelho=inadimplente, cinza=pendente). É cor de marca, não
-  // de dado. Usá-lo num estado quebraria a leitura rápida do painel.
+  // Conferidos um a um contra o fundo e contra o cartão: todos acima de 6:1.
+  --sucesso:      #4fd98c;
+  --sucesso-bg:   rgba(79, 217, 140, 0.14);
+  --alerta:       #f5a94a;
+  --alerta-bg:    rgba(245, 169, 74, 0.14);
+  --perigo:       #ff7a85;
+  --perigo-bg:    rgba(255, 122, 133, 0.14);
+  --info:         #c9a9ff;
+  --info-bg:      rgba(201, 169, 255, 0.14);
+
+  // Neutro: para o que ainda não aconteceu (ex.: parcela pendente).
+  // Fica proposital fora da família verde, para não se confundir com "pago".
+  --neutro:       #a79bb8;
+  --neutro-bg:    rgba(167, 155, 184, 0.12);
+
+  // --- Acento: o lilás que acende --------------------------------------------
+  // A ameixa sozinha não tem contra o que brilhar. O lilás é a mesma família,
+  // muito mais claro: contra o fundo escuro ele acende, e é o que tira a
+  // paleta do monocromático.
   //
-  // Contraste: lima sobre branco reprova em texto. Só sobre superfície escura,
-  // ou como elemento gráfico (traço, brilho, borda), nunca como texto no claro.
-  --lima-300: #d7f98a;
-  --lima-400: #c3f25e;
-  --lima-500: #a8e34a;
-  --lima-600: #8bc734;
+  // IMPORTANTE: o lilás NUNCA entra no sistema de status (verde=pago,
+  // laranja=atraso, vermelho=inadimplente, cinza=pendente). É cor de marca,
+  // não de dado. Usá-lo num estado quebraria a leitura rápida do painel.
+  --lilas-300: #ddc7ff;
+  --lilas-400: #c9a9ff;
+  --lilas-500: #b184ff;
+  --lilas-600: #9560e8;
 
-  --petroleo-900: #04231f;
-  --petroleo-800: #06302b;
-  --petroleo-700: #0a4239;
+  // --- Nomes antigos ---------------------------------------------------------
+  // O sistema nasceu verde. Ao virar ameixa, estes nomes passaram a apontar
+  // para a cor nova, em vez de serem trocados em 35 arquivos de uma vez: assim
+  // nenhuma tela ficou para trás com um verde solto no meio do roxo.
+  // São apelidos, não cores próprias. Em tela nova, use os nomes de cima.
+  --verde-900: var(--ameixa-900);
+  --verde-800: var(--ameixa-800);
+  --verde-700: var(--ameixa-700);
+  --verde-600: var(--ameixa-600);
+  --verde-500: var(--ameixa-500);
+  --verde-100: var(--ameixa-100);
+  --verde-50:  var(--ameixa-50);
+  --lima-300:  var(--lilas-300);
+  --lima-400:  var(--lilas-400);
+  --lima-500:  var(--lilas-500);
+  --lima-600:  var(--lilas-600);
+  --petroleo-900: var(--fundo-900);
+  --petroleo-800: var(--fundo-800);
+  --petroleo-700: var(--fundo-700);
 
-  // --- Profundidade ---------------------------------------------------------
-  // Uma escala, não uma sombra só. Toda sombra tem deslocamento E desfoque:
-  // halo sem deslocamento é adesivo, não profundidade. O tom vem do verde da
-  // marca. Sombra preta genérica é a marca de design apressado.
-  --elev-1: 0 1px 2px rgba(15, 98, 52, 0.06),
-            0 2px 6px rgba(15, 98, 52, 0.05);
-  --elev-2: 0 2px 4px rgba(15, 98, 52, 0.07),
-            0 8px 20px -6px rgba(15, 98, 52, 0.12);
-  --elev-3: 0 4px 8px rgba(15, 98, 52, 0.08),
-            0 18px 40px -12px rgba(15, 98, 52, 0.20);
+  // --- Profundidade ----------------------------------------------------------
+  // No escuro, sombra preta não aparece: o fundo já é escuro. A profundidade
+  // vem de duas coisas ao mesmo tempo: a sombra, que afunda o que está atrás,
+  // e uma linha clara na aresta de cima, que é a luz batendo na superfície.
+  // Só sombra, no escuro, não lê como elevação.
+  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.44),
+            0 2px 6px rgba(0, 0, 0, 0.30);
+  --elev-2: 0 2px 4px rgba(0, 0, 0, 0.46),
+            0 10px 24px -8px rgba(0, 0, 0, 0.52);
+  --elev-3: 0 4px 10px rgba(0, 0, 0, 0.48),
+            0 22px 48px -14px rgba(0, 0, 0, 0.62);
   --sombra: var(--elev-1); // nome antigo, mantido para não quebrar telas
+
+  // A luz na aresta de cima, usada junto das sombras acima.
+  --luz-aresta: inset 0 1px 0 rgba(255, 255, 255, 0.07);
 
   --raio: 12px;
   --raio-interno: 8px; // elementos dentro de cartões: raio menor que o container
@@ -132,19 +176,19 @@ input, textarea {
 // Firefox
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(31, 130, 77, 0.35) transparent;
+  scrollbar-color: rgba(177, 132, 255, 0.38) transparent;
 }
 
 // WebKit / Blink
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(31, 130, 77, 0.28);
+  background: rgba(177, 132, 255, 0.30);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(31, 130, 77, 0.45); background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(177, 132, 255, 0.52); background-clip: content-box; }
 
 html, body { height: 100%; }
 html { scroll-behavior: smooth; }
@@ -191,17 +235,19 @@ table td, table th, .valor-atraso, .percentual, input[type="number"] {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)' opacity='0.06'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)' opacity='0.10'/%3E%3C/svg%3E");
 }
 
 body {
   // Luz de verdade nos cantos. A versão anterior ficava em 7% de opacidade e
   // simplesmente não era vista. Degradê que ninguém percebe não está lá.
   background-color: var(--fundo);
+  // No escuro a luz precisa de menos opacidade e mais alcance: o mesmo valor
+  // do tema claro virava uma mancha roxa chapada em cima do fundo.
   background-image:
-    radial-gradient(58rem 40rem at 10% -12%, rgba(168, 227, 74, 0.30), transparent 58%),
-    radial-gradient(52rem 38rem at 100% 2%, rgba(60, 182, 118, 0.24), transparent 56%),
-    radial-gradient(46rem 34rem at 50% 108%, rgba(31, 130, 77, 0.16), transparent 60%);
+    radial-gradient(64rem 44rem at 8% -14%, rgba(177, 132, 255, 0.20), transparent 60%),
+    radial-gradient(56rem 40rem at 102% 0%, rgba(116, 82, 159, 0.22), transparent 58%),
+    radial-gradient(50rem 36rem at 50% 110%, rgba(93, 64, 128, 0.18), transparent 62%);
   background-attachment: fixed;
 }
 
@@ -214,31 +260,34 @@ body {
 .mat-mdc-card {
   position: relative;
   border-radius: var(--raio) !important;
+  color: var(--texto) !important;
   // Borda clara em cima, mais fechada embaixo: a luz vem de cima, então a
   // aresta superior brilha e a inferior recolhe. Borda de cor única em volta
   // é desenho plano.
-  border: 1px solid rgba(31, 130, 77, 0.14);
-  border-top-color: rgba(255, 255, 255, 0.9);
-  // Vidro: o fundo com as luzes verdes atravessa o cartão em vez de ser tapado
-  // por um branco chapado. É isto que faz a superfície ter material.
-  background-color: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid rgba(201, 169, 255, 0.11);
+  border-top-color: rgba(255, 255, 255, 0.10);
+  // Vidro: a luz roxa do fundo atravessa o cartão em vez de ser tapada por um
+  // retângulo chapado. É isto que faz a superfície ter material. No escuro o
+  // vidro é mais fechado que no claro: translúcido demais e o texto perde o
+  // contraste contra o que passa por trás.
+  background-color: rgba(30, 23, 38, 0.82) !important;
   background-image: linear-gradient(
     158deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.72) 42%,
-    rgba(233, 246, 239, 0.62) 100%
+    rgba(45, 35, 57, 0.92) 0%,
+    rgba(30, 23, 38, 0.86) 46%,
+    rgba(23, 17, 30, 0.88) 100%
   ) !important;
-  backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(140%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    var(--luz-aresta),
     var(--elev-2) !important;
   transition: box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1),
               transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-// Sem backdrop-filter o vidro vira um cartão lavado: devolve o branco cheio.
+// Sem backdrop-filter o vidro vira um cartão lavado: devolve a superfície cheia.
 @supports not (backdrop-filter: blur(1px)) {
-  .mat-mdc-card { background-color: #ffffff !important; }
+  .mat-mdc-card { background-color: var(--superficie) !important; }
 }
 
 // Cartão que leva a algum lugar sobe ao passar o mouse. Só onde há mouse:
@@ -247,8 +296,8 @@ body {
   .mat-mdc-card.clicavel:hover,
   .mat-mdc-card:has(.clicavel:hover) {
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      var(--elev-2) !important;
+      inset 0 1px 0 rgba(255, 255, 255, 0.11),
+      var(--elev-3) !important;
   }
 }
 
@@ -260,22 +309,22 @@ body {
   top: 0;
   z-index: 10;
   background-image:
-    radial-gradient(34rem 16rem at 4% 120%, rgba(168, 227, 74, 0.38), transparent 66%),
-    radial-gradient(40rem 18rem at 72% -30%, rgba(60, 182, 118, 0.40), transparent 64%),
-    linear-gradient(100deg, var(--petroleo-800) 0%, var(--verde-700) 100%);
+    radial-gradient(34rem 16rem at 4% 120%, rgba(201, 169, 255, 0.26), transparent 66%),
+    radial-gradient(40rem 18rem at 72% -30%, rgba(134, 99, 187, 0.30), transparent 64%),
+    linear-gradient(100deg, var(--fundo-900) 0%, var(--ameixa-800) 100%);
   box-shadow:
-    inset 0 -1px 0 rgba(168, 227, 74, 0.28),
-    0 1px 0 rgba(15, 98, 52, 0.25),
-    0 6px 24px -12px rgba(15, 98, 52, 0.45);
+    inset 0 -1px 0 rgba(201, 169, 255, 0.22),
+    0 1px 0 rgba(0, 0, 0, 0.40),
+    0 6px 24px -12px rgba(0, 0, 0, 0.60);
 }
 
 @supports (backdrop-filter: blur(1px)) {
   .mat-toolbar.mat-primary {
-    background-color: rgba(10, 66, 57, 0.80);
+    background-color: rgba(20, 15, 26, 0.82);
     background-image:
-      radial-gradient(34rem 16rem at 4% 120%, rgba(168, 227, 74, 0.42), transparent 66%),
-      radial-gradient(40rem 18rem at 72% -30%, rgba(60, 182, 118, 0.45), transparent 64%),
-      linear-gradient(100deg, rgba(6, 48, 43, 0.94) 0%, rgba(31, 130, 77, 0.90) 100%);
+      radial-gradient(34rem 16rem at 4% 120%, rgba(201, 169, 255, 0.30), transparent 66%),
+      radial-gradient(40rem 18rem at 72% -30%, rgba(134, 99, 187, 0.34), transparent 64%),
+      linear-gradient(100deg, rgba(15, 11, 20, 0.94) 0%, rgba(63, 42, 89, 0.90) 100%);
     backdrop-filter: blur(18px) saturate(165%);
   }
 }
@@ -292,16 +341,20 @@ body {
               filter 200ms ease;
 }
 
-// O botão principal é a única superfície verde cheia da tela: ganha o degradê
-// e a luz na borda de cima, como os cartões. Sem isso ele é um retângulo
-// chapado ao lado de superfícies que têm espessura.
+// O botão principal é a única superfície de marca cheia da tela: ganha o
+// degradê e a luz na borda de cima, como os cartões. Sem isso ele é um
+// retângulo chapado ao lado de superfícies que têm espessura.
+//
+// No escuro ele clareia em vez de escurecer: um botão mais escuro que o fundo
+// afunda, e quem procura a ação não o acha.
 .mat-mdc-raised-button.mat-primary,
 .mat-mdc-unelevated-button.mat-primary {
-  background-image: linear-gradient(180deg, var(--verde-700) 0%, var(--verde-800) 100%);
+  background-image: linear-gradient(180deg, var(--ameixa-600) 0%, var(--ameixa-800) 100%);
+  color: #ffffff !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 1px 2px rgba(15, 98, 52, 0.24),
-    0 6px 16px -6px rgba(15, 98, 52, 0.45) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 1px 2px rgba(0, 0, 0, 0.40),
+    0 8px 20px -8px rgba(93, 64, 128, 0.70) !important;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -324,8 +377,14 @@ body {
 
 // Campo de texto: o miolo afunda um fio em relação ao cartão. É o inverso da
 // sombra do cartão. Mesma fonte de luz, superfície para dentro.
+// Campos: no escuro o fundo do Material fica quase igual ao da página e o
+// campo some. Um degrau de luz acima da superfície devolve a borda do campo.
 .mat-mdc-form-field .mat-mdc-text-field-wrapper {
   border-radius: var(--raio-interno) !important;
+  background-color: rgba(255, 255, 255, 0.045) !important;
+}
+.mat-mdc-form-field:hover .mat-mdc-text-field-wrapper {
+  background-color: rgba(255, 255, 255, 0.07) !important;
 }
 .mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper {
   background-color: rgba(233, 246, 239, 0.35);
@@ -415,4 +474,156 @@ body {
   .pagina { padding-left: 12px; padding-right: 12px; }
   h2 { font-size: 1.35rem; }
   h3 { font-size: 1rem; }
+}
+
+// ============================================================================
+// Menu da pessoa (barra lateral e celular).
+//
+// O Material desenha o menu fora do componente, numa camada por cima da
+// página, então o estilo dele precisa morar aqui: regra escrita dentro do
+// componente não alcança esse conteúdo.
+// ============================================================================
+.mat-mdc-menu-panel {
+  min-width: 232px !important;
+  border-radius: var(--raio) !important;
+  border: 1px solid var(--borda);
+  background: var(--superficie-2) !important;
+  box-shadow: var(--luz-aresta), var(--elev-3) !important;
+
+  // Quem está logado, no topo do menu. Não é item clicável: é identificação.
+  .cabecalho-menu {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 12px 16px 10px;
+    border-bottom: 1px solid var(--borda);
+    cursor: default;
+
+    .nome { font-weight: 600; font-size: 0.92rem; color: var(--texto); }
+    .email {
+      font-size: 0.8rem; color: var(--texto-suave);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      max-width: 220px;
+    }
+  }
+
+  // Título de seção. Maiúsculas pequenas com espacejamento aberto, que é como
+  // se separa grupo sem gastar uma linha inteira de traço.
+  .secao {
+    padding: 12px 16px 4px;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--texto-fraco);
+    cursor: default;
+  }
+
+  .divisor { height: 1px; background: var(--borda); margin: 8px 0 4px; }
+
+  // Sair é saída, não destino: fica separado embaixo e em vermelho.
+  .sair, .sair .mat-icon { color: var(--perigo); }
+}
+
+// ============================================================================
+// Telas de configuração.
+//
+// Cada seção virou uma tela própria (WhatsApp, Cobrança automática, Resumo
+// diário). O desenho das linhas é o mesmo nas três, então mora aqui em vez de
+// ser copiado em cada componente.
+// ============================================================================
+.pagina-config {
+  max-width: 720px; margin: 0 auto; padding: 16px;
+
+  .ajuda { color: var(--texto-suave); margin: 4px 0 18px; }
+  .centro { display: flex; justify-content: center; padding: 32px; }
+  .bloco { padding: 16px 20px; margin-bottom: 16px; }
+
+  // Rótulo à esquerda, controle à direita. É o padrão de tela de ajuste:
+  // a pessoa lê o que a opção faz antes de decidir mexer.
+  .linha {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--borda);
+  }
+  .linha:last-of-type { border-bottom: none; }
+  .texto { display: flex; flex-direction: column; }
+  .rotulo { font-weight: 500; }
+  .descricao { font-size: 0.8rem; color: var(--texto-suave); margin-top: 2px; }
+  .campo-curto { width: 130px; margin-bottom: -1.25em; }
+
+  .nota {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.8rem; color: var(--texto-suave); margin: 12px 0 0;
+  }
+  .acoes { display: flex; justify-content: flex-end; }
+
+  // Em tela estreita o controle desce para baixo do texto, senão os dois
+  // ficam espremidos na mesma linha.
+  @media (max-width: 600px) {
+    .linha { flex-direction: column; align-items: flex-start; }
+    .acoes button { width: 100%; }
+  }
+}
+
+// ============================================================================
+// Superfícies do navegador.
+//
+// A seleção de texto, o cursor que pisca, o anel de foco e os diálogos vêm com
+// a cor padrão do navegador, que não pertence a tema nenhum. No claro passavam
+// despercebidos; no escuro gritam, porque o azul padrão do sistema não tem
+// nada a ver com ameixa.
+// ============================================================================
+
+::selection {
+  background: rgba(177, 132, 255, 0.34);
+  color: var(--texto);
+}
+
+input, textarea, [contenteditable] {
+  caret-color: var(--lilas-400);
+}
+
+// Anel de foco visível para quem navega pelo teclado, na cor da marca. O
+// padrão do navegador é um contorno fino que some sobre fundo escuro.
+:focus-visible {
+  outline: 2px solid var(--lilas-400);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+// Diz ao navegador que o documento é escuro: com isto, os controles que ele
+// desenha sozinho (calendário do campo de data, menu do campo numérico, barra
+// de rolagem nativa) vêm escuros em vez de brancos.
+:root { color-scheme: dark; }
+
+// O calendário e a setinha dos campos nativos saem pretos sobre fundo escuro.
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.65);
+  cursor: pointer;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover { filter: invert(1) opacity(1); }
+
+// Preenchimento automático do navegador: ele força um fundo amarelo claro com
+// texto preto, e o campo fica ilegível no escuro.
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--texto);
+  -webkit-box-shadow: 0 0 0 1000px var(--superficie-2) inset;
+  caret-color: var(--lilas-400);
+}
+
+// Abas: o Material pinta a aba ativa com a cor principal, que no escuro é uma
+// ameixa média e deu 3,1 de contraste sobre o fundo. A aba selecionada é
+// justamente a que precisa se ler. Vai para o lilás, que é a cor de marca
+// clara, e a aba não escolhida fica no texto suave.
+.mat-mdc-tab .mdc-tab__text-label { color: var(--texto-suave) !important; }
+.mat-mdc-tab.mdc-tab--active .mdc-tab__text-label { color: var(--lilas-300) !important; }
+.mat-mdc-tab-group .mdc-tab-indicator__content--underline {
+  border-color: var(--lilas-400) !important;
+}
+
+// Pastilhas e selos pintados com uma cor de estado levam texto escuro: no tema
+// escuro essas cores são claras, e é o que as faz aparecer sobre o fundo.
+// Texto branco sobre elas reprovava em contraste nas quatro.
+.selo, .tag, .pastilha, .chip-estado {
+  &.pago, &.bom, &.sucesso { background: var(--sucesso); color: var(--fundo-900); }
+  &.atraso, &.regular, &.alerta { background: var(--alerta); color: var(--fundo-900); }
+  &.inadimplente, &.perigo { background: var(--perigo); color: var(--fundo-900); }
+  &.pendente, &.neutro, &.sem_historico { background: var(--neutro); color: var(--fundo-900); }
 }
