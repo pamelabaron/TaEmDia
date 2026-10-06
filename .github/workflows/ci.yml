@@ -66,7 +66,7 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v4
 
   frontend:
-    name: Frontend. Build
+    name: Frontend. Testes e build
     runs-on: ubuntu-latest
 
     steps:
@@ -86,3 +86,16 @@ jobs:
       - name: Compilar a aplicação
         working-directory: frontend
         run: npx ng build
+
+      # O navegador já vem instalado no ubuntu-latest. Sem tela, porque no CI
+      # não existe janela para abrir.
+      - name: Rodar os testes com cobertura
+        working-directory: frontend
+        run: npx ng test --watch=false --browsers=ChromeHeadlessCI --code-coverage
+
+      - name: Guardar o relatório de cobertura do frontend
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cobertura-frontend
+          path: frontend/coverage

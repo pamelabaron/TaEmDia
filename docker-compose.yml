@@ -29,7 +29,13 @@ services:
       # Só para os testes conferirem a topologia de produção. Somente leitura.
       - ./docker-compose.prod.yml:/app/docker-compose.prod.yml:ro
       - ./docker/nginx/taemdia.conf:/app/docker/nginx/taemdia.conf:ro
-      - ./frontend/src/app/app.routes.ts:/app/frontend/src/app/app.routes.ts:ro
+      - ./frontend/src/app:/app/frontend/src/app:ro
+      - ./frontend/karma.conf.js:/app/frontend/karma.conf.js:ro
+      # A Wiki é gerada a partir daqui. Os testes conferem a geração.
+      - ./docs:/app/docs:ro
+      - ./scripts:/app/scripts:ro
+      - ./README.md:/app/README.md:ro
+      - ./COMO-RODAR.md:/app/COMO-RODAR.md:ro
       # Comprovantes de assinatura. Fica fora de qualquer pasta pública: os
       # arquivos só saem pelo endpoint autenticado da administradora.
       - uploads-data:/app/uploads
@@ -65,6 +71,23 @@ services:
       WEBHOOK_GLOBAL_URL: "http://backend:8000/whatsapp/webhook?token=${WEBHOOK_TOKEN:-}"
     volumes:
       - evolution-data:/evolution/instances
+
+  # Testes do frontend. Não sobe junto com o sistema: roda sob demanda com
+  #   docker compose --profile testes run --rm frontend-testes
+  frontend-testes:
+    profiles: ["testes"]
+    build:
+      context: .
+      dockerfile: docker/frontend-testes.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    # Só instala quando falta. Rodar "npm ci" toda vez apagaria as
+    # dependências que o container do site está usando para servir o
+    # localhost:4200, e derrubaria o desenvolvimento no meio.
+    command: >
+      sh -c "[ -d node_modules/@angular/cli ] || npm install --no-audit --no-fund;
+             npx ng test --watch=false --browsers=ChromeHeadlessCI --code-coverage"
 
 volumes:
   postgres-data:
