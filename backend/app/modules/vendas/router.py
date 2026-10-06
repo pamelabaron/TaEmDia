@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.modules.assinatura.deps import exigir_assinatura_ativa
 from app.modules.auth.deps import get_current_vendedor_id
 from app.modules.clientes.repository import ClienteRepository
 from app.modules.vendas.repository import ParcelaRepository, VendaRepository
@@ -30,7 +31,7 @@ def get_service(db: Session = Depends(get_db)) -> VendasService:
 def registrar_venda(
     dados: VendaCreate,
     service: VendasService = Depends(get_service),
-    vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
+    vendedor_id: uuid.UUID = Depends(exigir_assinatura_ativa),
 ):
     try:
         venda = service.registrar_venda(
@@ -58,7 +59,7 @@ def obter_venda(
 def confirmar_pagamento(
     parcela_id: uuid.UUID,
     service: VendasService = Depends(get_service),
-    vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
+    vendedor_id: uuid.UUID = Depends(exigir_assinatura_ativa),
 ):
     try:
         parcela = service.confirmar_pagamento(vendedor_id, parcela_id)
@@ -80,7 +81,7 @@ def confirmar_pagamento(
 def cancelar_venda(
     venda_id: uuid.UUID,
     service: VendasService = Depends(get_service),
-    vendedor_id: uuid.UUID = Depends(get_current_vendedor_id),
+    vendedor_id: uuid.UUID = Depends(exigir_assinatura_ativa),
 ):
     try:
         venda = service.cancelar_venda(vendedor_id, venda_id)

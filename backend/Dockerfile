@@ -2,9 +2,10 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Dependências do sistema (para psycopg / build)
+# Dependências do sistema (psycopg para o banco; pango para gerar PDF)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential libpq-dev \
+    libpango-1.0-0 libpangoft2-1.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

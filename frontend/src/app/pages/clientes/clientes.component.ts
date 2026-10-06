@@ -10,6 +10,10 @@ import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Cliente, ClientesService } from '../../core/clientes.service';
+import { bloqueadoPorAssinatura } from '../../core/erros';
+import {
+  CODIGO_PAIS_PADRAO, conferirCpf, conferirTelefone, formatarTelefone,
+} from '../../core/regras-cliente';
 
 @Component({
   selector: 'app-clientes',
@@ -33,19 +37,37 @@ import { Cliente, ClientesService } from '../../core/clientes.service';
           <mat-card-content>
             <mat-form-field appearance="outline" class="campo">
               <mat-label>Nome completo</mat-label>
-              <input matInput [(ngModel)]="novo.nome" name="nome" />
+              <input matInput [(ngModel)]="novo.nome" name="nome" maxlength="120" />
             </mat-form-field>
-            <mat-form-field appearance="outline" class="campo">
-              <mat-label>WhatsApp (só números, com DDD)</mat-label>
-              <input matInput [(ngModel)]="novo.whatsapp_numero" name="whatsapp" placeholder="5547999990000" />
-            </mat-form-field>
+            <div class="linha-telefone">
+              <mat-form-field appearance="outline" class="campo-pais">
+                <mat-label>País</mat-label>
+                <span matTextPrefix>+&nbsp;</span>
+                <input matInput [(ngModel)]="novo.codigo_pais" name="codigoPais"
+                       inputmode="numeric" maxlength="3" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="campo-numero">
+                <mat-label>WhatsApp com DDD</mat-label>
+                <input matInput [(ngModel)]="novo.whatsapp_numero" name="whatsapp"
+                       inputmode="tel" maxlength="16" placeholder="(47) 99999-0000" />
+                @if (erroTelefone(); as erro) {
+                  <mat-error>{{ erro }}</mat-error>
+                } @else {
+                  <mat-hint>{{ previaDoTelefone() }}</mat-hint>
+                }
+              </mat-form-field>
+            </div>
             <mat-form-field appearance="outline" class="campo">
               <mat-label>CPF (opcional)</mat-label>
-              <input matInput [(ngModel)]="novo.cpf" name="cpf" />
+              <input matInput [(ngModel)]="novo.cpf" name="cpf"
+                     inputmode="numeric" maxlength="14" placeholder="000.000.000-00" />
+              @if (erroCpf(); as erro) {
+                <mat-error>{{ erro }}</mat-error>
+              }
             </mat-form-field>
             <mat-form-field appearance="outline" class="campo">
               <mat-label>Endereço (opcional)</mat-label>
-              <input matInput [(ngModel)]="novo.endereco" name="endereco" />
+              <input matInput [(ngModel)]="novo.endereco" name="endereco" maxlength="200" />
             </mat-form-field>
             <button mat-raised-button color="primary" [disabled]="salvando()" (click)="salvar()">
               Salvar cliente
@@ -57,7 +79,7 @@ import { Cliente, ClientesService } from '../../core/clientes.service';
       <mat-form-field appearance="outline" class="busca">
         <mat-icon matPrefix>search</mat-icon>
         <mat-label>Buscar por nome ou WhatsApp</mat-label>
-        <input matInput [(ngModel)]="termo" name="busca" />
+        <input matInput [(ngModel)]="termo" name="busca" maxlength="60" />
       </mat-form-field>
 
       @if (carregando()) {
@@ -71,7 +93,7 @@ import { Cliente, ClientesService } from '../../core/clientes.service';
               <mat-list-item class="clicavel" (click)="abrirPerfil(c.id)">
                 <mat-icon matListItemIcon>person</mat-icon>
                 <div matListItemTitle>{{ c.nome }}</div>
-                <div matListItemLine>{{ c.whatsapp_numero }}</div>
+                <div matListItemLine>{{ c.whatsapp_formatado }}</div>
                 <mat-icon matListItemMeta>chevron_right</mat-icon>
               </mat-list-item>
             }
@@ -86,11 +108,16 @@ import { Cliente, ClientesService } from '../../core/clientes.service';
     .cabecalho h2 { margin: 0; }
     .form-card { margin-bottom: 16px; }
     .campo, .busca { width: 100%; }
+    /* O código do país fica estreito e sempre na frente do número: é o que
+       a pessoa quase nunca muda, mas precisa enxergar. */
+    .linha-telefone { display: flex; gap: 10px; align-items: flex-start; }
+    .campo-pais { width: 96px; flex: 0 0 96px; }
+    .campo-numero { flex: 1; min-width: 0; }
     .busca { margin-bottom: 8px; }
     .centro { display: flex; justify-content: center; padding: 32px; }
-    .vazio { text-align: center; color: #888; padding: 24px; }
+    .vazio { text-align: center; color: var(--texto-fraco); padding: 24px; }
     .clicavel { cursor: pointer; }
-    .clicavel:hover { background: #f5f5f5; }
+
   `],
 })
 export class ClientesComponent implements OnInit {
@@ -103,14 +130,23 @@ export class ClientesComponent implements OnInit {
   readonly salvando = signal<boolean>(false);
   readonly mostrarForm = signal<boolean>(false);
   termo = '';
-  novo = { nome: '', whatsapp_numero: '', cpf: '', endereco: '' };
+  novo = {
+    nome: '',
+    codigo_pais: CODIGO_PAIS_PADRAO,
+    whatsapp_numero: '',
+    cpf: '',
+    endereco: '',
+  };
 
   // Lista filtrada em tempo real por nome ou WhatsApp.
   readonly filtrados = computed(() => {
     const t = this.termo.trim().toLowerCase();
     if (!t) return this.clientes();
     return this.clientes().filter(
-      (c) => c.nome.toLowerCase().includes(t) || c.whatsapp_numero.includes(t),
+      (c) =>
+        c.nome.toLowerCase().includes(t)
+        || c.whatsapp_numero.includes(t)
+        || c.whatsapp_formatado.includes(t),
     );
   });
 
@@ -134,27 +170,67 @@ export class ClientesComponent implements OnInit {
     this.router.navigate(['/clientes', clienteId]);
   }
 
+  /** O erro do telefone, ou vazio. Só fala depois que a pessoa digitou algo:
+   *  reclamar de campo em branco enquanto ela ainda escreve é ruído. */
+  erroTelefone(): string {
+    if (!this.novo.whatsapp_numero.trim()) return '';
+    const r = conferirTelefone(this.novo.whatsapp_numero, this.novo.codigo_pais);
+    return r.ok ? '' : r.erro;
+  }
+
+  /** Mostra como o número vai ficar guardado, enquanto a pessoa digita. */
+  previaDoTelefone(): string {
+    if (!this.novo.whatsapp_numero.trim()) return 'Exemplo: 47 99999-0000';
+    const r = conferirTelefone(this.novo.whatsapp_numero, this.novo.codigo_pais);
+    return r.ok ? `Será salvo como ${formatarTelefone(r.valor)}` : '';
+  }
+
+  erroCpf(): string {
+    if (!this.novo.cpf.trim()) return '';
+    const r = conferirCpf(this.novo.cpf);
+    return r.ok ? '' : r.erro;
+  }
+
   salvar(): void {
-    if (!this.novo.nome.trim() || !this.novo.whatsapp_numero.trim()) {
-      this.snack.open('Preencha nome e WhatsApp.', 'OK', { duration: 3000 });
+    if (!this.novo.nome.trim()) {
+      this.snack.open('Preencha o nome.', 'OK', { duration: 3000 });
       return;
     }
+
+    // A API confere de novo. Aqui é só para a pessoa não esperar a viagem
+    // até o servidor para descobrir que faltou um dígito.
+    const telefone = conferirTelefone(this.novo.whatsapp_numero, this.novo.codigo_pais);
+    if (!telefone.ok) {
+      this.snack.open(telefone.erro, 'OK', { duration: 4000 });
+      return;
+    }
+    const cpf = conferirCpf(this.novo.cpf);
+    if (!cpf.ok) {
+      this.snack.open(cpf.erro, 'OK', { duration: 4000 });
+      return;
+    }
+
     this.salvando.set(true);
     this.service.criar({
       nome: this.novo.nome.trim(),
-      whatsapp_numero: this.novo.whatsapp_numero.trim(),
-      cpf: this.novo.cpf.trim() || null,
+      codigo_pais: this.novo.codigo_pais.trim() || CODIGO_PAIS_PADRAO,
+      whatsapp_numero: telefone.valor,
+      cpf: cpf.valor || null,
       endereco: this.novo.endereco.trim() || null,
     }).subscribe({
       next: () => {
-        this.snack.open('Cliente cadastrado!', 'OK', { duration: 3000 });
-        this.novo = { nome: '', whatsapp_numero: '', cpf: '', endereco: '' };
+        this.snack.open('Cliente cadastrado', 'OK', { duration: 3000 });
+        this.novo = {
+          nome: '', codigo_pais: CODIGO_PAIS_PADRAO,
+          whatsapp_numero: '', cpf: '', endereco: '',
+        };
         this.mostrarForm.set(false);
         this.salvando.set(false);
         this.carregar();
       },
       error: (erro) => {
         this.salvando.set(false);
+        if (bloqueadoPorAssinatura(erro)) return;
         const msg = erro.status === 409
           ? 'Já existe um cliente com esse número de WhatsApp.'
           : 'Erro ao cadastrar cliente.';

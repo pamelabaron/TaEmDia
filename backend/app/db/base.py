@@ -7,3 +7,5 @@ from app.modules.vendedores.models import Vendedor, Configuracao  # noqa: F401
 from app.modules.clientes.models import Cliente  # noqa: F401
 from app.modules.vendas.models import Venda, Parcela  # noqa: F401
 from app.modules.templates.models import TemplateMensagem  # noqa: F401
+from app.modules.cobrancas.models import CobrancaLog, RespostaDevedor  # noqa: F401
+from app.modules.assinatura.models import Assinatura, PagamentoAssinatura  # noqa: F401

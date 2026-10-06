@@ -30,4 +30,10 @@ export class DashboardService {
   carregar(): Observable<Dashboard> {
     return this.http.get<Dashboard>(`${API_URL}/relatorios/dashboard`);
   }
+
+  /** Baixa o relatório financeiro do período em PDF. */
+  exportarPdf(desde?: string, ate?: string): Observable<Blob> {
+    const filtro = desde && ate ? `?desde=${desde}&ate=${ate}` : '';
+    return this.http.get(`${API_URL}/relatorios/pdf${filtro}`, { responseType: 'blob' });
+  }
 }

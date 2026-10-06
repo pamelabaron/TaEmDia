@@ -26,12 +26,25 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      # Só para os testes conferirem a topologia de produção. Somente leitura.
+      - ./docker-compose.prod.yml:/app/docker-compose.prod.yml:ro
+      - ./docker/nginx/taemdia.conf:/app/docker/nginx/taemdia.conf:ro
+      - ./frontend/src/app:/app/frontend/src/app:ro
+      - ./frontend/karma.conf.js:/app/frontend/karma.conf.js:ro
+      # A Wiki é gerada a partir daqui. Os testes conferem a geração.
+      - ./docs:/app/docs:ro
+      - ./scripts:/app/scripts:ro
+      - ./README.md:/app/README.md:ro
+      - ./COMO-RODAR.md:/app/COMO-RODAR.md:ro
+      # Comprovantes de assinatura. Fica fora de qualquer pasta pública: os
+      # arquivos só saem pelo endpoint autenticado da administradora.
+      - uploads-data:/app/uploads
     depends_on:
       db:
         condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-  # Interface (frontend Angular) — servidor de desenvolvimento
+  # Interface (frontend Angular). Servidor de desenvolvimento
   frontend:
     image: node:20
     working_dir: /app
@@ -41,5 +54,42 @@ services:
       - ./frontend:/app
     command: npx ng serve --host 0.0.0.0 --poll 2000
 
+  # WhatsApp (Evolution API). Só sobe quando pedido explicitamente:
+  #   docker compose --profile whatsapp up -d
+  # Enquanto não estiver ligada, o sistema roda em "modo simulador".
+  evolution:
+    image: atendai/evolution-api:v2.1.1
+    profiles: ["whatsapp"]
+    ports:
+      - "8080:8080"
+    environment:
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-troque-esta-chave}
+      DATABASE_ENABLED: "false"
+      CACHE_REDIS_ENABLED: "false"
+      CACHE_LOCAL_ENABLED: "true"
+      WEBHOOK_GLOBAL_ENABLED: "true"
+      WEBHOOK_GLOBAL_URL: "http://backend:8000/whatsapp/webhook?token=${WEBHOOK_TOKEN:-}"
+    volumes:
+      - evolution-data:/evolution/instances
+
+  # Testes do frontend. Não sobe junto com o sistema: roda sob demanda com
+  #   docker compose --profile testes run --rm frontend-testes
+  frontend-testes:
+    profiles: ["testes"]
+    build:
+      context: .
+      dockerfile: docker/frontend-testes.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    # Só instala quando falta. Rodar "npm ci" toda vez apagaria as
+    # dependências que o container do site está usando para servir o
+    # localhost:4200, e derrubaria o desenvolvimento no meio.
+    command: >
+      sh -c "[ -d node_modules/@angular/cli ] || npm install --no-audit --no-fund;
+             npx ng test --watch=false --browsers=ChromeHeadlessCI --code-coverage"
+
 volumes:
   postgres-data:
+  evolution-data:
+  uploads-data:
