@@ -10,6 +10,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Configuracao, ConfiguracoesService } from '../../core/configuracoes.service';
 import { bloqueadoPorAssinatura } from '../../core/erros';
+import { EsqueletoComponent } from '../../core/esqueleto.component';
+import { EstadoErroComponent } from '../../core/estado-erro.component';
+import { EstadoVazioComponent } from '../../core/estado-vazio.component';
 
 /** Como e quando o sistema cobra sozinho. */
 @Component({
@@ -18,14 +21,21 @@ import { bloqueadoPorAssinatura } from '../../core/erros';
   imports: [
     FormsModule, MatCardModule, MatButtonModule, MatIconModule, MatFormFieldModule,
     MatInputModule, MatSlideToggleModule, MatProgressSpinnerModule,
+    EsqueletoComponent, EstadoErroComponent, EstadoVazioComponent,
   ],
   template: `
     <div class="pagina-config">
       <h2>Cobrança automática</h2>
       <p class="ajuda">Quando o sistema envia as mensagens sem você precisar lembrar.</p>
 
-      @if (carregando()) {
-        <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
+      @if (erro()) {
+        <app-estado-erro
+          titulo="Não deu para carregar as configurações"
+          texto="Pode ter sido a conexão. O que estava configurado continua
+                 valendo: o sistema segue cobrando como você deixou."
+          (aoTentar)="carregar()" />
+      } @else if (carregando()) {
+        <app-esqueleto quantidade="3" rotulo="Carregando as configurações" />
       } @else {
         @if (config; as c) {
           <mat-card class="bloco">
@@ -83,15 +93,17 @@ export class ConfigCobrancaComponent implements OnInit {
   /** Cópia do que veio do servidor, para o Cancelar ter a que voltar. */
   private original: Configuracao | null = null;
   readonly carregando = signal<boolean>(true);
+  readonly erro = signal<boolean>(false);
   readonly salvando = signal<boolean>(false);
 
-  ngOnInit(): void {
+  ngOnInit(): void { this.carregar(); }
+
+  carregar(): void {
+    this.carregando.set(true);
+    this.erro.set(false);
     this.service.obter().subscribe({
       next: (c) => { this.guardar(c); this.carregando.set(false); },
-      error: () => {
-        this.carregando.set(false);
-        this.aviso.open('Erro ao carregar as configurações.', 'OK', { duration: 4000 });
-      },
+      error: () => { this.carregando.set(false); this.erro.set(true); },
     });
   }
 

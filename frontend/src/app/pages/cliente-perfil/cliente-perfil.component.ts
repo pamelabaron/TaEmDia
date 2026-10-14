@@ -11,6 +11,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { CobrancasService } from '../../core/cobrancas.service';
 import { PerfilCliente, VendasService } from '../../core/vendas.service';
 import { bloqueadoPorAssinatura } from '../../core/erros';
+import { EsqueletoComponent } from '../../core/esqueleto.component';
+import { EstadoErroComponent } from '../../core/estado-erro.component';
+import { EstadoVazioComponent } from '../../core/estado-vazio.component';
 
 @Component({
   selector: 'app-cliente-perfil',
@@ -18,13 +21,20 @@ import { bloqueadoPorAssinatura } from '../../core/erros';
   imports: [
     FormsModule, MatCardModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatIconModule, MatProgressSpinnerModule,
+    EsqueletoComponent, EstadoErroComponent, EstadoVazioComponent,
   ],
   template: `
     <div class="pagina">
       <button mat-button (click)="voltar()"><mat-icon>arrow_back</mat-icon> Voltar</button>
 
-      @if (carregando()) {
-        <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
+      @if (erro()) {
+        <app-estado-erro
+          titulo="Não deu para carregar este cliente"
+          texto="Pode ter sido a conexão. As vendas e os pagamentos dele
+                 continuam registrados."
+          (aoTentar)="carregar()" />
+      } @else if (carregando()) {
+        <app-esqueleto quantidade="4" rotulo="Carregando o cliente" />
       } @else {
         @if (perfil(); as p) {
         <div class="topo">
@@ -71,7 +81,12 @@ import { bloqueadoPorAssinatura } from '../../core/erros';
 
         <h3>Vendas</h3>
         @if (p.vendas.length === 0) {
-          <p class="vazio">Nenhuma venda registrada.</p>
+          <app-estado-vazio
+            titulo="Nenhuma venda para este cliente"
+            texto="Registre a primeira venda e o sistema calcula os vencimentos,
+                   acompanha cada parcela e cobra sozinho na data certa."
+            acao="Registrar venda"
+            (aoAgir)="mostrarForm.set(true)" />
         } @else {
           @for (v of p.vendas; track v.id) {
             <mat-card class="venda-card" [class.cancelada]="v.status === 'cancelada'">
@@ -153,6 +168,7 @@ export class ClientePerfilComponent implements OnInit {
 
   readonly perfil = signal<PerfilCliente | null>(null);
   readonly carregando = signal<boolean>(true);
+  readonly erro = signal<boolean>(false);
   readonly mostrarForm = signal<boolean>(false);
   readonly salvando = signal<boolean>(false);
   private clienteId = '';
@@ -176,11 +192,12 @@ export class ClientePerfilComponent implements OnInit {
     this.carregar();
   }
 
-  private carregar(): void {
+  carregar(): void {
     this.carregando.set(true);
+    this.erro.set(false);
     this.service.perfil(this.clienteId).subscribe({
       next: (p) => { this.perfil.set(p); this.carregando.set(false); },
-      error: () => { this.carregando.set(false); this.snack.open('Erro ao carregar o cliente.', 'OK', { duration: 4000 }); },
+      error: () => { this.carregando.set(false); this.erro.set(true); },
     });
   }
 

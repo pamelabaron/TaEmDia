@@ -17,6 +17,9 @@ import {
   ResumoDoDia,
 } from '../../core/configuracoes.service';
 import { bloqueadoPorAssinatura } from '../../core/erros';
+import { EsqueletoComponent } from '../../core/esqueleto.component';
+import { EstadoErroComponent } from '../../core/estado-erro.component';
+import { EstadoVazioComponent } from '../../core/estado-vazio.component';
 
 // Horários possíveis para o resumo (fim do dia, conforme o RFC).
 const HORARIOS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00'];
@@ -29,14 +32,21 @@ const HORARIOS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00',
     FormsModule, MatCardModule, MatButtonModule, MatButtonToggleModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatSlideToggleModule,
     MatProgressSpinnerModule,
+    EsqueletoComponent, EstadoErroComponent, EstadoVazioComponent,
   ],
   template: `
     <div class="pagina-config">
       <h2>Resumo diário</h2>
       <p class="ajuda">Um retrato do dia: cobranças enviadas, pagamentos e respostas.</p>
 
-      @if (carregando()) {
-        <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
+      @if (erro()) {
+        <app-estado-erro
+          titulo="Não deu para carregar o resumo"
+          texto="Pode ter sido a conexão. As cobranças e os pagamentos do dia
+                 continuam registrados."
+          (aoTentar)="carregar()" />
+      } @else if (carregando()) {
+        <app-esqueleto quantidade="3" rotulo="Carregando o resumo" />
       } @else {
         @if (config; as c) {
           <!-- ================================================= como receber -->
@@ -158,7 +168,11 @@ const HORARIOS = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00',
           } @else {
             @if (resumo(); as r) {
             @if (!r.houve_atividade) {
-              <p class="vazio">Nenhuma atividade neste dia.</p>
+              <app-estado-vazio
+                titulo="Nenhuma atividade neste dia"
+                texto="Aqui aparece o que o sistema fez: quantas cobranças
+                       saíram, quem respondeu e quanto entrou. Escolha outro dia
+                       acima para ver um dia com movimento." />
             } @else {
               <div class="numeros">
                 <div class="numero">
@@ -253,6 +267,7 @@ export class ConfigResumoComponent implements OnInit {
   horario = '20:00';
   readonly horarios = HORARIOS;
   readonly carregando = signal<boolean>(true);
+  readonly erro = signal<boolean>(false);
   readonly salvando = signal<boolean>(false);
 
   readonly dias = signal<string[]>([]);
@@ -299,16 +314,15 @@ export class ConfigResumoComponent implements OnInit {
     return canal === 'email' || canal === 'ambos';
   }
 
-  ngOnInit(): void {
+  ngOnInit(): void { this.carregar(); }
+
+  carregar(): void {
+    this.carregando.set(true);
+    this.erro.set(false);
+
     this.service.obter().subscribe({
-      next: (c) => {
-        this.guardar(c);
-        this.carregando.set(false);
-      },
-      error: () => {
-        this.carregando.set(false);
-        this.aviso.open('Erro ao carregar as configurações.', 'OK', { duration: 4000 });
-      },
+      next: (c) => { this.guardar(c); this.carregando.set(false); },
+      error: () => { this.carregando.set(false); this.erro.set(true); },
     });
 
     // A janela de dias vem do servidor: é ele quem define a regra dos 7 dias,

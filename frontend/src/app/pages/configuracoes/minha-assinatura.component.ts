@@ -9,6 +9,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AssinaturaService, MinhaAssinatura } from '../../core/assinatura.service';
 import { dataHoraLocal } from '../../core/datas';
+import { EsqueletoComponent } from '../../core/esqueleto.component';
+import { EstadoErroComponent } from '../../core/estado-erro.component';
+import { EstadoVazioComponent } from '../../core/estado-vazio.component';
 
 const ROTULOS: Record<string, string> = {
   em_teste: 'Período de teste',
@@ -23,6 +26,7 @@ const ROTULOS: Record<string, string> = {
   imports: [
     FormsModule, MatCardModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatProgressSpinnerModule,
+    EsqueletoComponent, EstadoErroComponent, EstadoVazioComponent,
   ],
   template: `
     <mat-card class="bloco assinatura" id="assinatura">
@@ -33,8 +37,13 @@ const ROTULOS: Record<string, string> = {
         }
       </div>
 
-      @if (carregando()) {
-        <div class="centro"><mat-spinner diameter="32"></mat-spinner></div>
+      @if (erro()) {
+        <app-estado-erro
+          titulo="Não deu para carregar sua assinatura"
+          texto="Pode ter sido a conexão. Seu acesso não muda por causa disto."
+          (aoTentar)="carregar()" />
+      } @else if (carregando()) {
+        <app-esqueleto quantidade="3" rotulo="Carregando sua assinatura" />
       } @else {
         @if (dados(); as a) {
           @if (a.situacao === 'isenta') {
@@ -123,6 +132,12 @@ const ROTULOS: Record<string, string> = {
           }
 
           <!-- Histórico ------------------------------------------------------>
+          @if (a.historico.length === 0) {
+            <app-estado-vazio
+              titulo="Nenhum pagamento enviado ainda"
+              texto="Quando você pagar o Pix e enviar o comprovante, ele fica
+                     registrado aqui com a data e se foi aprovado." />
+          }
           @if (a.historico.length > 0) {
             <div class="historico">
               <span class="rotulo">Envios anteriores</span>
@@ -231,6 +246,7 @@ export class MinhaAssinaturaComponent implements OnInit {
 
   readonly dados = signal<MinhaAssinatura | null>(null);
   readonly carregando = signal<boolean>(true);
+  readonly erro = signal<boolean>(false);
   readonly enviando = signal<boolean>(false);
   readonly arquivo = signal<File | null>(null);
   valor: number | null = null;
@@ -239,15 +255,16 @@ export class MinhaAssinaturaComponent implements OnInit {
     this.carregar();
   }
 
-  private carregar(): void {
+  carregar(): void {
     this.carregando.set(true);
+    this.erro.set(false);
     this.service.carregar().subscribe({
       next: (a) => {
         this.dados.set(a);
         if (this.valor === null) this.valor = a.valor_mensal;
         this.carregando.set(false);
       },
-      error: () => this.carregando.set(false),
+      error: () => { this.carregando.set(false); this.erro.set(true); },
     });
   }
 

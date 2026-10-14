@@ -6,6 +6,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Dashboard, DashboardService } from '../../core/dashboard.service';
+import { EsqueletoComponent } from '../../core/esqueleto.component';
+import { EstadoErroComponent } from '../../core/estado-erro.component';
+import { EstadoVazioComponent } from '../../core/estado-vazio.component';
 
 interface Barra { label: string; valor: number; altura: number; }
 
@@ -14,7 +17,10 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [MatCardModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule],
+  imports: [
+    MatCardModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule,
+    EsqueletoComponent, EstadoErroComponent, EstadoVazioComponent,
+  ],
   template: `
     <div class="pagina">
       <div class="cabecalho">
@@ -24,8 +30,21 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
         </button>
       </div>
 
-      @if (carregando()) {
-        <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
+      @if (erro()) {
+        <app-estado-erro
+          titulo="Não deu para carregar os números"
+          texto="Pode ter sido a conexão. Nenhum pagamento ou parcela se perdeu."
+          (aoTentar)="carregar()" />
+      } @else if (carregando()) {
+        <app-esqueleto tipo="blocos" quantidade="4" rotulo="Calculando seus números" />
+      } @else if (semMovimento()) {
+        <app-estado-vazio
+          titulo="Ainda não há o que somar"
+          texto="Este painel mostra quanto você tem a receber, quanto já entrou
+                 no mês e quanto está em atraso. Os números aparecem quando a
+                 primeira venda for registrada."
+          acao="Ir para os clientes"
+          (aoAgir)="irParaClientes()" />
       } @else {
         @if (dados(); as d) {
         <div class="kpis">
@@ -188,6 +207,7 @@ export class DashboardComponent implements OnInit {
 
   readonly dados = signal<Dashboard | null>(null);
   readonly carregando = signal<boolean>(true);
+  readonly erro = signal<boolean>(false);
   readonly exportando = signal<boolean>(false);
 
   readonly barras = computed<Barra[]>(() => {
@@ -201,11 +221,31 @@ export class DashboardComponent implements OnInit {
     }));
   });
 
-  ngOnInit(): void {
+  ngOnInit(): void { this.carregar(); }
+
+  carregar(): void {
+    this.carregando.set(true);
+    this.erro.set(false);
     this.service.carregar().subscribe({
       next: (d) => { this.dados.set(d); this.carregando.set(false); },
-      error: () => this.carregando.set(false),
+      error: () => { this.carregando.set(false); this.erro.set(true); },
     });
+  }
+
+  /** Conta nova: não há venda, pagamento nem atraso. Zero em tudo não é um
+   *  painel ruim, é um painel que ainda não tem o que mostrar. */
+  readonly semMovimento = computed(() => {
+    const d = this.dados();
+    if (!d) return false;
+    return d.total_a_receber === 0
+      && d.recebido_no_mes === 0
+      && d.em_atraso === 0
+      && d.recebimentos_mensais.length === 0
+      && d.clientes_em_atraso.length === 0;
+  });
+
+  irParaClientes(): void {
+    this.router.navigate(['/clientes']);
   }
 
   exportarPdf(): void {

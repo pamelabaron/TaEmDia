@@ -11,6 +11,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Cliente, ClientesService } from '../../core/clientes.service';
 import { bloqueadoPorAssinatura } from '../../core/erros';
+import { EsqueletoComponent } from '../../core/esqueleto.component';
+import { EstadoErroComponent } from '../../core/estado-erro.component';
+import { EstadoVazioComponent } from '../../core/estado-vazio.component';
 import {
   CODIGO_PAIS_PADRAO, conferirCpf, conferirTelefone, formatarTelefone,
 } from '../../core/regras-cliente';
@@ -21,6 +24,7 @@ import {
   imports: [
     FormsModule, MatCardModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatIconModule, MatListModule, MatProgressSpinnerModule,
+    EsqueletoComponent, EstadoErroComponent, EstadoVazioComponent,
   ],
   template: `
     <div class="pagina">
@@ -82,10 +86,27 @@ import {
         <input matInput [(ngModel)]="termo" name="busca" maxlength="60" />
       </mat-form-field>
 
-      @if (carregando()) {
-        <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
+      @if (erro()) {
+        <app-estado-erro
+          titulo="Não deu para carregar sua carteira"
+          texto="Pode ter sido a conexão. Nenhum cliente seu se perdeu."
+          (aoTentar)="carregar()" />
+      } @else if (carregando()) {
+        <app-esqueleto quantidade="5" rotulo="Carregando seus clientes" />
+      } @else if (clientes().length === 0) {
+        <app-estado-vazio
+          titulo="Sua carteira começa aqui"
+          texto="Cadastre quem compra parcelado e o sistema passa a cuidar dos
+                 vencimentos, das cobranças e do saldo de cada pessoa."
+          acao="Cadastrar cliente"
+          (aoAgir)="abrirFormulario()" />
       } @else if (filtrados().length === 0) {
-        <p class="vazio">Nenhum cliente encontrado.</p>
+        <app-estado-vazio
+          titulo="Nenhum cliente com esse nome"
+          texto="A busca não encontrou ninguém. Confira a escrita, ou limpe o
+                 campo para ver a carteira inteira."
+          acao="Limpar a busca"
+          (aoAgir)="limparBusca()" />
       } @else {
         <mat-card>
           <mat-list>
@@ -129,6 +150,8 @@ export class ClientesComponent implements OnInit {
   readonly carregando = signal<boolean>(true);
   readonly salvando = signal<boolean>(false);
   readonly mostrarForm = signal<boolean>(false);
+  /** Houve falha ao carregar? Guardado para a tela mostrar, não para sumir. */
+  readonly erro = signal<boolean>(false);
   termo = '';
   novo = {
     nome: '',
@@ -154,12 +177,23 @@ export class ClientesComponent implements OnInit {
     this.carregar();
   }
 
-  private carregar(): void {
+  carregar(): void {
     this.carregando.set(true);
+    this.erro.set(false);
     this.service.listar().subscribe({
       next: (lista) => { this.clientes.set(lista); this.carregando.set(false); },
-      error: () => { this.carregando.set(false); this.snack.open('Erro ao carregar clientes.', 'OK', { duration: 4000 }); },
+      // Sem tarja: a falha fica na tela, no lugar da lista, com saída.
+      error: () => { this.carregando.set(false); this.erro.set(true); },
     });
+  }
+
+  /** Abre o formulário a partir da tela vazia, sem a pessoa procurar o botão. */
+  abrirFormulario(): void {
+    this.mostrarForm.set(true);
+  }
+
+  limparBusca(): void {
+    this.termo = '';
   }
 
   alternarFormulario(): void {
