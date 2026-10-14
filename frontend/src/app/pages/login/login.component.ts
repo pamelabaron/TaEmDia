@@ -3,37 +3,31 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../core/auth.service';
 
-interface Recurso { icone: string; titulo: string; texto: string; }
+interface Recurso { titulo: string; texto: string; }
 interface Passo { numero: string; titulo: string; texto: string; }
 
 const RECURSOS: Recurso[] = [
   {
-    icone: 'people',
     titulo: 'Carteira de clientes',
     texto: 'Cadastro completo com histórico de compras, pagamentos e o saldo devedor de cada pessoa sempre à mão.',
   },
   {
-    icone: 'send',
     titulo: 'Cobrança automática',
     texto: 'O sistema envia a mensagem no WhatsApp na data certa: lembrete antes, aviso no vencimento e cobrança no atraso.',
   },
   {
-    icone: 'chat',
     titulo: 'Mensagens do seu jeito',
     texto: 'Modelos personalizáveis que preenchem sozinhos o nome, o valor e a data. Você escreve uma vez e o sistema usa sempre.',
   },
   {
-    icone: 'insights',
     titulo: 'Painel financeiro',
     texto: 'Quanto você tem a receber, quanto já recebeu no mês e quanto está em atraso, tudo em uma tela só.',
   },
   {
-    icone: 'leaderboard',
     titulo: 'Ranking de pagadores',
     texto: 'O sistema classifica quem paga em dia e quem costuma atrasar, com base no histórico real de cada cliente.',
   },
   {
-    icone: 'summarize',
     titulo: 'Resumo diário',
     texto: 'No fim do dia você recebe no WhatsApp um resumo do que foi cobrado, quem pagou e quem respondeu.',
   },
@@ -90,24 +84,24 @@ const PASSOS: Passo[] = [
         <p class="secao-texto">
           Em pesquisa com pequenos empreendedores que vendem parcelado, o retrato foi este:
         </p>
-        <div class="numeros">
+        <dl class="numeros">
           <div class="numero">
-            <strong>100%</strong>
-            <span>vendem parcelado e precisam controlar vencimentos</span>
+            <dt>100%</dt>
+            <dd>vendem parcelado e precisam controlar vencimentos</dd>
           </div>
           <div class="numero">
-            <strong>83%</strong>
-            <span>cobram manualmente, uma mensagem de cada vez</span>
+            <dt>83%</dt>
+            <dd>cobram manualmente, uma mensagem de cada vez</dd>
           </div>
           <div class="numero">
-            <strong>50%</strong>
-            <span>têm dificuldade de cobrar sem parecer insistente</span>
+            <dt>50%</dt>
+            <dd>têm dificuldade de cobrar sem parecer insistente</dd>
           </div>
-        </div>
+        </dl>
       </section>
 
       <section class="faixa">
-        <h2>Como funciona</h2>
+        <h2>Do cadastro à baixa, em quatro passos</h2>
         <p class="secao-texto">Quatro passos, e o sistema assume a parte repetitiva.</p>
         <div class="passos">
           @for (p of passos; track p.numero) {
@@ -121,38 +115,37 @@ const PASSOS: Passo[] = [
       </section>
 
       <section class="faixa claro">
-        <h2>O que o sistema faz</h2>
-        <p class="secao-texto">Tudo o que você precisa para não perder um vencimento.</p>
-        <div class="recursos">
+        <h2>Seis coisas que você deixa de fazer à mão</h2>
+        <p class="secao-texto">Cada uma delas tomava um pedaço do seu dia.</p>
+        <ul class="recursos">
           @for (r of recursos; track r.titulo) {
-            <div class="recurso">
-              <span class="recurso-icone"><mat-icon>{{ r.icone }}</mat-icon></span>
+            <li class="recurso">
               <h3>{{ r.titulo }}</h3>
               <p>{{ r.texto }}</p>
-            </div>
+            </li>
           }
-        </div>
+        </ul>
       </section>
 
       <section class="faixa">
-        <h2>Feito com cuidado</h2>
+        <h2>O que ele nunca faz sem você</h2>
         <div class="garantias">
           <div class="garantia">
-            <mat-icon>verified_user</mat-icon>
+            <mat-icon>fact_check</mat-icon>
             <div>
               <h3>Você decide o que é pago</h3>
               <p>Se o cliente responder "já paguei", a parcela fica aguardando sua conferência. Só você dá baixa.</p>
             </div>
           </div>
           <div class="garantia">
-            <mat-icon>schedule</mat-icon>
+            <mat-icon>do_not_disturb_on</mat-icon>
             <div>
               <h3>Sem incomodar fora de hora</h3>
               <p>As mensagens saem apenas em horário comercial, com limite diário por cliente.</p>
             </div>
           </div>
           <div class="garantia">
-            <mat-icon>lock</mat-icon>
+            <mat-icon>visibility_off</mat-icon>
             <div>
               <h3>Seus dados são só seus</h3>
               <p>Entrada pela conta Google, sem senha guardada, e cada conta enxerga apenas os próprios clientes.</p>
@@ -162,7 +155,7 @@ const PASSOS: Passo[] = [
       </section>
 
       <section class="chamada com-grao">
-        <h2>Comece agora</h2>
+        <h2>Pare de cobrar um por um</h2>
         <p>Leva menos de um minuto para cadastrar o primeiro cliente.</p>
         <button mat-flat-button class="btn-grande botao-claro" (click)="entrar()">
           <mat-icon>login</mat-icon> Continuar com Google
@@ -316,12 +309,15 @@ const PASSOS: Passo[] = [
     .faixa { padding: 72px 28px; max-width: 1060px; margin: 0 auto; text-align: center; }
     /* A faixa clara não pode ser só cinza claro entre duas faixas escuras,
        senão vira o vão entre elas. Ganha luz própria, da mesma família. */
+    /* Sem luz aqui, de propósito. Quando toda seção tem a sua aurora, a luz
+       deixa de ser acontecimento e vira textura de fundo: o olho para de
+       registrar. A página passa a alternar seção acesa e seção calma, e é a
+       alternância que cria o ritmo. Esta é calma. */
     .faixa.claro {
-      position: relative; overflow: hidden;
+      position: relative;
       background-color: var(--fundo-700); max-width: none;
-      background-image:
-        radial-gradient(36rem 24rem at 88% -10%, rgba(201, 169, 255, 0.30), transparent 62%),
-        radial-gradient(30rem 22rem at 4% 108%, rgba(134, 99, 187, 0.22), transparent 60%);
+      border-top: 1px solid rgba(201, 169, 255, 0.08);
+      border-bottom: 1px solid rgba(201, 169, 255, 0.08);
     }
     .faixa.claro > * { max-width: 1060px; margin-left: auto; margin-right: auto; }
     .faixa h2 {
@@ -344,16 +340,33 @@ const PASSOS: Passo[] = [
     }
     .problema h2, .problema .secao-texto { color: #fff; }
     .problema .secao-texto { opacity: 0.85; }
-    .numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; max-width: 900px; margin: 0 auto; }
-    .numero { color: #fff; }
-    .numero strong {
-      display: block;
-      font-size: clamp(2.9rem, 5.4vw, 4.6rem);
-      color: var(--lima-400);
-      line-height: 0.9; letter-spacing: -0.04em; margin-bottom: 14px;
-      text-shadow: 0 0 42px rgba(201, 169, 255, 0.35);
+    /* Três números enormes lado a lado é o painel de métricas que toda página
+       de produto exibe, e some do olho justamente por isso. Aqui são achados
+       de pesquisa, então se leem como achados: um por linha, o número à
+       esquerda na largura de uma coluna, a frase ao lado, filete entre eles.
+       O número perdeu o brilho em volta: luz colorida atrás de texto é
+       enfeite, e aqui ela competia com a própria leitura. */
+    .numeros {
+      max-width: 760px; margin: 0 auto; text-align: left;
     }
-    .numero span { font-size: 0.92rem; opacity: 0.85; line-height: 1.5; display: block; }
+    .numero {
+      display: grid; grid-template-columns: 5.4rem 1fr;
+      gap: 0 28px; align-items: baseline;
+      padding: 22px 0;
+      border-top: 1px solid rgba(201, 169, 255, 0.18);
+    }
+    .numero:last-child { border-bottom: 1px solid rgba(201, 169, 255, 0.18); }
+    .numero dt {
+      font-family: "Outfit", "Hanken Grotesk", sans-serif;
+      font-size: 2.3rem; font-weight: 600;
+      color: var(--lilas-300);
+      line-height: 1; letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+    }
+    .numero dd {
+      margin: 0; font-size: 1rem; line-height: 1.5;
+      color: #fff; opacity: 0.88;
+    }
 
     /* passos
        Quatro cartões iguais lado a lado não dizem que existe uma ordem: dizem
@@ -381,9 +394,13 @@ const PASSOS: Passo[] = [
     .passo-numero {
       display: flex; align-items: center; justify-content: center;
       width: 34px; height: 34px; border-radius: 50%;
-      background-image: linear-gradient(150deg,
-        var(--lima-500) 0%, var(--verde-700) 58%, var(--verde-900) 100%);
-      color: #fff; font-weight: 700; margin-bottom: 16px;
+      /* Chapado, não em degradê: a pastilha colorida com brilho é o enfeite
+         que acompanha toda sequência 1-2-3 por aí. O número precisa marcar
+         posição no trilho, não brilhar. */
+      background: var(--ameixa-700);
+      border: 1px solid rgba(201, 169, 255, 0.34);
+      color: var(--lilas-300); font-weight: 600; margin-bottom: 16px;
+      font-variant-numeric: tabular-nums;
       /* O anel na cor do fundo abre um vão no trilho em volta do número. */
       box-shadow:
         0 0 0 6px var(--fundo),
@@ -394,52 +411,32 @@ const PASSOS: Passo[] = [
     .passo p { font-size: 0.88rem; color: var(--texto-suave); margin: 0; line-height: 1.55;
                max-width: 22em; }
 
-    /* Recursos em duas colunas desencontradas.
-       Três colunas iguais é o arranjo mais previsível que existe; o desencontro
-       cria ritmo e faz o olho percorrer em ziguezague. */
+    /* Recursos como índice, não como cartões.
+       Seis caixas iguais, cada uma com um ícone em cima, um título e um
+       parágrafo, é o arranjo mais repetido da internet e a assinatura mais
+       reconhecível de página gerada por máquina. Sai a moldura, sai o ícone
+       decorativo, e fica o que interessa: a lista do que a pessoa deixa de
+       fazer. O filete em cima de cada item separa sem desenhar uma caixa. */
     .recursos {
       display: grid; grid-template-columns: repeat(2, 1fr);
-      gap: 22px 24px; text-align: left; padding-bottom: 34px;
+      gap: 0 52px; text-align: left; padding-bottom: 34px;
+      list-style: none; margin: 0;
     }
-    /* Desencontro com margem (não transform): funciona em qualquer motor de
-       renderização e não depende de composição de camadas. */
-    .recursos > :nth-child(even) { margin-top: 34px; }
     .recurso {
-      position: relative;
-      /* Vidro: a luz da faixa atravessa o cartão. Branco chapado por cima de um
-         fundo com luz apaga justamente o que se quer mostrar. */
-      background-color: rgba(39, 30, 49, 0.78);
-      background-image: linear-gradient(158deg,
-        rgba(48, 37, 60, 0.88) 0%, rgba(30, 23, 38, 0.76) 100%);
-      backdrop-filter: blur(16px) saturate(150%);
-      border: 1px solid rgba(201, 169, 255, 0.13);
-      border-bottom-color: rgba(93, 64, 128, 0.14);
-      border-radius: var(--raio); padding: 30px 28px;
-      box-shadow: var(--elev-2);
-      transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1),
-                  box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 26px 0 28px;
+      border-top: 1px solid rgba(201, 169, 255, 0.14);
     }
-    @supports not (backdrop-filter: blur(1px)) {
-      .recurso { background-color: var(--superficie-2); }
+    /* O título assume o peso que a moldura carregava. Numa lista sem caixa,
+       quem separa um item do outro é a diferença de tamanho e de cor entre o
+       título e o texto, não uma borda em volta. */
+    .recurso h3 {
+      font-size: 1.16rem; margin: 0 0 8px;
+      letter-spacing: -0.018em; color: var(--texto);
     }
-    @media (hover: hover) and (pointer: fine) {
-      .recurso:hover { transform: translateY(-4px); box-shadow: var(--elev-3); }
+    .recurso p {
+      font-size: 0.93rem; color: var(--texto-suave); margin: 0;
+      line-height: 1.62; max-width: 34em;
     }
-    /* O ícone é o único lugar do cartão onde o lima aparece: um ponto de cor
-       forte por cartão. Espalhar acento em tudo devolve o monocromático, só
-       que noutra cor. */
-    .recurso-icone {
-      display: flex; align-items: center; justify-content: center;
-      width: 50px; height: 50px; border-radius: 14px;
-      background-image: linear-gradient(145deg,
-        var(--lima-400) 0%, var(--verde-500) 55%, var(--verde-700) 100%);
-      color: var(--petroleo-900); margin-bottom: 18px;
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.10),
-        0 6px 14px -4px rgba(134, 99, 187, 0.55);
-    }
-    .recurso h3 { font-size: 1.05rem; margin: 0 0 8px; }
-    .recurso p { font-size: 0.9rem; color: var(--texto-suave); margin: 0; line-height: 1.6; }
 
     /* garantias */
     .garantias { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; text-align: left; }
@@ -450,13 +447,12 @@ const PASSOS: Passo[] = [
 
     /* Chamada final: luzes radiais sobre o verde escuro, em vez do degradê
        linear de 45°, que é a assinatura mais reconhecível de tela gerada por IA. */
+    /* O fecho é o ponto mais escuro da página. Sem brilho atrás: quem tem de
+       acender aqui é o botão, e luz em volta dele tira dele a atenção. */
     .chamada {
-      position: relative; overflow: hidden;
-      background-color: var(--petroleo-900);
-      background-image:
-        radial-gradient(36rem 24rem at 24% -8%, rgba(201, 169, 255, 0.34), transparent 62%),
-        radial-gradient(32rem 24rem at 86% 112%, rgba(134, 99, 187, 0.44), transparent 60%),
-        linear-gradient(200deg, var(--petroleo-800) 0%, var(--petroleo-900) 100%);
+      position: relative;
+      background-color: var(--fundo-900);
+      border-top: 1px solid rgba(201, 169, 255, 0.10);
       padding: 92px 28px; text-align: center;
     }
     .chamada h2 { color: #fff; font-size: 1.9rem; margin: 0 0 10px; }
