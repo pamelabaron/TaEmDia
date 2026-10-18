@@ -171,9 +171,9 @@ const VAZIO: Record<SituacaoComprovante, { icone: string; titulo: string; texto:
     .cabecalho h2 { margin: 0; }
     .ajuda { color: var(--texto-suave); margin-top: 4px; }
     .centro { display: flex; justify-content: center; padding: 32px; }
-    .bloco { padding: 16px; margin-bottom: 16px; }
+    .bloco { padding: 18px; margin-bottom: var(--vao-secao); }
 
-    .abas { margin-bottom: 16px; }
+    .abas { margin-bottom: var(--vao-grupo); }
     /* No celular as três abas precisam caber lado a lado: o Material esconde
        as que sobram atrás de uma seta, e aba escondida é aba que ninguém acha.
        O espaçamento interno padrão (24px de cada lado) é o que não cabia. */

@@ -31,6 +31,7 @@ GUARDAS = {
         ("LISTA", "frontend/src/app/cobertura.spec.ts"),
     ],
     "test_limites_nos_formularios": [("TELAS", "pasta frontend/src/app/pages")],
+    "test_ritmo_do_espaco": [("ESTILOS", "frontend/src/styles.scss")],
 }
 
 

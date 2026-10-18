@@ -108,7 +108,7 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     /* Quatro caixas de peso igual dizem que os quatro números importam igual.
        "Total a receber" é o que a pessoa abre o sistema para ver: ocupa duas
        colunas e é o único cartão escuro da tela. Os outros três recuam. */
-    .kpis { display: grid; gap: 14px; margin-bottom: 18px; }
+    .kpis { display: grid; gap: var(--vao-dentro); margin-bottom: var(--vao-secao); }
 
     /* Celular: um embaixo do outro. */
     .kpis { grid-template-columns: 1fr; }
@@ -183,7 +183,7 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     .kpi.recebido      { --tom: var(--sucesso);   --tom-rgb: 79, 217, 140; }
     .kpi.atraso        { --tom: var(--alerta);    --tom-rgb: 245, 169, 74; }
     .kpi.inadimplentes { --tom: var(--perigo);    --tom-rgb: 255, 122, 133; }
-    .bloco { padding: 16px; margin-bottom: 16px; }
+    .bloco { padding: 18px; margin-bottom: var(--vao-secao); }
     .bloco h3 { margin: 0 0 16px; }
     .grafico { display: flex; align-items: flex-end; gap: 16px; height: 160px; padding-top: 20px; }
     .coluna { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; height: 100%; }

@@ -135,7 +135,7 @@ export class ConfigWhatsappComponent implements OnInit {
       },
       error: (erro) => {
         if (bloqueadoPorAssinatura(erro)) return;
-        this.aviso.open('Erro ao desconectar.', 'OK', { duration: 4000 });
+        this.aviso.open('O número não foi desconectado. Ele continua enviando as cobranças.', 'OK', { duration: 4000 });
       },
     });
   }

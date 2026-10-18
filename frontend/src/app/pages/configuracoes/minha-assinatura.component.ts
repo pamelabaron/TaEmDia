@@ -156,7 +156,7 @@ const ROTULOS: Record<string, string> = {
     </mat-card>
   `,
   styles: [`
-    .bloco { padding: 16px; margin-bottom: 16px; }
+    .bloco { padding: 18px; margin-bottom: var(--vao-secao); }
     .topo { display: flex; align-items: center; justify-content: space-between; gap: 12px;
             flex-wrap: wrap; margin-bottom: 14px; }
     /* Mesmo verde dos demais títulos de bloco das Configurações. */

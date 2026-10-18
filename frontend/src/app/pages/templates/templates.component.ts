@@ -155,7 +155,7 @@ export class TemplatesComponent implements OnInit {
       error: (erro) => {
         this.salvando.set(false);
         if (bloqueadoPorAssinatura(erro)) return;
-        this.snack.open('Erro ao salvar.', 'OK', { duration: 4000 });
+        this.snack.open('Não deu para salvar. O que estava valendo continua valendo.', 'OK', { duration: 4000 });
       },
     });
   }

@@ -31,6 +31,7 @@ services:
       - ./docker/nginx/taemdia.conf:/app/docker/nginx/taemdia.conf:ro
       - ./frontend/src/app:/app/frontend/src/app:ro
       - ./frontend/karma.conf.js:/app/frontend/karma.conf.js:ro
+      - ./frontend/src/styles.scss:/app/frontend/src/styles.scss:ro
       # A Wiki é gerada a partir daqui. Os testes conferem a geração.
       - ./docs:/app/docs:ro
       - ./scripts:/app/scripts:ro

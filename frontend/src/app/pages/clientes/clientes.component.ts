@@ -132,7 +132,7 @@ import {
     .pagina { max-width: 720px; margin: 0 auto; padding: 16px; }
     .cabecalho { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
     .cabecalho h2 { margin: 0; }
-    .form-card { margin-bottom: 16px; }
+    .form-card { margin-bottom: var(--vao-secao); }
     .campo, .busca { width: 100%; }
     /* O código do país fica estreito e sempre na frente do número: é o que
        a pessoa quase nunca muda, mas precisa enxergar. */
@@ -272,7 +272,7 @@ export class ClientesComponent implements OnInit {
         if (bloqueadoPorAssinatura(erro)) return;
         const msg = erro.status === 409
           ? 'Já existe um cliente com esse número de WhatsApp.'
-          : 'Erro ao cadastrar cliente.';
+          : 'O cliente não foi cadastrado. Nada foi gravado pela metade.';
         this.snack.open(msg, 'OK', { duration: 4000 });
       },
     });

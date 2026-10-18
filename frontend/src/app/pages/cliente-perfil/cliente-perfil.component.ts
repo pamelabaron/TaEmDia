@@ -153,7 +153,7 @@ import { EstadoVazioComponent } from '../../core/estado-vazio.component';
     .saldo .valor { font-size: 1.6rem; font-weight: 600; color: var(--alerta); }
     .saldo.zerado .valor { color: var(--sucesso); }
     .acoes { margin: 16px 0; }
-    .form-card, .venda-card { margin-bottom: 16px; }
+    .form-card, .venda-card { margin-bottom: var(--vao-secao); }
     .campo { width: 100%; }
     .venda-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
     .venda-card.cancelada { opacity: 0.6; }
@@ -254,7 +254,7 @@ export class ClientePerfilComponent implements OnInit {
       error: (erro) => {
         this.salvando.set(false);
         if (bloqueadoPorAssinatura(erro)) return;
-        this.snack.open('Erro ao registrar a venda.', 'OK', { duration: 4000 });
+        this.snack.open('A venda não foi registrada. Confira os valores e tente de novo.', 'OK', { duration: 4000 });
       },
     });
   }
@@ -264,7 +264,7 @@ export class ClientePerfilComponent implements OnInit {
       next: () => { this.snack.open('Pagamento confirmado', 'OK', { duration: 3000 }); this.carregar(); },
       error: (erro) => {
         if (bloqueadoPorAssinatura(erro)) return;
-        this.snack.open('Erro ao confirmar pagamento.', 'OK', { duration: 4000 });
+        this.snack.open('A baixa não foi dada. A parcela continua como estava.', 'OK', { duration: 4000 });
       },
     });
   }
@@ -292,7 +292,7 @@ export class ClientePerfilComponent implements OnInit {
       next: () => { this.snack.open('Venda cancelada.', 'OK', { duration: 3000 }); this.carregar(); },
       error: (erro) => {
         if (bloqueadoPorAssinatura(erro)) return;
-        this.snack.open('Erro ao cancelar a venda.', 'OK', { duration: 4000 });
+        this.snack.open('A venda não foi cancelada. Ela continua valendo.', 'OK', { duration: 4000 });
       },
     });
   }
