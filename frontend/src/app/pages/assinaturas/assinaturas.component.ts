@@ -14,6 +14,9 @@ import {
   SituacaoComprovante,
 } from '../../core/assinatura.service';
 import { dataHoraLocal } from '../../core/datas';
+import { EsqueletoComponent } from '../../core/esqueleto.component';
+import { EstadoErroComponent } from '../../core/estado-erro.component';
+import { EstadoVazioComponent } from '../../core/estado-vazio.component';
 
 interface Aba { situacao: SituacaoComprovante; titulo: string; }
 
@@ -54,6 +57,7 @@ const VAZIO: Record<SituacaoComprovante, { icone: string; titulo: string; texto:
   imports: [
     FormsModule, MatCardModule, MatButtonModule, MatIconModule, MatTabsModule,
     MatFormFieldModule, MatInputModule, MatProgressSpinnerModule,
+    EsqueletoComponent, EstadoErroComponent, EstadoVazioComponent,
   ],
   template: `
     <div class="pagina">
@@ -86,14 +90,15 @@ const VAZIO: Record<SituacaoComprovante, { icone: string; titulo: string; texto:
           }
         </mat-tab-group>
 
-        @if (carregando()) {
-          <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
+        @if (erro()) {
+          <app-estado-erro
+            titulo="Não deu para carregar a fila"
+            texto="Pode ter sido a conexão. Nenhum comprovante enviado se perdeu."
+            (aoTentar)="carregar()" />
+        } @else if (carregando()) {
+          <app-esqueleto quantidade="3" rotulo="Carregando os comprovantes" />
         } @else if (itens().length === 0) {
-          <mat-card class="bloco vazio-card">
-            <mat-icon class="icone-grande">{{ vazio().icone }}</mat-icon>
-            <h3>{{ vazio().titulo }}</h3>
-            <p>{{ vazio().texto }}</p>
-          </mat-card>
+          <app-estado-vazio [titulo]="vazio().titulo" [texto]="vazio().texto" />
         } @else {
           @for (p of itens(); track p.id) {
             <mat-card class="bloco item" [class.historico]="aba() !== 'pendente'">
@@ -166,9 +171,9 @@ const VAZIO: Record<SituacaoComprovante, { icone: string; titulo: string; texto:
     .cabecalho h2 { margin: 0; }
     .ajuda { color: var(--texto-suave); margin-top: 4px; }
     .centro { display: flex; justify-content: center; padding: 32px; }
-    .bloco { padding: 16px; margin-bottom: 16px; }
+    .bloco { padding: 18px; margin-bottom: var(--vao-secao); }
 
-    .abas { margin-bottom: 16px; }
+    .abas { margin-bottom: var(--vao-grupo); }
     /* No celular as três abas precisam caber lado a lado: o Material esconde
        as que sobram atrás de uma seta, e aba escondida é aba que ninguém acha.
        O espaçamento interno padrão (24px de cada lado) é o que não cabia. */
@@ -241,6 +246,7 @@ export class AssinaturasComponent implements OnInit {
   readonly itens = signal<ComprovanteAdmin[]>([]);
   readonly quantidadeAguardando = signal<number>(0);
   readonly carregando = signal<boolean>(true);
+  readonly erro = signal<boolean>(false);
   readonly agindo = signal<boolean>(false);
   readonly semAcesso = signal<boolean>(false);
   readonly recusando = signal<string | null>(null);
@@ -262,6 +268,7 @@ export class AssinaturasComponent implements OnInit {
   /** Carrega a aba atual. A contagem da fila é atualizada em qualquer aba. */
   carregar(): void {
     this.carregando.set(true);
+    this.erro.set(false);
     const situacao = this.aba();
     this.service.listar(situacao).subscribe({
       next: (lista) => {
@@ -273,7 +280,10 @@ export class AssinaturasComponent implements OnInit {
         if (situacao === 'pendente') this.quantidadeAguardando.set(lista.length);
       },
       error: (erro) => {
-        this.semAcesso.set(erro.status === 403);
+        // 403 tem tela própria ("área restrita"); o resto é falha de carga.
+        const semPermissao = erro.status === 403;
+        this.semAcesso.set(semPermissao);
+        this.erro.set(!semPermissao);
         this.carregando.set(false);
       },
     });

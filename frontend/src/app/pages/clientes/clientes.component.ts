@@ -11,6 +11,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Cliente, ClientesService } from '../../core/clientes.service';
 import { bloqueadoPorAssinatura } from '../../core/erros';
+import { EsqueletoComponent } from '../../core/esqueleto.component';
+import { EstadoErroComponent } from '../../core/estado-erro.component';
+import { EstadoVazioComponent } from '../../core/estado-vazio.component';
 import {
   CODIGO_PAIS_PADRAO, conferirCpf, conferirTelefone, formatarTelefone,
 } from '../../core/regras-cliente';
@@ -21,15 +24,21 @@ import {
   imports: [
     FormsModule, MatCardModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatIconModule, MatListModule, MatProgressSpinnerModule,
+    EsqueletoComponent, EstadoErroComponent, EstadoVazioComponent,
   ],
   template: `
     <div class="pagina">
       <div class="cabecalho">
         <h2>Clientes</h2>
-        <button mat-raised-button color="primary" (click)="alternarFormulario()">
-          <mat-icon>{{ mostrarForm() ? 'close' : 'add' }}</mat-icon>
-          {{ mostrarForm() ? 'Cancelar' : 'Novo cliente' }}
-        </button>
+        @if (mostrarForm()) {
+          <button mat-stroked-button (click)="alternarFormulario()">
+            <mat-icon>close</mat-icon> Cancelar
+          </button>
+        } @else {
+          <button mat-raised-button color="primary" (click)="alternarFormulario()">
+            <mat-icon>add</mat-icon> Novo cliente
+          </button>
+        }
       </div>
 
       @if (mostrarForm()) {
@@ -82,10 +91,27 @@ import {
         <input matInput [(ngModel)]="termo" name="busca" maxlength="60" />
       </mat-form-field>
 
-      @if (carregando()) {
-        <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
+      @if (erro()) {
+        <app-estado-erro
+          titulo="Não deu para carregar sua carteira"
+          texto="Pode ter sido a conexão. Nenhum cliente seu se perdeu."
+          (aoTentar)="carregar()" />
+      } @else if (carregando()) {
+        <app-esqueleto quantidade="5" rotulo="Carregando seus clientes" />
+      } @else if (clientes().length === 0) {
+        <app-estado-vazio
+          titulo="Sua carteira começa aqui"
+          texto="Cadastre quem compra parcelado e o sistema passa a cuidar dos
+                 vencimentos, das cobranças e do saldo de cada pessoa."
+          acao="Cadastrar cliente"
+          (aoAgir)="abrirFormulario()" />
       } @else if (filtrados().length === 0) {
-        <p class="vazio">Nenhum cliente encontrado.</p>
+        <app-estado-vazio
+          titulo="Nenhum cliente com esse nome"
+          texto="A busca não encontrou ninguém. Confira a escrita, ou limpe o
+                 campo para ver a carteira inteira."
+          acao="Limpar a busca"
+          (aoAgir)="limparBusca()" />
       } @else {
         <mat-card>
           <mat-list>
@@ -106,7 +132,7 @@ import {
     .pagina { max-width: 720px; margin: 0 auto; padding: 16px; }
     .cabecalho { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
     .cabecalho h2 { margin: 0; }
-    .form-card { margin-bottom: 16px; }
+    .form-card { margin-bottom: var(--vao-secao); }
     .campo, .busca { width: 100%; }
     /* O código do país fica estreito e sempre na frente do número: é o que
        a pessoa quase nunca muda, mas precisa enxergar. */
@@ -129,6 +155,8 @@ export class ClientesComponent implements OnInit {
   readonly carregando = signal<boolean>(true);
   readonly salvando = signal<boolean>(false);
   readonly mostrarForm = signal<boolean>(false);
+  /** Houve falha ao carregar? Guardado para a tela mostrar, não para sumir. */
+  readonly erro = signal<boolean>(false);
   termo = '';
   novo = {
     nome: '',
@@ -154,12 +182,23 @@ export class ClientesComponent implements OnInit {
     this.carregar();
   }
 
-  private carregar(): void {
+  carregar(): void {
     this.carregando.set(true);
+    this.erro.set(false);
     this.service.listar().subscribe({
       next: (lista) => { this.clientes.set(lista); this.carregando.set(false); },
-      error: () => { this.carregando.set(false); this.snack.open('Erro ao carregar clientes.', 'OK', { duration: 4000 }); },
+      // Sem tarja: a falha fica na tela, no lugar da lista, com saída.
+      error: () => { this.carregando.set(false); this.erro.set(true); },
     });
+  }
+
+  /** Abre o formulário a partir da tela vazia, sem a pessoa procurar o botão. */
+  abrirFormulario(): void {
+    this.mostrarForm.set(true);
+  }
+
+  limparBusca(): void {
+    this.termo = '';
   }
 
   alternarFormulario(): void {
@@ -233,7 +272,7 @@ export class ClientesComponent implements OnInit {
         if (bloqueadoPorAssinatura(erro)) return;
         const msg = erro.status === 409
           ? 'Já existe um cliente com esse número de WhatsApp.'
-          : 'Erro ao cadastrar cliente.';
+          : 'O cliente não foi cadastrado. Nada foi gravado pela metade.';
         this.snack.open(msg, 'OK', { duration: 4000 });
       },
     });

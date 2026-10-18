@@ -11,6 +11,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Template, TemplatesService } from '../../core/templates.service';
 import { bloqueadoPorAssinatura } from '../../core/erros';
+import { EsqueletoComponent } from '../../core/esqueleto.component';
+import { EstadoErroComponent } from '../../core/estado-erro.component';
+import { EstadoVazioComponent } from '../../core/estado-vazio.component';
 
 const VARIAVEIS = ['nome_cliente', 'valor_parcela', 'data_vencimento', 'dias_atraso'];
 const EXEMPLO: Record<string, string> = {
@@ -31,6 +34,7 @@ const TIPO_LABEL: Record<string, string> = {
   imports: [
     FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule,
     MatIconModule, MatSlideToggleModule, MatChipsModule, MatProgressSpinnerModule,
+    EsqueletoComponent, EstadoErroComponent, EstadoVazioComponent,
   ],
   template: `
     <div class="pagina">
@@ -40,8 +44,22 @@ const TIPO_LABEL: Record<string, string> = {
         serão trocadas pelos dados reais de cada cliente na hora do envio.
       </p>
 
-      @if (carregando()) {
-        <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
+      @if (erro()) {
+        <app-estado-erro
+          titulo="Não deu para carregar as mensagens"
+          texto="Pode ter sido a conexão. Os textos que você escreveu continuam
+                 salvos."
+          (aoTentar)="carregar()" />
+      } @else if (carregando()) {
+        <app-esqueleto quantidade="3" rotulo="Carregando os modelos" />
+      } @else if (templates.length === 0) {
+        <app-estado-vazio
+          titulo="Nenhum modelo de mensagem"
+          texto="Cada tipo de cobrança tem um texto que o sistema envia, com o
+                 nome, o valor e a data preenchidos sozinhos. Os modelos padrão
+                 deveriam estar aqui."
+          acao="Recarregar"
+          (aoAgir)="carregar()" />
       } @else {
         @for (t of templates; track t.id) {
           <mat-card class="tpl">
@@ -103,13 +121,18 @@ export class TemplatesComponent implements OnInit {
 
   templates: Template[] = [];
   readonly carregando = signal<boolean>(true);
+  readonly erro = signal<boolean>(false);
   readonly salvando = signal<boolean>(false);
   readonly variaveis = VARIAVEIS;
 
-  ngOnInit(): void {
+  ngOnInit(): void { this.carregar(); }
+
+  carregar(): void {
+    this.carregando.set(true);
+    this.erro.set(false);
     this.service.listar().subscribe({
       next: (lista) => { this.templates = lista; this.carregando.set(false); },
-      error: () => { this.carregando.set(false); this.snack.open('Erro ao carregar mensagens.', 'OK', { duration: 4000 }); },
+      error: () => { this.carregando.set(false); this.erro.set(true); },
     });
   }
 
@@ -132,7 +155,7 @@ export class TemplatesComponent implements OnInit {
       error: (erro) => {
         this.salvando.set(false);
         if (bloqueadoPorAssinatura(erro)) return;
-        this.snack.open('Erro ao salvar.', 'OK', { duration: 4000 });
+        this.snack.open('Não deu para salvar. O que estava valendo continua valendo.', 'OK', { duration: 4000 });
       },
     });
   }

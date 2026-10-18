@@ -7,6 +7,9 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CobrancaLog, CobrancasService } from '../../core/cobrancas.service';
+import { EsqueletoComponent } from '../../core/esqueleto.component';
+import { EstadoErroComponent } from '../../core/estado-erro.component';
+import { EstadoVazioComponent } from '../../core/estado-vazio.component';
 
 type Periodo = 'hoje' | 'semana' | 'mes';
 
@@ -22,6 +25,7 @@ const ROTULO_TIPO: Record<string, string> = {
   selector: 'app-cobrancas',
   standalone: true,
   imports: [
+    EsqueletoComponent, EstadoErroComponent, EstadoVazioComponent,
     MatCardModule, MatButtonModule, MatIconModule, MatTabsModule, MatProgressSpinnerModule,
   ],
   template: `
@@ -35,10 +39,22 @@ const ROTULO_TIPO: Record<string, string> = {
         <mat-tab label="Mês"></mat-tab>
       </mat-tab-group>
 
-      @if (carregando()) {
-        <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
+      @if (erro()) {
+        <app-estado-erro
+          titulo="Não deu para carregar o histórico"
+          texto="Pode ter sido a conexão. As cobranças que o sistema enviou
+                 continuam registradas."
+          (aoTentar)="carregar()" />
+      } @else if (carregando()) {
+        <app-esqueleto quantidade="4" rotulo="Carregando as cobranças" />
       } @else if (logs().length === 0) {
-        <p class="vazio">Nenhuma cobrança enviada neste período.</p>
+        <app-estado-vazio
+          titulo="Nenhuma cobrança neste período"
+          texto="Aqui fica o registro de cada mensagem que o sistema enviou, com
+                 o que foi dito e se chegou. Troque o período acima para ver
+                 outro intervalo."
+          acao="Ver o mês inteiro"
+          (aoAgir)="verOMes()" />
       } @else {
         @for (l of logs(); track l.id) {
           <mat-card class="item">
@@ -90,6 +106,7 @@ export class CobrancasComponent implements OnInit {
 
   readonly logs = signal<CobrancaLog[]>([]);
   readonly carregando = signal<boolean>(true);
+  readonly erro = signal<boolean>(false);
   private periodo: Periodo = 'hoje';
 
   ngOnInit(): void { this.carregar(); }
@@ -99,12 +116,21 @@ export class CobrancasComponent implements OnInit {
     this.carregar();
   }
 
-  private carregar(): void {
+  carregar(): void {
     this.carregando.set(true);
+    this.erro.set(false);
     this.service.listar(this.periodo).subscribe({
       next: (lista) => { this.logs.set(lista); this.carregando.set(false); },
-      error: () => { this.carregando.set(false); this.snack.open('Erro ao carregar as cobranças.', 'OK', { duration: 4000 }); },
+      // Sem tarja: a falha fica na tela, no lugar da lista, com saída.
+      error: () => { this.carregando.set(false); this.erro.set(true); },
     });
+  }
+
+  /** Atalho da tela vazia: o período mais largo é o que tem mais chance de
+   *  ter alguma coisa para mostrar. */
+  verOMes(): void {
+    this.periodo = 'mes';
+    this.carregar();
   }
 
   abrirPerfil(l: CobrancaLog): void {

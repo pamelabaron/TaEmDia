@@ -164,6 +164,7 @@ todo texto. Foi ele que achou os problemas acima. Olhar não acha.
 
 | Armadilha | O que fazer |
 |---|---|
+| Encolher um contêiner no teste **não aciona `@media`**: a regra responde à largura da janela, não do elemento. Um teste de 320px acusou o Painel estourando, mas ele estava no arranjo de 4 colunas porque a janela do karma é larga | Responsividade se mede no navegador com a tela emulada. No karma dá para medir contraste, estados e hierarquia, não arranjo que depende de `@media` |
 | `karma.conf.js` criado na raiz do frontend é **ignorado**. O `ChromeHeadlessCI` "não existe" e nada roda | Declare `"karmaConfig": "karma.conf.js"` em `architect.test.options` no `angular.json` |
 | A cobertura do Karma só conta arquivo que **algum teste importa**. A primeira medição deu 72%, mas o total eram 9 arquivos de 35 | `src/app/cobertura.spec.ts` importa todos. `test_cobertura_frontend.py` confere que a lista continua completa |
 | `npm ci` num container que compartilha `node_modules` com o `ng serve` apaga as dependências do site em desenvolvimento | Instale só se faltar: `[ -d node_modules/@angular/cli ] || npm install` (com as duas barras verticais) |

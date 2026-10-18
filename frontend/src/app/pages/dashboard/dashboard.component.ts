@@ -6,6 +6,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Dashboard, DashboardService } from '../../core/dashboard.service';
+import { EsqueletoComponent } from '../../core/esqueleto.component';
+import { EstadoErroComponent } from '../../core/estado-erro.component';
+import { EstadoVazioComponent } from '../../core/estado-vazio.component';
 
 interface Barra { label: string; valor: number; altura: number; }
 
@@ -14,7 +17,10 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [MatCardModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule],
+  imports: [
+    MatCardModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule,
+    EsqueletoComponent, EstadoErroComponent, EstadoVazioComponent,
+  ],
   template: `
     <div class="pagina">
       <div class="cabecalho">
@@ -24,8 +30,21 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
         </button>
       </div>
 
-      @if (carregando()) {
-        <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
+      @if (erro()) {
+        <app-estado-erro
+          titulo="Não deu para carregar os números"
+          texto="Pode ter sido a conexão. Nenhum pagamento ou parcela se perdeu."
+          (aoTentar)="carregar()" />
+      } @else if (carregando()) {
+        <app-esqueleto tipo="blocos" quantidade="4" rotulo="Calculando seus números" />
+      } @else if (semMovimento()) {
+        <app-estado-vazio
+          titulo="Ainda não há o que somar"
+          texto="Este painel mostra quanto você tem a receber, quanto já entrou
+                 no mês e quanto está em atraso. Os números aparecem quando a
+                 primeira venda for registrada."
+          acao="Ir para os clientes"
+          (aoAgir)="irParaClientes()" />
       } @else {
         @if (dados(); as d) {
         <div class="kpis">
@@ -89,7 +108,7 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     /* Quatro caixas de peso igual dizem que os quatro números importam igual.
        "Total a receber" é o que a pessoa abre o sistema para ver: ocupa duas
        colunas e é o único cartão escuro da tela. Os outros três recuam. */
-    .kpis { display: grid; gap: 14px; margin-bottom: 18px; }
+    .kpis { display: grid; gap: var(--vao-dentro); margin-bottom: var(--vao-secao); }
 
     /* Celular: um embaixo do outro. */
     .kpis { grid-template-columns: 1fr; }
@@ -123,8 +142,21 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     }
     .kpi > * { position: relative; }
     .kpi .rotulo { font-size: 0.8rem; color: var(--texto-suave); letter-spacing: 0.01em; }
-    .kpi .valor { font-size: 1.6rem; font-weight: 600; margin-top: 4px; color: var(--tom);
+    .kpi .valor { font-size: 1.5rem; font-weight: 600; margin-top: 4px; color: var(--tom);
                   letter-spacing: -0.02em; }
+
+    /* O principal também é maior, não só mais escuro e mais largo.
+       Cor e largura dizem "este é diferente"; tamanho diz "olhe este
+       primeiro". Com os quatro números no mesmo corpo, a tela informava
+       quatro coisas e não ordenava nenhuma. */
+    .kpi.receber .valor {
+      /* O mínimo da escala garante a dominância mesmo na tela mais estreita:
+         com a medida só em vw, no celular os quatro números voltavam a ficar
+         do mesmo tamanho e a hierarquia sumia justamente onde cabe menos
+         coisa na tela. */
+      font-size: clamp(2.3rem, 5.5vw, 3rem);
+      letter-spacing: -0.035em; line-height: 1.05; margin-top: 8px;
+    }
 
     /* O cartão principal: petróleo com o lima acendendo no canto. É a única
        superfície escura do painel. Se houvesse duas, nenhuma seria o destaque. */
@@ -151,7 +183,7 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     .kpi.recebido      { --tom: var(--sucesso);   --tom-rgb: 79, 217, 140; }
     .kpi.atraso        { --tom: var(--alerta);    --tom-rgb: 245, 169, 74; }
     .kpi.inadimplentes { --tom: var(--perigo);    --tom-rgb: 255, 122, 133; }
-    .bloco { padding: 16px; margin-bottom: 16px; }
+    .bloco { padding: 18px; margin-bottom: var(--vao-secao); }
     .bloco h3 { margin: 0 0 16px; }
     .grafico { display: flex; align-items: flex-end; gap: 16px; height: 160px; padding-top: 20px; }
     .coluna { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; height: 100%; }
@@ -188,6 +220,7 @@ export class DashboardComponent implements OnInit {
 
   readonly dados = signal<Dashboard | null>(null);
   readonly carregando = signal<boolean>(true);
+  readonly erro = signal<boolean>(false);
   readonly exportando = signal<boolean>(false);
 
   readonly barras = computed<Barra[]>(() => {
@@ -201,11 +234,31 @@ export class DashboardComponent implements OnInit {
     }));
   });
 
-  ngOnInit(): void {
+  ngOnInit(): void { this.carregar(); }
+
+  carregar(): void {
+    this.carregando.set(true);
+    this.erro.set(false);
     this.service.carregar().subscribe({
       next: (d) => { this.dados.set(d); this.carregando.set(false); },
-      error: () => this.carregando.set(false),
+      error: () => { this.carregando.set(false); this.erro.set(true); },
     });
+  }
+
+  /** Conta nova: não há venda, pagamento nem atraso. Zero em tudo não é um
+   *  painel ruim, é um painel que ainda não tem o que mostrar. */
+  readonly semMovimento = computed(() => {
+    const d = this.dados();
+    if (!d) return false;
+    return d.total_a_receber === 0
+      && d.recebido_no_mes === 0
+      && d.em_atraso === 0
+      && d.recebimentos_mensais.length === 0
+      && d.clientes_em_atraso.length === 0;
+  });
+
+  irParaClientes(): void {
+    this.router.navigate(['/clientes']);
   }
 
   exportarPdf(): void {

@@ -11,6 +11,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { CobrancasService } from '../../core/cobrancas.service';
 import { PerfilCliente, VendasService } from '../../core/vendas.service';
 import { bloqueadoPorAssinatura } from '../../core/erros';
+import { EsqueletoComponent } from '../../core/esqueleto.component';
+import { EstadoErroComponent } from '../../core/estado-erro.component';
+import { EstadoVazioComponent } from '../../core/estado-vazio.component';
 
 @Component({
   selector: 'app-cliente-perfil',
@@ -18,13 +21,20 @@ import { bloqueadoPorAssinatura } from '../../core/erros';
   imports: [
     FormsModule, MatCardModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatIconModule, MatProgressSpinnerModule,
+    EsqueletoComponent, EstadoErroComponent, EstadoVazioComponent,
   ],
   template: `
     <div class="pagina">
       <button mat-button (click)="voltar()"><mat-icon>arrow_back</mat-icon> Voltar</button>
 
-      @if (carregando()) {
-        <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
+      @if (erro()) {
+        <app-estado-erro
+          titulo="Não deu para carregar este cliente"
+          texto="Pode ter sido a conexão. As vendas e os pagamentos dele
+                 continuam registrados."
+          (aoTentar)="carregar()" />
+      } @else if (carregando()) {
+        <app-esqueleto quantidade="4" rotulo="Carregando o cliente" />
       } @else {
         @if (perfil(); as p) {
         <div class="topo">
@@ -39,10 +49,15 @@ import { bloqueadoPorAssinatura } from '../../core/erros';
         </div>
 
         <div class="acoes">
-          <button mat-raised-button color="primary" (click)="alternarForm()">
-            <mat-icon>{{ mostrarForm() ? 'close' : 'add_shopping_cart' }}</mat-icon>
-            {{ mostrarForm() ? 'Cancelar' : 'Nova venda' }}
-          </button>
+          @if (mostrarForm()) {
+            <button mat-stroked-button (click)="alternarForm()">
+              <mat-icon>close</mat-icon> Cancelar
+            </button>
+          } @else {
+            <button mat-raised-button color="primary" (click)="alternarForm()">
+              <mat-icon>add_shopping_cart</mat-icon> Nova venda
+            </button>
+          }
         </div>
 
         @if (mostrarForm()) {
@@ -71,7 +86,12 @@ import { bloqueadoPorAssinatura } from '../../core/erros';
 
         <h3>Vendas</h3>
         @if (p.vendas.length === 0) {
-          <p class="vazio">Nenhuma venda registrada.</p>
+          <app-estado-vazio
+            titulo="Nenhuma venda para este cliente"
+            texto="Registre a primeira venda e o sistema calcula os vencimentos,
+                   acompanha cada parcela e cobra sozinho na data certa."
+            acao="Registrar venda"
+            (aoAgir)="mostrarForm.set(true)" />
         } @else {
           @for (v of p.vendas; track v.id) {
             <mat-card class="venda-card" [class.cancelada]="v.status === 'cancelada'">
@@ -99,7 +119,9 @@ import { bloqueadoPorAssinatura } from '../../core/erros';
                     <td><span class="chip {{ parc.status }}">{{ rotuloStatus(parc.status) }}</span></td>
                     <td>
                       @if (parc.status !== 'paga' && v.status === 'ativa') {
-                        <button mat-button color="primary" (click)="pagar(parc.id)">Marcar como pago</button>
+                        <button mat-button class="dar-baixa" (click)="pagar(parc.id)">
+                          Marcar como pago
+                        </button>
                         <button mat-button (click)="cobrar(parc.id)" [disabled]="cobrando()"><mat-icon inline>send</mat-icon> Cobrar</button>
                       }
                     </td>
@@ -115,6 +137,11 @@ import { bloqueadoPorAssinatura } from '../../core/erros';
     </div>
   `,
   styles: [`
+    /* Dar baixa é ação de uma linha, não da tela. Em verde porque verde já
+       significa "pago" em todo o sistema, e sem o peso de botão principal:
+       com ele, cada parcela da lista virava um chamado concorrendo com o
+       "Nova venda" lá em cima. */
+    .dar-baixa { color: var(--sucesso); }
     .pagina { max-width: 760px; margin: 0 auto; padding: 16px; }
     .topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
     .topo h2 { margin: 8px 0 4px; }
@@ -126,7 +153,7 @@ import { bloqueadoPorAssinatura } from '../../core/erros';
     .saldo .valor { font-size: 1.6rem; font-weight: 600; color: var(--alerta); }
     .saldo.zerado .valor { color: var(--sucesso); }
     .acoes { margin: 16px 0; }
-    .form-card, .venda-card { margin-bottom: 16px; }
+    .form-card, .venda-card { margin-bottom: var(--vao-secao); }
     .campo { width: 100%; }
     .venda-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
     .venda-card.cancelada { opacity: 0.6; }
@@ -153,6 +180,7 @@ export class ClientePerfilComponent implements OnInit {
 
   readonly perfil = signal<PerfilCliente | null>(null);
   readonly carregando = signal<boolean>(true);
+  readonly erro = signal<boolean>(false);
   readonly mostrarForm = signal<boolean>(false);
   readonly salvando = signal<boolean>(false);
   private clienteId = '';
@@ -176,11 +204,12 @@ export class ClientePerfilComponent implements OnInit {
     this.carregar();
   }
 
-  private carregar(): void {
+  carregar(): void {
     this.carregando.set(true);
+    this.erro.set(false);
     this.service.perfil(this.clienteId).subscribe({
       next: (p) => { this.perfil.set(p); this.carregando.set(false); },
-      error: () => { this.carregando.set(false); this.snack.open('Erro ao carregar o cliente.', 'OK', { duration: 4000 }); },
+      error: () => { this.carregando.set(false); this.erro.set(true); },
     });
   }
 
@@ -225,7 +254,7 @@ export class ClientePerfilComponent implements OnInit {
       error: (erro) => {
         this.salvando.set(false);
         if (bloqueadoPorAssinatura(erro)) return;
-        this.snack.open('Erro ao registrar a venda.', 'OK', { duration: 4000 });
+        this.snack.open('A venda não foi registrada. Confira os valores e tente de novo.', 'OK', { duration: 4000 });
       },
     });
   }
@@ -235,7 +264,7 @@ export class ClientePerfilComponent implements OnInit {
       next: () => { this.snack.open('Pagamento confirmado', 'OK', { duration: 3000 }); this.carregar(); },
       error: (erro) => {
         if (bloqueadoPorAssinatura(erro)) return;
-        this.snack.open('Erro ao confirmar pagamento.', 'OK', { duration: 4000 });
+        this.snack.open('A baixa não foi dada. A parcela continua como estava.', 'OK', { duration: 4000 });
       },
     });
   }
@@ -263,7 +292,7 @@ export class ClientePerfilComponent implements OnInit {
       next: () => { this.snack.open('Venda cancelada.', 'OK', { duration: 3000 }); this.carregar(); },
       error: (erro) => {
         if (bloqueadoPorAssinatura(erro)) return;
-        this.snack.open('Erro ao cancelar a venda.', 'OK', { duration: 4000 });
+        this.snack.open('A venda não foi cancelada. Ela continua valendo.', 'OK', { duration: 4000 });
       },
     });
   }

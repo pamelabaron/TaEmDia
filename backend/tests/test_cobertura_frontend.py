@@ -29,6 +29,10 @@ DISPENSADOS = {
     "cobertura.spec.ts",
     # Ponto de entrada: sobe a aplicação de verdade ao ser importado.
     "main.ts",
+    # Andaime de teste: as dez telas e o que cada uma pede ao abrir. Nada aqui
+    # vai para o navegador de quem usa, então entrar na conta da cobertura só
+    # inflaria o total com código que nunca roda em produção.
+    "telas.fixtures.ts",
 }
 
 

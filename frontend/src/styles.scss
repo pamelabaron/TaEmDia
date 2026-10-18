@@ -153,6 +153,20 @@ $tema: mat.define-dark-theme((
   // A luz na aresta de cima, usada junto das sombras acima.
   --luz-aresta: inset 0 1px 0 rgba(255, 255, 255, 0.07);
 
+  // --- Ritmo do espaço ---------------------------------------------------
+  // Doze valores de vão diferentes espalhados pelas telas, escolhidos um a um,
+  // e o pior: 16px separava tanto dois itens de uma lista quanto duas seções
+  // inteiras. Com o mesmo vão em todo lugar, a estrutura some: a tela vira uma
+  // pilha de coisas igualmente distantes e nada diz onde um assunto acaba.
+  //
+  // A escala resolve pela proporção, não pelo valor: apertado dentro do grupo,
+  // largo entre grupos, muito largo entre seções. É a diferença entre os três
+  // que o olho lê como organização.
+  --vao-apertado: 6px;   // dentro de uma linha: ícone e texto, rótulo e valor
+  --vao-dentro: 12px;    // entre itens do mesmo grupo
+  --vao-grupo: 24px;     // entre grupos de uma seção
+  --vao-secao: 44px;     // entre seções da página
+
   --raio: 12px;
   --raio-interno: 8px; // elementos dentro de cartões: raio menor que o container
 }
@@ -530,9 +544,14 @@ body {
 .pagina-config {
   max-width: 720px; margin: 0 auto; padding: 16px;
 
-  .ajuda { color: var(--texto-suave); margin: 4px 0 18px; }
+  // O texto de apoio gruda no título (mesmo assunto) e abre antes do conteúdo.
+  .ajuda { color: var(--texto-suave); margin: var(--vao-apertado) 0 var(--vao-grupo); }
   .centro { display: flex; justify-content: center; padding: 32px; }
-  .bloco { padding: 16px 20px; margin-bottom: 16px; }
+  // Entre blocos vai o vão de seção: cada bloco é um assunto fechado, e antes
+  // ele se separava do vizinho pela mesma distância que separava duas linhas
+  // dentro dele.
+  .bloco { padding: 18px 20px; margin-bottom: var(--vao-secao); }
+  .bloco:last-child { margin-bottom: var(--vao-grupo); }
 
   // Rótulo à esquerda, controle à direita. É o padrão de tela de ajuste:
   // a pessoa lê o que a opção faz antes de decidir mexer.
