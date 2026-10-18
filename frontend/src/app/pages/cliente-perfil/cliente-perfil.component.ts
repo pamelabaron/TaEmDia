@@ -49,10 +49,15 @@ import { EstadoVazioComponent } from '../../core/estado-vazio.component';
         </div>
 
         <div class="acoes">
-          <button mat-raised-button color="primary" (click)="alternarForm()">
-            <mat-icon>{{ mostrarForm() ? 'close' : 'add_shopping_cart' }}</mat-icon>
-            {{ mostrarForm() ? 'Cancelar' : 'Nova venda' }}
-          </button>
+          @if (mostrarForm()) {
+            <button mat-stroked-button (click)="alternarForm()">
+              <mat-icon>close</mat-icon> Cancelar
+            </button>
+          } @else {
+            <button mat-raised-button color="primary" (click)="alternarForm()">
+              <mat-icon>add_shopping_cart</mat-icon> Nova venda
+            </button>
+          }
         </div>
 
         @if (mostrarForm()) {
@@ -114,7 +119,9 @@ import { EstadoVazioComponent } from '../../core/estado-vazio.component';
                     <td><span class="chip {{ parc.status }}">{{ rotuloStatus(parc.status) }}</span></td>
                     <td>
                       @if (parc.status !== 'paga' && v.status === 'ativa') {
-                        <button mat-button color="primary" (click)="pagar(parc.id)">Marcar como pago</button>
+                        <button mat-button class="dar-baixa" (click)="pagar(parc.id)">
+                          Marcar como pago
+                        </button>
                         <button mat-button (click)="cobrar(parc.id)" [disabled]="cobrando()"><mat-icon inline>send</mat-icon> Cobrar</button>
                       }
                     </td>
@@ -130,6 +137,11 @@ import { EstadoVazioComponent } from '../../core/estado-vazio.component';
     </div>
   `,
   styles: [`
+    /* Dar baixa é ação de uma linha, não da tela. Em verde porque verde já
+       significa "pago" em todo o sistema, e sem o peso de botão principal:
+       com ele, cada parcela da lista virava um chamado concorrendo com o
+       "Nova venda" lá em cima. */
+    .dar-baixa { color: var(--sucesso); }
     .pagina { max-width: 760px; margin: 0 auto; padding: 16px; }
     .topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
     .topo h2 { margin: 8px 0 4px; }

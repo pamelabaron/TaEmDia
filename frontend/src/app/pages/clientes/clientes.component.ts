@@ -30,10 +30,15 @@ import {
     <div class="pagina">
       <div class="cabecalho">
         <h2>Clientes</h2>
-        <button mat-raised-button color="primary" (click)="alternarFormulario()">
-          <mat-icon>{{ mostrarForm() ? 'close' : 'add' }}</mat-icon>
-          {{ mostrarForm() ? 'Cancelar' : 'Novo cliente' }}
-        </button>
+        @if (mostrarForm()) {
+          <button mat-stroked-button (click)="alternarFormulario()">
+            <mat-icon>close</mat-icon> Cancelar
+          </button>
+        } @else {
+          <button mat-raised-button color="primary" (click)="alternarFormulario()">
+            <mat-icon>add</mat-icon> Novo cliente
+          </button>
+        }
       </div>
 
       @if (mostrarForm()) {

@@ -142,8 +142,21 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
     }
     .kpi > * { position: relative; }
     .kpi .rotulo { font-size: 0.8rem; color: var(--texto-suave); letter-spacing: 0.01em; }
-    .kpi .valor { font-size: 1.6rem; font-weight: 600; margin-top: 4px; color: var(--tom);
+    .kpi .valor { font-size: 1.5rem; font-weight: 600; margin-top: 4px; color: var(--tom);
                   letter-spacing: -0.02em; }
+
+    /* O principal também é maior, não só mais escuro e mais largo.
+       Cor e largura dizem "este é diferente"; tamanho diz "olhe este
+       primeiro". Com os quatro números no mesmo corpo, a tela informava
+       quatro coisas e não ordenava nenhuma. */
+    .kpi.receber .valor {
+      /* O mínimo da escala garante a dominância mesmo na tela mais estreita:
+         com a medida só em vw, no celular os quatro números voltavam a ficar
+         do mesmo tamanho e a hierarquia sumia justamente onde cabe menos
+         coisa na tela. */
+      font-size: clamp(2.3rem, 5.5vw, 3rem);
+      letter-spacing: -0.035em; line-height: 1.05; margin-top: 8px;
+    }
 
     /* O cartão principal: petróleo com o lima acendendo no canto. É a única
        superfície escura do painel. Se houvesse duas, nenhuma seria o destaque. */
