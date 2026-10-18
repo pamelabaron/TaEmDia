@@ -67,13 +67,6 @@ const CHAVE_ENCOLHIDA = 'taemdia_barra_encolhida';
                 <span class="rotulo">{{ item.titulo }}</span>
               </a>
             }
-            @if (auth.administrador()) {
-              <a routerLink="/assinaturas" routerLinkActive="ativo" class="item"
-                 [matTooltip]="encolhida() ? 'Comprovantes' : ''" matTooltipPosition="right">
-                <mat-icon>receipt_long</mat-icon>
-                <span class="rotulo">Comprovantes</span>
-              </a>
-            }
           </nav>
 
           <!-- Bloco da pessoa. Fica no rodapé porque é sobre quem usa, não
