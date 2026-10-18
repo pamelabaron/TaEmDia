@@ -124,32 +124,39 @@ jobs:
         run: |
           set -euo pipefail
 
-          # O git pull traz o compose e a configuração do Nginx; as imagens
-          # vêm prontas. O restart do nginx não é opcional: sem ele o site
-          # responde 502, porque ele guarda o endereço interno dos containers
-          # de quando subiu. Já aconteceu uma vez e o site ficou fora do ar.
-          COMANDO=$(cat <<SCRIPT
+          # O script vai para um arquivo, e o arquivo vira JSON com jq. Montar
+          # os parâmetros na forma abreviada (commands="...") quebra com script
+          # de várias linhas: a CLI corta no espaço e manda só o primeiro
+          # pedaço, sem reclamar.
+          cat > /tmp/trocar.sh <<SCRIPT
           set -euo pipefail
           cd /home/ubuntu/TaEmDia
+
+          # Traz o compose e a configuração do Nginx desta versão. As imagens
+          # já vêm prontas; aqui só o que é arquivo de configuração.
           git fetch --all --prune
           git reset --hard ${VERSAO}
+
           export VERSAO=${VERSAO}
           docker compose -f docker-compose.prod.yml pull
           docker compose -f docker-compose.prod.yml up -d
+
+          # Não é opcional: o Nginx guarda o endereço interno dos containers
+          # de quando subiu, e sem reiniciar o site responde 502. Já aconteceu.
           docker compose -f docker-compose.prod.yml restart nginx
+
           sleep 5
           curl -sf -o /dev/null -k https://localhost/ || { echo "o site nao respondeu"; exit 1; }
+
+          # O disco tem pouco mais de 9 GB livres e cada subida deixa a imagem
+          # antiga para trás.
           docker image prune -af --filter "until=72h" >/dev/null
           echo "no ar: ${VERSAO}"
           SCRIPT
-          )
 
-          ID=$(aws ssm send-command \
-            --instance-ids "$INSTANCIA" \
-            --document-name "AWS-RunShellScript" \
-            --comment "Deploy ${VERSAO}" \
-            --parameters commands="$COMANDO" \
-            --query "Command.CommandId" --output text)
+          jq -Rs '{commands: [.]}' /tmp/trocar.sh > /tmp/parametros.json
+
+          ID=$(aws ssm send-command             --instance-ids "$INSTANCIA"             --document-name "AWS-RunShellScript"             --comment "Deploy ${VERSAO}"             --parameters file:///tmp/parametros.json             --query "Command.CommandId" --output text)
 
           echo "Comando enviado: $ID"
 
