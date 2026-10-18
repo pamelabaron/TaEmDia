@@ -233,7 +233,14 @@ Depois vá em **Configurações** e escaneie o QR Code
 ```bash
 git pull
 docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml restart nginx
 ```
+
+> **O terceiro comando não é opcional.** O `up -d --build` recria o site e a
+> API, e os containers novos ganham endereços internos novos. O Nginx guardou
+> os antigos quando subiu e continua procurando por eles, então o site responde
+> **502 Bad Gateway** até ele ser reiniciado. Já aconteceu uma vez, e o site
+> ficou fora do ar sem nenhum erro aparecer no deploy.
 
 **Renovar o certificado** (a cada 90 dias):
 ```bash
