@@ -10,8 +10,18 @@ name: Deploy
 #   2. pede à AWS que mande o servidor baixar e trocar.
 #
 # Nenhuma etapa usa SSH. A AWS conversa com a máquina por dentro, pelo agente
-# que já vem instalado no Ubuntu, e a autenticação entre GitHub e AWS é por
-# confiança federada: nenhuma chave fica guardada em lugar nenhum.
+# que já vem instalado no Ubuntu.
+#
+# A autenticação com a AWS é por chave de usuário técnico, e não por confiança
+# federada (OIDC), que seria tecnicamente melhor por não guardar credencial
+# nenhuma. O motivo é concreto: nesta conta, criar o provedor de identidade
+# exige "ativar recursos avançados", e a própria AWS avisa que isso **não pode
+# ser desfeito** e **remove o limite de gastos da conta, sem poder recriá-lo**.
+# Trocar um limite de gastos permanente por um método de login não compensa num
+# projeto de faculdade.
+#
+# O risco da chave é contido pela permissão: ela só consegue mandar comando
+# nesta única máquina. Não cria recurso, não lê banco, não gasta.
 
 on:
   workflow_run:
@@ -106,15 +116,13 @@ jobs:
 
     permissions:
       contents: read
-      # Necessária para a confiança federada com a AWS: é com ela que o
-      # GitHub prova quem é, sem chave guardada.
-      id-token: write
 
     steps:
       - name: Autenticar na AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_PAPEL_DEPLOY }}
+          aws-access-key-id: ${{ secrets.AWS_CHAVE_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_CHAVE_SECRETA }}
           aws-region: ${{ vars.AWS_REGIAO || 'us-east-2' }}
 
       - name: Mandar o servidor baixar e trocar

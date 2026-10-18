@@ -22,20 +22,32 @@ você envia o código
 Três coisas valem notar:
 
 - **Teste quebrado não vira site no ar.** O deploy só começa se o CI tiver
-  passado, e ele roda sobre o commit que o CI testou, não sobre o topo da
-  branch.
+  passado, e roda sobre o commit que o CI testou, não sobre o topo da branch.
 - **A compilação acontece no GitHub.** O servidor tem 909 MB de memória e
   levava de 5 a 10 minutos para compilar o Angular, usando memória de troca em
-  disco. Agora ele só baixa.
-- **Nenhuma senha fica guardada.** A autenticação entre GitHub e AWS é por
-  confiança federada (OIDC): a AWS confere quem está pedindo na hora, e aceita
-  apenas pedidos vindos deste repositório.
+  disco. Agora ele só baixa, e a troca leva segundos.
+- **Nada passa pela porta 22.** A AWS fala com a máquina por dentro, pelo
+  agente que já vem instalado no Ubuntu.
+
+## Por que chave de usuário, e não confiança federada
+
+O método mais seguro seria a confiança federada (OIDC): o GitHub prova quem é
+na hora e nenhuma credencial fica guardada. Nesta conta ele não foi usado, e o
+motivo é concreto.
+
+Criar o provedor de identidade que o OIDC exige está atrás de **"Ativar
+recursos avançados"**, e a documentação da AWS diz duas coisas sobre esse
+botão: a ativação **não pode ser desfeita**, e ela **remove o limite de gastos
+da conta, sem permitir recriá-lo**. Num projeto de faculdade, trocar um teto
+de gastos permanente por um método de login não compensa.
+
+A escolha foi usuário técnico com chave, e o risco dela é contido pela
+permissão: ela consegue mandar comando **nesta única máquina** e nada mais.
+Não cria recurso, não lê banco, não gasta.
 
 ## O que precisa ser feito uma vez, no painel da AWS
 
-São dois cadastros. Depois disto, nunca mais.
-
-Os dados desta instalação:
+Dados desta instalação:
 
 | | |
 |---|---|
@@ -45,60 +57,84 @@ Os dados desta instalação:
 
 ### Parte 1. Deixar a AWS falar com a máquina
 
-O agente que faz isso **já está instalado** no Ubuntu. Falta dar permissão.
+**Esta parte já está feita.** A instância tem o papel `taemdia-maquina` com a
+permissão `AmazonSSMManagedInstanceCore`, e o agente está registrado.
 
-1. Abra o painel da AWS e procure por **IAM**
-2. No menu da esquerda, **Roles** (Funções), e clique em **Create role**
-3. Em "Trusted entity type", escolha **AWS service**
-4. Em "Use case", escolha **EC2** e clique em **Next**
-5. Na busca de permissões, digite `AmazonSSMManagedInstanceCore` e marque a
-   caixa dela. Clique em **Next**
-6. Em "Role name", escreva `taemdia-maquina` e clique em **Create role**
+Como foi feito, para registro: em **IAM** → **Funções** → **Criar função** →
+**Serviço da AWS** → **EC2**, com a permissão `AmazonSSMManagedInstanceCore`,
+nome `taemdia-maquina`. Depois, em **EC2** → a instância → **Ações** →
+**Segurança** → **Modificar função do IAM**.
 
-Agora ligar esse papel à máquina:
+Efeito colateral útil: a aba **Conectar** da instância passou a oferecer
+**Session Manager**, que é entrar na máquina pelo navegador, sem SSH.
 
-7. Vá para **EC2**, **Instances**, e marque a instância `i-084fdc0991f9456fe`
-8. Menu **Actions** → **Security** → **Modify IAM role**
-9. Escolha `taemdia-maquina` e clique em **Update IAM role**
+### Parte 2. Criar o usuário que o GitHub vai usar
 
-**Como conferir:** ainda no EC2, com a instância marcada, a aba **Connect**
-passa a oferecer **Session Manager**. Se o botão "Connect" dessa aba abrir um
-terminal, está funcionando. Pode levar uns dois minutos para aparecer.
+1. Em **IAM**, no menu da esquerda, **Políticas**, botão **Criar política**
+2. Escolha a aba **JSON** e cole o texto abaixo, **trocando
+   `SEU-NUMERO-DE-CONTA`** pelo número da sua conta (fica no canto superior
+   direito do painel, ao clicar no seu nome):
 
-### Parte 2. Deixar o GitHub pedir à AWS
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "MandarComandoNaMaquinaDoTaEmDia",
+      "Effect": "Allow",
+      "Action": "ssm:SendCommand",
+      "Resource": [
+        "arn:aws:ec2:us-east-2:SEU-NUMERO-DE-CONTA:instance/i-084fdc0991f9456fe",
+        "arn:aws:ssm:us-east-2::document/AWS-RunShellScript"
+      ]
+    },
+    {
+      "Sid": "LerOResultadoDoComando",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetCommandInvocation",
+        "ssm:ListCommandInvocations"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
 
-1. Em **IAM**, menu da esquerda, **Identity providers**, **Add provider**
-2. Escolha **OpenID Connect**
-3. Em "Provider URL", cole: `https://token.actions.githubusercontent.com`
-4. Clique em **Get thumbprint**
-5. Em "Audience", cole: `sts.amazonaws.com`
-6. Clique em **Add provider**
+3. **Próximo**, nome `taemdia-deploy`, **Criar política**
 
-Agora o papel que o GitHub vai usar:
+> O primeiro bloco é o que limita tudo: a permissão de mandar comando vale
+> **só** para a instância `i-084fdc0991f9456fe`. O segundo bloco é apenas para
+> ler a resposta, e não permite ação nenhuma.
 
-7. Em **Roles**, **Create role**
-8. Escolha **Web identity**
-9. Em "Identity provider", escolha `token.actions.githubusercontent.com`
-10. Em "Audience", escolha `sts.amazonaws.com`
-11. Em "GitHub organization", escreva `pamelabaron`.
-    Em "GitHub repository", escreva `TaEmDia`.
-    Em "GitHub branch", escreva `main`
-12. **Next**. Na busca de permissões, marque `AmazonSSMFullAccess`
-13. Em "Role name", escreva `taemdia-deploy` e clique em **Create role**
-14. Abra o papel recém-criado e copie o **ARN** (começa com `arn:aws:iam::`)
+Agora o usuário:
 
-> O passo 11 é o que impede qualquer outro repositório do mundo de pedir à AWS
-> para mexer na sua máquina. Não pule e não deixe em branco.
+4. Em **Usuários do IAM**, **Criar usuário**
+5. Nome: `taemdia-deploy`. **Não** marque acesso ao console. **Próximo**
+6. Em permissões, escolha **Anexar políticas diretamente**, busque
+   `taemdia-deploy` e marque. **Próximo**, **Criar usuário**
+7. Abra o usuário criado, aba **Credenciais de segurança**
+8. Em "Chaves de acesso", **Criar chave de acesso**
+9. Escolha **Aplicação em execução fora da AWS**, confirme, **Próximo**,
+   **Criar chave de acesso**
+10. Copie os dois valores que aparecem: **ID da chave** e **Chave secreta**
+
+> A chave secreta aparece **uma vez só**. Se fechar a tela sem copiar, apague
+> a chave e crie outra.
 
 ### Parte 3. Contar ao GitHub
 
 No GitHub, em **Settings** → **Secrets and variables** → **Actions**, aba
-**Secrets**, crie dois:
+**Secrets**, crie três:
 
 | Nome | Valor |
 |---|---|
-| `AWS_PAPEL_DEPLOY` | o ARN que você copiou no passo 14 |
+| `AWS_CHAVE_ID` | o ID da chave, do passo 10 |
+| `AWS_CHAVE_SECRETA` | a chave secreta, do passo 10 |
 | `AWS_INSTANCIA` | `i-084fdc0991f9456fe` |
+
+Depois de colados, o GitHub nunca mais mostra os valores, nem para você. Isso
+é proposital.
 
 ## Como subir, daqui em diante
 
@@ -108,8 +144,8 @@ git push
 
 É só. Acompanhe em **Actions**, no fluxo chamado **Deploy**.
 
-Para subir sem enviar código (refazer a última subida, por exemplo): em
-**Actions**, escolha **Deploy** e clique em **Run workflow**.
+Para subir sem enviar código: em **Actions**, escolha **Deploy** e clique em
+**Run workflow**.
 
 ## Se der errado
 
@@ -135,14 +171,20 @@ docker compose -f docker-compose.prod.yml restart nginx
 Esse caminho leva de 5 a 10 minutos e aperta a memória da máquina. É
 emergência, não rotina.
 
+## Trocar a chave, se precisar
+
+Se a chave vazar, ou por higiene de tempos em tempos: crie uma chave nova para
+o mesmo usuário, troque os dois segredos no GitHub, confirme que uma subida
+funciona, e só então apague a chave antiga.
+
 ## Depois que estiver funcionando
 
 Com o deploy novo provado, a porta 22 pode ser fechada: em **EC2** →
-**Security Groups** → o grupo da instância → **Edit inbound rules**, remova a
-regra da porta 22.
+**Grupos de segurança** → o grupo da instância → **Editar regras de entrada**,
+remova a regra da porta 22.
 
 A partir daí, para entrar na máquina use **Session Manager**, na aba
-**Connect** da instância. Sem porta aberta e sem chave para guardar.
+**Conectar** da instância.
 
 **Não feche a porta antes de testar o Session Manager.** Fechar sem o caminho
 novo provado é trancar a chave dentro de casa.
