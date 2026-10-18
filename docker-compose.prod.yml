@@ -5,7 +5,15 @@
 #   - o banco NÃO expõe porta para fora do servidor;
 #   - o backend roda sem --reload e atrás do Nginx;
 #   - o frontend é servido compilado (build de produção), não pelo ng serve;
-#   - o Nginx é a única porta de entrada, com HTTPS.
+#   - o Nginx é a única porta de entrada, com HTTPS;
+#   - as imagens vêm prontas, compiladas pelo CI, em vez de compiladas aqui.
+#
+# A variável VERSAO escolhe qual versão subir. O robô do deploy a define com o
+# identificador do commit; sem ela, vale "latest", e o comando manual continua
+# funcionando como sempre funcionou.
+#
+# Para compilar no próprio servidor (emergência, sem GitHub):
+#   docker compose -f docker-compose.prod.yml -f docker-compose.build.yml up -d --build
 services:
   db:
     image: postgres:16
@@ -24,7 +32,7 @@ services:
     # Sem "ports": o banco só é acessível pela rede interna do Docker.
 
   backend:
-    build: ./backend
+    image: ghcr.io/pamelabaron/taemdia-backend:${VERSAO:-latest}
     restart: unless-stopped
     env_file: .env
     environment:
@@ -44,7 +52,10 @@ services:
 
   # Agendador das cobranças: um container, um processo, um agendador.
   agendador:
-    build: ./backend
+    # A mesma imagem da API, de propósito: os dois precisam rodar exatamente o
+    # mesmo código, senão a cobrança é calculada por uma regra e enviada por
+    # outra, sem nada falhar.
+    image: ghcr.io/pamelabaron/taemdia-backend:${VERSAO:-latest}
     restart: unless-stopped
     env_file: .env
     environment:
@@ -59,9 +70,7 @@ services:
     command: python -m app.agendador_main
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: ghcr.io/pamelabaron/taemdia-frontend:${VERSAO:-latest}
     restart: unless-stopped
 
   nginx:

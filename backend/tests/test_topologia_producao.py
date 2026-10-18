@@ -63,3 +63,49 @@ def test_o_agendador_roda_em_um_processo_so(servicos):
     assert "--workers" not in comando, (
         f"O serviço {nome} agenda e usa --workers: cada worker criaria um agendador."
     )
+
+
+def _origem(servico: dict) -> str:
+    """De onde vem o código deste serviço: imagem pronta ou pasta compilada.
+
+    A produção passou a usar imagem já compilada pelo CI, em vez de compilar
+    no servidor. A conferência precisa entender as duas formas: a manual, que
+    continua valendo como caminho de emergência, e a nova.
+    """
+    imagem = servico.get("image")
+    if imagem:
+        return f"image:{imagem}"
+
+    construcao = servico.get("build")
+    if isinstance(construcao, dict):
+        return "build:" + str(construcao.get("context", ""))
+    return f"build:{construcao}"
+
+
+def test_a_api_e_o_agendador_usam_a_mesma_versao(servicos):
+    """Os dois rodam o mesmo código, e isso não pode depender de sorte.
+
+    Se a API subir numa versão e o agendador em outra, o sistema calcula a
+    cobrança por uma regra e envia por outra. O estrago é silencioso: nada
+    falha, só sai errado.
+    """
+    da_api = _origem(servicos["backend"])
+    do_agendador = _origem(servicos["agendador"])
+
+    assert da_api == do_agendador, (
+        f"A API vem de {da_api} e o agendador de {do_agendador}. "
+        "Os dois precisam ser a mesma coisa."
+    )
+
+
+def test_nenhum_servico_de_dados_e_recriado_pela_versao(servicos):
+    """Banco e volumes não acompanham a versão do código.
+
+    Marcar o Postgres com a versão do commit faria cada subida trocar o
+    container do banco. Os dados sobrevivem (estão no volume), mas é risco
+    gratuito num sistema que guarda clientes e comprovantes.
+    """
+    origem = _origem(servicos["db"])
+    assert "${VERSAO" not in origem and "$VERSAO" not in origem, (
+        f"O banco está marcado com a versão do código ({origem})."
+    )
