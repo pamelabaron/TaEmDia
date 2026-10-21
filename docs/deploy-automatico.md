@@ -149,19 +149,26 @@ Para subir sem enviar código: em **Actions**, escolha **Deploy** e clique em
 
 ## Se der errado
 
-Enquanto a porta 22 estiver aberta, o caminho manual continua:
+Para entrar na máquina: painel da AWS → **EC2** → a instância → aba
+**Conectar** → **Session Manager** → **Conectar**. Abre um terminal no
+navegador, sem senha, sem chave e sem porta aberta.
+
+Lá dentro, o caminho manual:
 
 ```bash
-ssh -i C:\Users\User\.ssh\taemdia-chave.pem ubuntu@taemdia.duckdns.org
+sudo -u ubuntu -i
 cd TaEmDia
-git pull
 docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 docker compose -f docker-compose.prod.yml restart nginx
 ```
 
+> O `sudo -u ubuntu -i` da primeira linha é necessário: o Session Manager
+> entra como outro usuário, e o projeto pertence ao `ubuntu`. Sem isso o git
+> recusa com "dubious ownership" e o Docker não acha os containers.
+
 E se as imagens prontas não existirem (GitHub fora do ar, por exemplo), dá
-para compilar no próprio servidor:
+para compilar no próprio servidor, ainda dentro do Session Manager:
 
 ```bash
 docker compose -f docker-compose.prod.yml -f docker-compose.build.yml up -d --build
@@ -179,12 +186,14 @@ funciona, e só então apague a chave antiga.
 
 ## Depois que estiver funcionando
 
-Com o deploy novo provado, a porta 22 pode ser fechada: em **EC2** →
-**Grupos de segurança** → o grupo da instância → **Editar regras de entrada**,
-remova a regra da porta 22.
+A porta 22 foi fechada depois que o deploy automático e o Session Manager
+foram testados, nesta ordem. O grupo de segurança é o `sg-0896d0bbb53386ddf`.
 
-A partir daí, para entrar na máquina use **Session Manager**, na aba
-**Conectar** da instância.
+Para reabrir, se um dia precisar: em **EC2** → **Grupos de segurança** → esse
+grupo → **Editar regras de entrada** → **Adicionar regra**, tipo SSH, porta 22.
 
-**Não feche a porta antes de testar o Session Manager.** Fechar sem o caminho
-novo provado é trancar a chave dentro de casa.
+Para fechar de novo, pelo CloudShell:
+
+```bash
+aws ec2 revoke-security-group-ingress --group-id sg-0896d0bbb53386ddf   --protocol tcp --port 22 --cidr 0.0.0.0/0
+```
