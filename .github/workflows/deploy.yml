@@ -166,7 +166,26 @@ jobs:
           echo "no ar: ${VERSAO}"
           SCRIPT
 
-          jq -Rs '{commands: [.]}' /tmp/trocar.sh > /tmp/parametros.json
+          # O script vai codificado em base64. Parece exagero, mas resolve de uma
+          # vez a classe inteira de problemas de aspas, acento e expansão de
+          # variável entre três camadas (YAML, shell do robô, shell do
+          # servidor). O que chega lá é byte a byte o que saiu daqui.
+          CODIFICADO=$(base64 -w0 /tmp/trocar.sh)
+
+          # E roda como "ubuntu", não como root. O Systems Manager executa tudo
+          # como root, e o repositório pertence ao ubuntu: o git recusa mexer
+          # num repositório de outro dono ("dubious ownership"). Liberar a
+          # pasta para o root resolveria o erro e criaria outro, porque os
+          # arquivos passariam a ser dele e o caminho manual pararia de
+          # funcionar.
+          cat > /tmp/comando.sh <<FORA
+          set -eu
+          echo '${CODIFICADO}' | base64 -d > /tmp/taemdia-deploy.sh
+          chmod 644 /tmp/taemdia-deploy.sh
+          sudo -u ubuntu sh /tmp/taemdia-deploy.sh
+          FORA
+
+          jq -Rs '{commands: [.]}' /tmp/comando.sh > /tmp/parametros.json
 
           ID=$(aws ssm send-command             --instance-ids "$INSTANCIA"             --document-name "AWS-RunShellScript"             --comment "Deploy ${VERSAO}"             --parameters file:///tmp/parametros.json             --query "Command.CommandId" --output text)
 
