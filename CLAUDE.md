@@ -171,6 +171,14 @@ todo texto. Foi ele que achou os problemas acima. Olhar não acha.
 | `TestBed.createComponent()` **não dispara o `ngOnInit`** | Chame `fixture.detectChanges()` antes de esperar a chamada HTTP |
 | Canalizar a saída para o `tail` faz `$?` devolver o estado do `tail`, não o do comando. Pareceu que o CI passava com 10 testes falhando | Redirecione para arquivo e leia `$?`, ou use `PIPESTATUS` |
 
+## Deploy e servidor
+
+| Armadilha | O que fazer |
+|---|---|
+| O Systems Manager roda o script com `/bin/sh`, que no Ubuntu é o **dash**, não o bash. `set -euo pipefail` morre na primeira linha com "Illegal option" | Use `set -eu` no script que vai para o servidor, e confira com `sh -n` antes |
+| `up -d --build` recria os containers, que ganham endereço interno novo, e o Nginx continua procurando no antigo. O site responde **502** | O `restart nginx` faz parte do deploy, não é passo opcional |
+| Arquivo montado pelo Docker para dentro de `/app` (que é a pasta `backend/`) cria um **arquivo vazio** no disco, e alguns foram commitados. O CI ficou vermelho 5 envios seguidos lendo um `docker-compose.prod.yml` de 0 byte | Os restos estão no `.gitignore`. A busca dos testes ignora arquivo vazio (`backend/tests/caminhos.py`) |
+
 ## Backend e testes
 
 | Armadilha | O que fazer |

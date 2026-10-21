@@ -137,7 +137,11 @@ jobs:
           # de várias linhas: a CLI corta no espaço e manda só o primeiro
           # pedaço, sem reclamar.
           cat > /tmp/trocar.sh <<SCRIPT
-          set -euo pipefail
+          # "set -eu" e não "set -euo pipefail": o Systems Manager roda este
+          # script com /bin/sh, que no Ubuntu é o dash, e o dash não conhece
+          # pipefail. O script morria na primeira linha com "Illegal option".
+          # Não faz falta: aqui não há nenhum cano para proteger.
+          set -eu
           cd /home/ubuntu/TaEmDia
 
           # Traz o compose e a configuração do Nginx desta versão. As imagens
