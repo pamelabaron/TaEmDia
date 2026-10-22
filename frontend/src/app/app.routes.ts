@@ -76,5 +76,17 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/assinaturas/assinaturas.component').then((m) => m.AssinaturasComponent),
   },
+  // Documentos legais: abertos de propósito, sem nenhuma proteção.
+  // Quem mais precisa lê-los é quem ainda não tem conta, e o cliente do
+  // vendedor, que foi cadastrado por outra pessoa.
+  {
+    path: 'privacidade',
+    loadComponent: () => import('./pages/legal/privacidade.component').then((m) => m.PrivacidadeComponent),
+  },
+  {
+    path: 'termos',
+    loadComponent: () => import('./pages/legal/termos.component').then((m) => m.TermosComponent),
+  },
+
   { path: '**', redirectTo: 'painel' },
 ];

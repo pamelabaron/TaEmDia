@@ -48,6 +48,8 @@ import './pages/configuracoes/pagina-assinatura.component';
 import './pages/configuracoes/resumo.component';
 import './pages/configuracoes/whatsapp.component';
 import './pages/dashboard/dashboard.component';
+import './pages/legal/privacidade.component';
+import './pages/legal/termos.component';
 import './pages/login/login.component';
 import './pages/ranking/ranking.component';
 import './pages/templates/templates.component';

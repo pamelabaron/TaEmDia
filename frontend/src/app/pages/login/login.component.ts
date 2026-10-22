@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 
 interface Recurso { titulo: string; texto: string; }
@@ -43,7 +44,7 @@ const PASSOS: Passo[] = [
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule],
+  imports: [MatButtonModule, MatIconModule, RouterLink],
   template: `
     <div class="pagina">
 
@@ -164,6 +165,10 @@ const PASSOS: Passo[] = [
 
       <footer class="rodape">
         <span><strong>TáEmDia</strong> · Cobrança automatizada via WhatsApp</span>
+        <nav class="rodape-links">
+          <a routerLink="/privacidade">Privacidade</a>
+          <a routerLink="/termos">Termos de uso</a>
+        </nav>
         <span class="rodape-fraco">© {{ ano }} TáEmDia</span>
       </footer>
     </div>
@@ -465,6 +470,13 @@ const PASSOS: Passo[] = [
       padding: 34px 28px; background: var(--superficie); border-top: 1px solid var(--borda);
       font-size: 0.85rem; color: var(--texto-suave); text-align: center;
     }
+    /* Exigência da LGPD, e também o item que mais falta em página gerada:
+       documento publicado que ninguém acha é o mesmo que inexistente. */
+    .rodape-links { display: flex; gap: var(--vao-grupo); flex-wrap: wrap; }
+    .rodape-links a {
+      color: var(--texto-suave); text-decoration: none; font-size: 0.88rem;
+    }
+    .rodape-links a:hover { color: var(--lilas-300); text-decoration: underline; }
     .rodape-fraco { color: var(--texto-fraco); font-size: 0.8rem; }
 
     /* telas menores */
