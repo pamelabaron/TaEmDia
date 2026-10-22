@@ -131,6 +131,8 @@ Consulte antes de agir na área correspondente.
 | No navegador embutido, `transform` **não renderiza** (nem inline com `!important`), mas `margin` funciona | Se um deslocamento "não aplica", teste com margem antes de supor que o CSS está errado |
 | `getComputedStyle` durante uma transição devolve o **valor inicial**, não o final | Meça posição real com `getBoundingClientRect()` |
 | Varrer `querySelectorAll('*')` atrás de quem passa da borda **não enxerga pseudo-elementos** (`::before`/`::after`). A varredura voltou vazia com a página rolando 279px para o lado | Compare `scrollWidth` com `clientWidth`; para achar o culpado, desligue o suspeito com um `<style>` injetado e meça de novo |
+| Com o painel do navegador **escondido**, o relógio das animações não corre: `currentTime` fica em 0 e tudo parece congelado no primeiro quadro. Pior, `document.visibilityState` responde `visible` e não denuncia | Confira `document.timeline.currentTime`: se for 0 depois de segundos, o painel não está pintando. Layout ainda pode ser medido; animação, não |
+| `getAnimations()` devolve `playState: "running"` mesmo com o relógio parado | "Running" quer dizer "não pausada por código", não "avançando" |
 | `docker compose restart frontend` pode deixar o `ng serve` morto | Use `up -d --force-recreate frontend` e aguarde ~45s |
 
 ## Angular e Material

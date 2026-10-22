@@ -29,9 +29,11 @@ services:
       # Só para os testes conferirem a topologia de produção. Somente leitura.
       - ./docker-compose.prod.yml:/app/docker-compose.prod.yml:ro
       - ./docker/nginx/taemdia.conf:/app/docker/nginx/taemdia.conf:ro
-      - ./frontend/src/app:/app/frontend/src/app:ro
+      # A pasta inteira, numa montagem só: as varreduras leem as telas, os
+      # estilos, o index.html e os arquivos do ícone. Três montagens separadas
+      # deixavam de fora o que viesse depois, e o teste pulava em silêncio.
+      - ./frontend/src:/app/frontend/src:ro
       - ./frontend/karma.conf.js:/app/frontend/karma.conf.js:ro
-      - ./frontend/src/styles.scss:/app/frontend/src/styles.scss:ro
       # A Wiki é gerada a partir daqui. Os testes conferem a geração.
       - ./docs:/app/docs:ro
       - ./scripts:/app/scripts:ro

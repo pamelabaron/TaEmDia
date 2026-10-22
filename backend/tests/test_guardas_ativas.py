@@ -32,6 +32,10 @@ GUARDAS = {
     ],
     "test_limites_nos_formularios": [("TELAS", "pasta frontend/src/app/pages")],
     "test_ritmo_do_espaco": [("ESTILOS", "frontend/src/styles.scss")],
+    "test_identidade_visual": [
+        ("ICONE", "frontend/src/icone.svg"),
+        ("PAGINA", "frontend/src/index.html"),
+    ],
     "test_documentos_legais": [
         ("ROTAS", "frontend/src/app/app.routes.ts"),
         ("ENTRADA", "a página de entrada"),
