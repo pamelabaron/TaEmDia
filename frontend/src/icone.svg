@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="TáEmDia">
+  <!-- Mesma geometria e mesmas cores do favicon.ico: ameixa com o visto em
+       lilás. Os tons vêm dos tokens do tema (ameixa 800, fundo 900 e lilás
+       300): o ícone é a primeira coisa que aparece do produto, numa aba de
+       16 pixels, e precisa ser reconhecivelmente a mesma marca.
+
+       Sem citar os nomes dos tokens com os dois hifens iniciais: duplo hifen
+       dentro de comentario XML e proibido, e quebra a leitura do arquivo. -->
+  <defs>
+    <linearGradient id="fundo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3f2a59"/>
+      <stop offset="1" stop-color="#0f0b14"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#fundo)"/>
+  <path d="M67 136 L110 179 L197 82" fill="none" stroke="#ddc7ff"
+        stroke-width="33" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

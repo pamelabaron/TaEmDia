@@ -8,13 +8,13 @@ O sistema usa o **Login com Google** (OAuth 2.0). Para funcionar, você precisa 
 
 ---
 
-## Passo 1 — Criar um projeto
+## Passo 1. Criar um projeto
 1. Acesse **https://console.cloud.google.com/**
 2. Faça login com sua conta Google.
 3. No topo, clique no seletor de projeto → **"Novo projeto"**.
 4. Nome: `TaEmDia` → **Criar**. Espere criar e selecione esse projeto.
 
-## Passo 2 — Configurar a tela de consentimento
+## Passo 2. Configurar a tela de consentimento
 1. No menu (☰) → **APIs e serviços** → **Tela de permissão OAuth**
    (em inglês: *OAuth consent screen*).
 2. Tipo de usuário: **Externo** → **Criar**.
@@ -27,7 +27,7 @@ O sistema usa o **Login com Google** (OAuth 2.0). Para funcionar, você precisa 
    e-mail Google** (enquanto o app está em modo de teste, só e-mails dessa lista conseguem entrar).
 6. **Salvar**.
 
-## Passo 3 — Criar a credencial (Client ID)
+## Passo 3. Criar a credencial (Client ID)
 1. Menu → **APIs e serviços** → **Credenciais**.
 2. **+ Criar credenciais** → **ID do cliente OAuth**.
 3. Tipo de aplicativo: **Aplicativo da Web**.
@@ -41,7 +41,7 @@ O sistema usa o **Login com Google** (OAuth 2.0). Para funcionar, você precisa 
 7. Aparece uma janela com **ID do cliente** e **Chave secreta do cliente**.
    **Copie os dois** (dá pra copiar depois também, na lista de credenciais).
 
-## Passo 4 — Colar no arquivo .env
+## Passo 4. Colar no arquivo .env
 Abra o arquivo `.env` na pasta do projeto e preencha:
 ```
 GOOGLE_CLIENT_ID=cole_aqui_o_id_do_cliente
@@ -50,7 +50,7 @@ GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
 ```
 Salve o arquivo.
 
-## Passo 5 — Reiniciar e testar
+## Passo 5. Reiniciar e testar
 No terminal, na pasta do projeto:
 ```
 docker compose restart backend

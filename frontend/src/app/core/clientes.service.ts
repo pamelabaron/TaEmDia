@@ -7,6 +7,9 @@ export interface Cliente {
   id: string;
   nome: string;
   whatsapp_numero: string;
+  /** Pronto para a tela: "55 (47) 99999-0000". Vem calculado da API, para
+   *  que o site não repita a regra de formatação e as duas não discordem. */
+  whatsapp_formatado: string;
   cpf: string | null;
   endereco: string | null;
   envio_auto_ativo: boolean;
@@ -18,6 +21,8 @@ export interface Cliente {
 export interface ClienteCreate {
   nome: string;
   whatsapp_numero: string;
+  /** Editável no formulário, mas sempre preenchido com 55 de início. */
+  codigo_pais?: string;
   cpf?: string | null;
   endereco?: string | null;
 }
