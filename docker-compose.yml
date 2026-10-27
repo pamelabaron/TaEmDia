@@ -29,6 +29,11 @@ services:
       # Só para os testes conferirem a topologia de produção. Somente leitura.
       - ./docker-compose.prod.yml:/app/docker-compose.prod.yml:ro
       - ./docker/nginx/taemdia.conf:/app/docker/nginx/taemdia.conf:ro
+      # O CI e a configuração da análise estática. Sem estes dois, os testes
+      # que conferem o pipeline pulam em silêncio aqui dentro e só reprovam
+      # no GitHub, onde o repositório inteiro existe.
+      - ./.github:/app/.github:ro
+      - ./sonar-project.properties:/app/sonar-project.properties:ro
       # A pasta inteira, numa montagem só: as varreduras leem as telas, os
       # estilos, o index.html e os arquivos do ícone. Três montagens separadas
       # deixavam de fora o que viesse depois, e o teste pulava em silêncio.

@@ -30,6 +30,12 @@ jobs:
       DATABASE_URL: postgresql+psycopg://taemdia:taemdia@localhost:5432/taemdia
       JWT_SECRET: chave-de-teste-do-ci
       AGENDADOR_ATIVO: "false"
+      # Fica aqui, no env do job, e não dentro do passo que o usa. A condição
+      # `if` de um passo não enxerga o `env` declarado nesse mesmo passo: ela
+      # lê o do job. Com o token só no passo, a análise aparecia como
+      # `skipped` em toda execução, e continuaria assim depois de alguém
+      # configurar o segredo. Ver backend/tests/test_analise_estatica.py.
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -58,11 +64,11 @@ jobs:
           name: cobertura
           path: backend/coverage.xml
 
-      - name: Análise no SonarCloud
+      # SonarQube Cloud (o antigo SonarCloud: a Sonar renomeou a família em
+      # outubro de 2024). O token vem do `env` do job, logo acima.
+      - name: Análise no SonarQube Cloud
         # Só roda quando o token estiver configurado nos segredos do repositório.
         if: ${{ env.SONAR_TOKEN != '' }}
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         uses: SonarSource/sonarqube-scan-action@v4
 
   frontend:

@@ -189,6 +189,8 @@ todo texto. Foi ele que achou os problemas acima. Olhar não acha.
 | `TestClient.get()` não aceita `json=` | Só `post`/`patch`/`put` aceitam |
 | Substring traiçoeira: a URL `connectionState` **contém** `connect` | Compare o caminho completo (`/instance/connect/`) |
 | Texto de exemplo longo passa em validação de tamanho (`gere_uma_chave...` tem 40 caracteres) | Valide contra uma **lista de valores de exemplo**, não só pelo comprimento |
+| Coluna nova + migração aplicada e **16 testes quebram** com `UndefinedColumn`. O banco de testes é outro (`taemdia_test`) e nasce de `Base.metadata.create_all`, que cria tabela que falta mas **não acrescenta coluna em tabela que já existe** | Apague o banco de testes e deixe o conftest recriar: `docker compose exec db psql -U taemdia -d postgres -c "DROP DATABASE IF EXISTS taemdia_test;"` |
+| Campo novo é aceito pela API, some, e a tela mostra vazio sem erro nenhum | O service monta o objeto **campo a campo** (não com `**model_dump()`), de propósito. Campo novo no schema precisa ser acrescentado lá também |
 
 ## Sinais de alerta. Pare e verifique
 

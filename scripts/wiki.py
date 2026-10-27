@@ -25,6 +25,7 @@ TITULOS = {
     "docs/instalacao-ambiente.md": "Instalação do ambiente",
     "docs/modelo-de-dados.md": "Modelo de dados",
     "docs/testes.md": "Testes",
+    "docs/analise-estatica.md": "Análise estática",
     "docs/deploy.md": "Deploy em produção",
     "docs/deploy-automatico.md": "Deploy automático",
     "docs/documentos-legais.md": "Documentos legais",

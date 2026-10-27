@@ -46,6 +46,8 @@ backend/docker/
 backend/README.md
 backend/COMO-RODAR.md
 backend/docker-compose.prod.yml
+backend/.github/
+backend/sonar-project.properties
 
 # Estado das ferramentas de design
 .impeccable/
