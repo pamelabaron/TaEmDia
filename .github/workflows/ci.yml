@@ -69,7 +69,11 @@ jobs:
       - name: Análise no SonarQube Cloud
         # Só roda quando o token estiver configurado nos segredos do repositório.
         if: ${{ env.SONAR_TOKEN != '' }}
-        uses: SonarSource/sonarqube-scan-action@v4
+        # Versão presa por inteiro, e não só "@v8": a análise precisa dar o
+        # mesmo resultado daqui até a defesa. A v4, que estava aqui antes,
+        # avisava no próprio log que não tem mais suporte e contém falha de
+        # segurança, mas o aviso não reprova o passo e passava batido.
+        uses: SonarSource/sonarqube-scan-action@v8.3.0
 
   frontend:
     name: Frontend. Testes e build

@@ -120,6 +120,25 @@ def test_a_condicao_so_depende_de_coisa_que_ela_enxerga(ci):
     )
 
 
+#: Versões da action que a própria Sonar declara sem suporte e com falha de
+#: segurança. A mensagem aparece como aviso no log, que ninguém lê, e o passo
+#: continua verde: por isso a conferência é aqui.
+VERSOES_VULNERAVEIS = ("@v1", "@v2", "@v3", "@v4", "@v5")
+
+
+def test_a_action_do_sonar_nao_esta_numa_versao_vulneravel(ci):
+    achado = re.search(r"sonarqube-scan-action(@[\w.]+)", ci)
+    assert achado, "Não achei a versão da action do Sonar."
+
+    versao = achado.group(1)
+    vulneravel = [v for v in VERSOES_VULNERAVEIS if versao == v or versao.startswith(v + ".")]
+    assert not vulneravel, (
+        f"A action do Sonar está em {versao}. A própria Sonar avisa no log que "
+        "esta versão não tem mais suporte e contém falha de segurança. O aviso "
+        "não reprova o passo, então ele passa despercebido."
+    )
+
+
 def test_a_configuracao_aponta_para_este_projeto(propriedades):
     assert propriedades.get("sonar.projectKey") == "pamelabaron_TaEmDia", (
         "A chave do projeto não é a deste repositório. Análise com chave "
