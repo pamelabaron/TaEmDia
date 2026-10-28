@@ -121,6 +121,56 @@ Como separar o que importa:
 | **Security Hotspots** | Trecho que **merece conferência**, não necessariamente problema | Marcar como revisado depois de olhar |
 | **Code Smells** | Estilo, complexidade, duplicação | Ignorar com tranquilidade. É a maior parte |
 
+## As duas marcas de segurança, e por que ficam
+
+A nota de segurança aparece como **E**, por causa de duas marcas graves. As
+duas foram investigadas, uma a uma, e **nenhuma é falha**. Elas continuam no
+painel porque só quem tem acesso à conta pode marcá-las como alarme falso.
+
+### 1. `armazenamento.py`, "Path Traversal via uploaded file"
+
+O motor vê bytes de um arquivo enviado chegando num `write_bytes` e marca
+travessia de caminho. Mas quem está contaminado é o **conteúdo**, não o
+caminho. O caminho é formado por três partes, nenhuma delas vinda do usuário:
+
+- `UPLOADS_DIR`, que vem da configuração;
+- um `uuid.uuid4()` gerado na hora;
+- uma extensão tirada de um dicionário de três valores, cuja chave é o tipo
+  **detectado pelos primeiros bytes do arquivo**, não pela extensão enviada.
+
+O nome que a pessoa digitou nunca entra na formação do caminho.
+
+A saída também foi conferida. O download põe o nome original no cabeçalho
+`Content-Disposition`, e o Starlette o codifica: um nome contendo `\r\n` sai
+como `%0D%0A`, sem injetar cabeçalho nenhum. A rota exige administradora.
+
+Mesmo assim, o nome original passou a ser limpo antes de ser guardado
+(`nome_seguro`, no mesmo arquivo): some o caminho, somem os caracteres de
+controle, e o tamanho é cortado em 120 preservando a extensão. Não era
+necessário para fechar uma brecha; é higiene, e é mais barato agora do que
+depois que houver dado de verdade. Tem 19 testes em
+`backend/tests/test_nome_do_comprovante.py`.
+
+### 2. `config.py`, "senha de PostgreSQL no código"
+
+A senha apontada é a palavra `troque_esta_senha`, que é um valor de exemplo no
+endereço padrão do banco, usado só em desenvolvimento.
+
+E há uma ironia: o sistema **se recusa a subir em produção** com ela. Está em
+`validar_para_producao`, no mesmo arquivo, que lista "A senha padrão do banco
+continua no DATABASE_URL" entre os problemas que impedem a inicialização. O
+Sonar reclama exatamente da proteção que existe contra o problema que ele teme.
+
+### Como marcar as duas no painel
+
+No SonarCloud, abra a marca, clique no menu e escolha **False Positive** (ou
+**Won't Fix**, na segunda), colando a justificativa correspondente acima. Feito
+isso, a nota de segurança volta para **A**.
+
+Fazer isso é parte do trabalho, não um jeito de esconder: análise estática se
+usa lendo cada marca e decidindo. O que não vale é deixar tudo aberto e parar
+de olhar.
+
 ## Limitação conhecida
 
 A cobertura que chega ao painel é **só a do backend**
