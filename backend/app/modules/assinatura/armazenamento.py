@@ -10,8 +10,9 @@ Três cuidados que valem a pena explicar:
 3. A pasta fica fora de qualquer diretório servido como estático: o arquivo só
    sai por endpoint autenticado de administradora.
 """
+import re
 import uuid
-from pathlib import Path
+from pathlib import PurePosixPath, PureWindowsPath, Path
 
 from app.core.config import settings
 
@@ -28,8 +29,49 @@ TAMANHO_MAXIMO = 5 * 1024 * 1024
 EXTENSOES = {"image/jpeg": ".jpg", "image/png": ".png", "application/pdf": ".pdf"}
 
 
+#: Limite do nome original guardado no banco. Não é regra de negócio: é o
+#: tamanho acima do qual o nome deixa de informar e vira despejo de texto.
+NOME_MAXIMO = 120
+
+#: Usado quando não sobra nome nenhum. A coluna é obrigatória no banco.
+NOME_PADRAO = "comprovante"
+
+#: Caracteres de controle: quebra de linha, tabulação, nulo e companhia.
+_CONTROLE = re.compile(r"[\x00-\x1f\x7f]")
+
+
 class ArquivoInvalido(Exception):
     """O arquivo enviado não é um comprovante aceitável."""
+
+
+def nome_seguro(nome: str | None) -> str:
+    """Limpa o nome que veio do cliente HTTP, para guardar e exibir.
+
+    Este nome **não** forma o caminho em disco: o arquivo salvo tem nome
+    gerado aqui (ver `guardar`). Ele existe só para a administradora ver
+    "nota-de-outubro.pdf" em vez de um UUID, e vai para o cabeçalho
+    `Content-Disposition` no download.
+
+    Mesmo assim ele é limpo, por três motivos somados: é texto de fora, não
+    tem limite de tamanho na coluna, e é mais barato tratar agora do que
+    depois que houver dado de verdade para migrar.
+
+    Três passos: tirar o caminho, tirar caractere de controle, e cortar no
+    tamanho preservando a extensão.
+    """
+    bruto = (nome or "").strip()
+    # Os dois sabores de separador, porque quem envia pode estar no Windows e
+    # o PurePosixPath sozinho não reconheceria a contrabarra.
+    so_nome = PureWindowsPath(PurePosixPath(bruto).name).name
+    limpo = _CONTROLE.sub("", so_nome).strip().strip(".")
+    if not limpo:
+        return NOME_PADRAO
+    if len(limpo) <= NOME_MAXIMO:
+        return limpo
+
+    # Corta o miolo, não o fim: a extensão é o que diz o que será aberto.
+    extensao = Path(limpo).suffix[:16]
+    return limpo[: NOME_MAXIMO - len(extensao)] + extensao
 
 
 def detectar_tipo(conteudo: bytes) -> str:

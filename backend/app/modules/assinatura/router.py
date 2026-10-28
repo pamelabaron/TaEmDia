@@ -84,7 +84,9 @@ async def enviar_comprovante(
         pagamento = service.registrar_comprovante(
             vendedor_id=vendedor_id,
             valor=valor,
-            arquivo_nome=arquivo.filename or "comprovante",
+            # O nome vem do cliente HTTP: entra limpo, sem caminho nem
+            # caractere de controle, e com tamanho de gente.
+            arquivo_nome=armazenamento.nome_seguro(arquivo.filename),
             arquivo_caminho=caminho,
             arquivo_tipo=tipo,
         )
