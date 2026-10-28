@@ -1,0 +1,105 @@
+// Estilo dos dois documentos legais.
+//
+// Um arquivo para os dois, porque são o mesmo tipo de página: texto corrido,
+// longo, para ler de cima a baixo. Tudo aqui serve à leitura e nada mais.
+//
+// A medida da linha é o ajuste que mais importa num documento destes. Linha
+// larga demais faz o olho perder o começo da próxima; o limite em "ch" prende
+// a largura ao tamanho da fonte, então ela acompanha quem aumenta o texto no
+// navegador.
+
+.documento {
+  max-width: 68ch;
+  margin: 0 auto;
+  padding: 40px 20px 72px;
+}
+
+header {
+  margin-bottom: var(--vao-secao);
+
+  .voltar {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: var(--lilas-300);
+    text-decoration: none;
+    font-size: 0.92rem;
+  }
+  .voltar:hover { text-decoration: underline; }
+
+  h1 {
+    font-size: clamp(1.9rem, 4vw, 2.5rem);
+    margin: 0 0 8px;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .data {
+    margin: 0;
+    color: var(--texto-fraco);
+    font-size: 0.88rem;
+  }
+}
+
+// Filete separando as seções: num documento longo, é o que diz onde um
+// assunto acaba. Mais confiável que espaço sozinho, porque espaço some
+// quando a seção anterior termina com parágrafo curto.
+section {
+  padding-top: var(--vao-grupo);
+  margin-bottom: var(--vao-grupo);
+  border-top: 1px solid rgba(201, 169, 255, 0.12);
+}
+
+h2 {
+  font-size: 1.3rem;
+  margin: 0 0 var(--vao-dentro);
+  letter-spacing: -0.02em;
+}
+
+h3 {
+  font-size: 1rem;
+  margin: var(--vao-grupo) 0 var(--vao-apertado);
+  color: var(--lilas-300);
+}
+
+p {
+  margin: 0 0 var(--vao-dentro);
+  line-height: 1.7;
+  color: var(--texto-suave);
+}
+
+// Texto em destaque dentro do parágrafo fica na cor cheia, não em negrito
+// apenas: no escuro, peso sozinho quase não se distingue.
+strong { color: var(--texto); font-weight: 600; }
+
+em { color: var(--lilas-300); font-style: normal; }
+
+ul {
+  margin: 0 0 var(--vao-dentro);
+  padding-left: 20px;
+  color: var(--texto-suave);
+  line-height: 1.7;
+}
+li { margin-bottom: var(--vao-apertado); }
+
+a { color: var(--lilas-300); }
+
+// Observação lateral: recuada e com um filete, para se ler como comentário
+// e não como mais uma regra do documento.
+.nota {
+  border-left: 2px solid rgba(201, 169, 255, 0.3);
+  padding-left: 16px;
+  font-size: 0.93rem;
+}
+
+footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vao-grupo);
+  padding-top: var(--vao-grupo);
+  border-top: 1px solid rgba(201, 169, 255, 0.12);
+
+  a { font-size: 0.92rem; }
+}
+
+@media (max-width: 480px) {
+  .documento { padding: 28px 16px 56px; }
+}
