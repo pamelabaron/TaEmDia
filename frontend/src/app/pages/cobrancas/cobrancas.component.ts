@@ -21,6 +21,15 @@ const ROTULO_TIPO: Record<string, string> = {
   resumo: 'Resumo diário',
 };
 
+/** Situação da mensagem. "descartada" é a que esperava na fila e deixou de
+ *  fazer sentido (a parcela foi paga, a venda cancelada, o dia virou). Antes
+ *  ela caía no "Na fila" e prometia um envio que nunca ia acontecer. */
+const ROTULO_STATUS: Record<string, string> = {
+  enviado: 'Enviada',
+  pendente: 'Na fila',
+  descartada: 'Não enviada',
+};
+
 @Component({
   selector: 'app-cobrancas',
   standalone: true,
@@ -65,9 +74,7 @@ const ROTULO_TIPO: Record<string, string> = {
               </span>
               <span class="direita">
                 <span class="etiqueta" [class]="'tipo-' + l.tipo">{{ rotulo(l.tipo) }}</span>
-                <span class="status" [class.falhou]="l.status !== 'enviado'">
-                  {{ l.status === 'enviado' ? 'Enviada' : 'Na fila' }}
-                </span>
+                <span class="status" [class]="'status-' + l.status">{{ rotuloStatus(l.status) }}</span>
               </span>
             </div>
             <p class="mensagem">{{ l.conteudo }}</p>
@@ -93,8 +100,10 @@ const ROTULO_TIPO: Record<string, string> = {
     .tipo-vencimento { background: var(--alerta-bg); color: var(--alerta); }
     .tipo-manual { background: rgba(201, 169, 255, 0.10); color: var(--lilas-300); }
     .tipo-resumo { background: var(--sucesso-bg); color: var(--sucesso); }
-    .status { font-size: 0.75rem; color: var(--sucesso); }
-    .status.falhou { color: var(--alerta); }
+    .status { font-size: 0.75rem; color: var(--alerta); }
+    .status-enviado { color: var(--sucesso); }
+    /* Cinza neutro: não é erro a corrigir nem envio a esperar. */
+    .status-descartada { color: var(--neutro); }
     .mensagem { white-space: pre-wrap; color: var(--texto); font-size: 0.88rem; margin: 8px 0 4px; }
     .data { font-size: 0.72rem; color: var(--texto-fraco); }
   `],
@@ -138,6 +147,8 @@ export class CobrancasComponent implements OnInit {
   }
 
   rotulo(tipo: string): string { return ROTULO_TIPO[tipo] ?? tipo; }
+
+  rotuloStatus(status: string): string { return ROTULO_STATUS[status] ?? 'Na fila'; }
 
   formatarData(iso: string): string {
     const d = new Date(iso + (iso.endsWith('Z') ? '' : 'Z'));

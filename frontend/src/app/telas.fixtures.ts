@@ -113,6 +113,16 @@ export const TELAS: TelaDeTeste[] = [
         id: '1', cliente_id: '1', cliente_nome: 'Rosangela Ferreira', parcela_id: '1',
         tipo: 'lembrete', conteudo: 'Olá! Sua parcela vence amanhã.',
         status: 'enviado', criado_em: '2026-09-25T09:00:00',
+      }, {
+        // As três situações na mesma tela, para o teste de contraste medir
+        // os três rótulos, e não só o de "Enviada".
+        id: '2', cliente_id: '2', cliente_nome: 'Marcos Lima', parcela_id: '2',
+        tipo: 'atraso', conteudo: 'Sua parcela venceu ontem.',
+        status: 'pendente', criado_em: '2026-09-25T10:00:00',
+      }, {
+        id: '3', cliente_id: '3', cliente_nome: 'Ana Souza', parcela_id: '3',
+        tipo: 'vencimento', conteudo: 'Sua parcela vence hoje.',
+        status: 'descartada', criado_em: '2026-09-24T11:00:00',
       }]],
       ['/whatsapp/status', {
         conectado: true, numero: '5547999990000', qrcode: null,

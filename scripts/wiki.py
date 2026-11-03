@@ -26,6 +26,8 @@ TITULOS = {
     "docs/modelo-de-dados.md": "Modelo de dados",
     "docs/testes.md": "Testes",
     "docs/analise-estatica.md": "Análise estática",
+    "docs/decisoes-tecnicas.md": "Decisões técnicas",
+    "docs/monitoramento.md": "Monitoramento",
     "docs/deploy.md": "Deploy em produção",
     "docs/deploy-automatico.md": "Deploy automático",
     "docs/documentos-legais.md": "Documentos legais",

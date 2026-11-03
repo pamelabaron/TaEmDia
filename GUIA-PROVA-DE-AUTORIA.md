@@ -24,6 +24,15 @@ pedir mudanças no código na hora.
 | 3 | Fazer os três ensaios da Parte 5 sozinha, do zero, cronometrando | 2 horas |
 | 4 | Repetir a Parte 5 na véspera, e reler a Parte 6 | 1 hora |
 
+**Leia junto: `docs/decisoes-tecnicas.md`.** São 22 decisões do projeto, cada
+uma com o motivo, a alternativa descartada, o preço e onde está no código. É
+exatamente o que a prova chama de "decisões de engenharia", e boa parte das
+respostas "por quê?" está lá.
+
+**Os números mudam.** Cada teste novo muda a contagem. Os deste guia são de 3
+de novembro de 2026; na véspera, rode os testes (Ensaio 1) e use os números que
+aparecerem na sua tela.
+
 **A regra que mais vale.** Quando ele perguntar, não comece a falar. Abra o
 arquivo primeiro, depois fale olhando para ele. Quem sabe onde a coisa está
 demonstra domínio mesmo quando erra um detalhe. Quem recita de cor e não acha o
@@ -115,11 +124,11 @@ curta e verdadeira:
 
 | | |
 |---|---|
-| Commits | 70 |
+| Commits | mais de 75 |
 | Tabelas no banco | 10 |
 | Migrações | 10 |
-| Testes do backend | 492, cobertura **91%** (meta do playbook: 75%) |
-| Testes do frontend | 178, cobertura **66,2%** (meta do playbook: 25%) |
+| Testes do backend | 547, cobertura **92%** (meta do playbook: 75%) |
+| Testes do frontend | 182, cobertura **66,3%** (meta do playbook: 25%) |
 | Telas | 15 rotas |
 
 ---
@@ -175,7 +184,7 @@ para rodar igual em qualquer máquina. É por isso que o setup é um comando só
 de código.
 
 **Cobertura de testes.** Percentual das linhas do sistema que os testes
-executam. 91% significa que, de cada 100 linhas, 91 foram percorridas por algum
+executam. 92% significa que, de cada 100 linhas, 92 foram percorridas por algum
 teste.
 
 ---
@@ -275,7 +284,7 @@ parte em que eu confio, porque é a única que o usuário não controla.
 **Se ele aprofundar:** "o que você faria diferente hoje?" Uma resposta honesta
 vale mais que uma defesa. Sugestão verdadeira: eu teria escrito as regras de
 negócio como funções puras desde o início, e não só da metade em diante. Foi o
-que deixou a cobertura chegar a 91%, porque função pura não precisa de banco
+que deixou a cobertura chegar a 92%, porque função pura não precisa de banco
 para ser testada, e eu só percebi isso no meio do caminho.
 
 ---
@@ -765,10 +774,21 @@ docker compose -f docker-compose.prod.yml logs backend --tail 100
 > nunca pode derrubar a aplicação**. Uma falha no envio de uma cobrança não pode
 > tirar o sistema inteiro do ar.
 
-**Se ele aprofundar:** "e monitoramento?" Resposta honesta: não tem ferramenta
-de monitoramento (tipo Sentry). O que existe é o log no servidor e a conferência
-automática no fim do deploy, que acessa o site e falha se ele não responder.
-Para o tamanho do projeto, foi uma escolha consciente de escopo.
+**Se ele aprofundar:** "e monitoramento?" Abra `.github/workflows/monitor.yml`.
+
+> A cada 30 minutos o GitHub consulta o site sozinho: a API e a página. Se
+> falhar, o fluxo fica vermelho e eu recebo e-mail. Não precisei de conta em
+> serviço nenhum.
+>
+> O detalhe que eu mais gosto: o `/health` (`backend/app/main.py`) **pergunta
+> ao banco**. Antes ele respondia "ok" sem olhar nada. Com o PostgreSQL parado,
+> a API continuaria viva jurando que estava tudo bem, e o monitor ficaria verde
+> com o sistema quebrado. Agora ele responde 503, e o monitor confere que o
+> corpo diz `"banco":"ok"`, não só o código 200.
+
+O que ele **não** faz, e você pode admitir: não mede lentidão e não olha
+memória e disco do servidor. Para isso existiria Prometheus com Grafana, que
+não cabem numa máquina de 909 MB. Está em `docs/monitoramento.md`.
 
 ---
 
@@ -808,7 +828,7 @@ Para o tamanho do projeto, foi uma escolha consciente de escopo.
 | Serviço | Para quê | Se cair |
 |---|---|---|
 | **Google OAuth** | O login | Ninguém entra. Quem já está dentro continua, porque o token vale 24h e não depende do Google. O `callback` captura `httpx.HTTPError` e responde 400 com mensagem clara (`auth/router.py:33`) |
-| **Evolution API (WhatsApp)** | Enviar as cobranças | O envio falha, mas **o sistema inteiro continua funcionando**. É aqui que está a melhor parte da arquitetura, veja abaixo |
+| **Evolution API (WhatsApp)** | Enviar as cobranças | O envio falha, mas **o sistema inteiro continua funcionando**, e a mensagem fica **na fila** para reenvio (FE01). É aqui que está a melhor parte da arquitetura, veja abaixo |
 | **AWS** | Onde tudo roda | Site fora do ar |
 
 **Mostre a abstração do WhatsApp.** Abra
@@ -840,16 +860,16 @@ bem feita do projeto:
 docker compose exec backend pytest
 ```
 
-Leva cerca de 2 minutos. O resultado esperado: **492 passed**, cobertura
-**91%**.
+Leva cerca de 2 minutos. O resultado esperado: **547 passed**, cobertura
+**92%**.
 
 ```bash
 docker compose --profile testes run --rm frontend-testes
 ```
 
-Resultado esperado: **178 de 178 SUCCESS**, Statements **66,2%**.
+Resultado esperado: **182 de 182 SUCCESS**, Statements **66,3%**.
 
-> As metas do playbook são 75% no backend e 25% no frontend. Estou em 91% e
+> As metas do playbook são 75% no backend e 25% no frontend. Estou em 92% e
 > 66%. E a meta não é promessa: no frontend ela está configurada em
 > `karma.conf.js:35`, e **o comando falha** se a cobertura cair abaixo de 25%. O
 > CI reprova o envio.
@@ -946,8 +966,23 @@ que eu faria, se o custo de minutos virasse problema, é filtrar por caminho
 >
 > **Backend** (linha 10): sobe um PostgreSQL de verdade como serviço, instala o
 > Python 3.12, instala as dependências, roda o pytest com cobertura, guarda o
-> relatório, e roda a análise estática no SonarCloud se o token estiver
-> configurado.
+> relatório, e roda a **análise estática no SonarQube Cloud**.
+
+**Sobre a análise estática**, que a pergunta cita pelo nome. Abra o painel
+(https://sonarcloud.io/dashboard?id=pamelabaron_TaEmDia) e mostre: notas A em
+confiabilidade, segurança e manutenibilidade, zero bug, zero vulnerabilidade
+aberta. Se ele perguntar o que acontece quando ela falha:
+
+> O quality gate dela está aprovado. As duas marcas de segurança que ela
+> levantou eu investiguei uma a uma: as duas eram falso positivo, e eu fechei
+> com a justificativa escrita, que está em `docs/analise-estatica.md`. Uma
+> delas era sobre o upload de comprovante, e eu provei com teste que o nome do
+> arquivo em disco é gerado pelo sistema.
+
+E a história boa: **o passo do Sonar existia e nunca tinha rodado.** Aparecia
+como "skipped" em toda execução, porque a condição dele lia uma variável que só
+existia dentro do próprio passo. Escrevi um teste que falhava por causa disso
+(`backend/tests/test_analise_estatica.py`) e só então corrigi.
 >
 > **Frontend** (linha 68): instala o Node 20, `npm ci`, **compila** a aplicação,
 > e só então roda os testes com cobertura num Chrome sem tela.
@@ -1061,8 +1096,8 @@ a migração que conserta os antigos, e os testes.
 diga o que fez no lugar:
 
 > Trabalhei sozinha, então não tive revisão de colega. O que usei no lugar foi
-> revisão automática: o CI roda 492 testes e a análise estática do SonarCloud a
-> cada envio, e os testes de guarda conferem coisas que uma pessoa esqueceria,
+> revisão automática: o CI roda todos os testes e a análise estática do
+> SonarQube a cada envio, e os testes de guarda conferem coisas que uma pessoa esqueceria,
 > como "a rota nova tem caminho no Nginx" e "as regras em Python e em TypeScript
 > continuam iguais".
 
@@ -1101,6 +1136,25 @@ silencioso.
 > foi criar `backend/tests/caminhos.py`, que **ignora arquivo de tamanho zero**,
 > pôr os restos no `.gitignore`, e escrever `test_guardas_ativas.py`, que falha
 > se algum teste de guarda estiver pulando em silêncio.
+
+**Bug 3, a cobrança repetida.** Mostra que você testa o que suspeita antes de
+afirmar. Abra `backend/tests/test_cobranca_sem_repeticao.py`.
+
+> A varredura de cobranças roda de hora em hora, das 8h às 20h. Lendo o código
+> para ligar o reenvio de mensagens, desconfiei que nada impedia a mesma
+> parcela de ser cobrada de novo na rodada seguinte. Em vez de sair mudando,
+> escrevi o teste do comportamento certo: um cliente com uma parcela atrasada,
+> treze varreduras no mesmo dia. Resultado: **3 cobranças iguais**, e não uma.
+> E quem respondia "1 - Já paguei" continuava sendo cobrado.
+>
+> O teste antigo de limite diário não pegava isso por acaso: o cenário dele
+> tinha três parcelas, então a primeira rodada já gastava as três mensagens.
+> Ele provava o teto, não a repetição.
+>
+> Como o WhatsApp real ainda não estava ligado em produção, nenhum cliente de
+> verdade recebeu isso. A correção é uma consulta que diz quais parcelas já
+> foram cobradas no dia, e o filtro que tira a parcela "aguardando
+> confirmação". O registro está em `docs/decisoes-tecnicas.md`, decisões 12 e 13.
 
 **Se ele aprofundar:** "como você depura?" Diga a verdade do projeto, que é uma
 disciplina real: **medir antes de concluir**. Por exemplo, para conferir
@@ -1155,13 +1209,13 @@ Espere cerca de 50 segundos.
 docker compose exec backend pytest
 ```
 
-**Resultado esperado:** `492 passed`, e no fim a linha `TOTAL ... 91%`.
+**Resultado esperado:** `547 passed`, e no fim a linha `TOTAL ... 92%`.
 
 ```bash
 docker compose --profile testes run --rm frontend-testes
 ```
 
-**Resultado esperado:** `Executed 178 of 178 SUCCESS` e `Statements : 66.2%`.
+**Resultado esperado:** `Executed 182 of 182 SUCCESS` e `Statements : 66.28%`.
 
 Para mostrar o relatório visual: o arquivo `backend/htmlcov/index.html` abre no
 navegador e mostra arquivo por arquivo, com as linhas não cobertas em vermelho.
@@ -1413,13 +1467,13 @@ Concorde, e mostre que você sabe o tamanho do problema:
 
 **Limitações reais do projeto que você pode assumir sem medo:**
 
-- Não tem ferramenta de monitoramento de erros em produção, só o log no
-  servidor.
+- O monitoramento é básico: sabe se o site e o banco respondem, mas não mede
+  lentidão nem olha memória e disco do servidor.
 - O status da parcela ser calculado impede filtrar por status direto no SQL.
 - Não tem refresh token: depois de 24 horas, login de novo.
 - Os comprovantes de assinatura são conferidos na mão, não tem pagamento
   automático.
-- A cobertura do frontend (66%) é menor que a do backend (91%), porque tela é
+- A cobertura do frontend (66%) é menor que a do backend (92%), porque tela é
   mais cara de testar que função pura.
 
 ### Perguntas "e se" prováveis
@@ -1442,7 +1496,7 @@ Marque cada um só depois de ter feito **de verdade**.
 - [ ] Consigo desenhar o diagrama da Parte 1 no papel, sem olhar
 - [ ] Sei dizer de cabeça o que faz cada uma das três camadas do backend
 - [ ] `docker compose up` roda na minha máquina e eu sei que leva 50 segundos
-- [ ] Rodei o Ensaio 1 e vi `492 passed` e `178 SUCCESS`
+- [ ] Rodei o Ensaio 1 e vi `547 passed` e `182 SUCCESS`
 - [ ] Fiz o Ensaio 2 sozinha, sem olhar o guia, e desfiz
 - [ ] Fiz o Ensaio 3 inteiro sozinha, inclusive a pegadinha do banco de testes
 - [ ] Sei explicar por que o status da parcela não é guardado

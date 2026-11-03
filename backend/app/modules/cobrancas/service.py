@@ -108,9 +108,13 @@ class CobrancaService:
         limite_data = hoje + timedelta(days=max(dias_antecedencia, 0))
         enviados: list[CobrancaLog] = []
         contagem_cache: dict[uuid.UUID, int] = {}
+        # Uma cobrança por parcela por dia, contando a manual e a que está na
+        # fila. A varredura roda de hora em hora e, sem isto, repetia a mesma
+        # cobrança até o limite de 3 por dia.
+        ja_cobradas = self.log_repo.parcelas_cobradas_no_dia(vendedor_id, hoje)
 
-        for parcela, venda, cliente in self.parcela_repo.elegiveis(hoje, limite_data):
-            if venda.vendedor_id != vendedor_id:
+        for parcela, _venda, cliente in self.parcela_repo.elegiveis(vendedor_id, hoje, limite_data):
+            if parcela.id in ja_cobradas:
                 continue
             tipo = escolher_tipo(parcela.data_vencimento, hoje, dias_antecedencia)
             if tipo is None:
@@ -130,21 +134,73 @@ class CobrancaService:
         return enviados
 
     # --------------------------------------------------------- fila de reenvio
-    def reenviar_pendentes(self, numeros_por_cliente: dict[uuid.UUID, str]) -> int:
-        """Reenvia as mensagens que ficaram na fila após queda de conexão (FE01)."""
+    def reenviar_pendentes(self, vendedor_id: uuid.UUID, hoje: date | None = None) -> int:
+        """Reenvia as mensagens que ficaram na fila após queda de conexão (FE01).
+
+        Chamado pela tarefa horária do agendador, antes da varredura. Esta
+        função existia desde o começo e ninguém a chamava: a mensagem que
+        falhava ficava na fila para sempre.
+
+        Antes de reenviar, confere se a cobrança ainda faz sentido. Enquanto
+        a mensagem esperava, o mundo pode ter mudado, e cada caso abaixo é
+        **descartado**, não enviado:
+
+        - a mensagem é de outro dia: o texto envelheceu ("atrasada há 10 dias"
+          virou 11), e a varredura de hoje manda uma versão atualizada;
+        - a parcela foi paga, ou o cliente respondeu que pagou (RN12);
+        - a venda foi cancelada, ou o cliente foi desativado;
+        - era automática e o envio automático do cliente foi desligado.
+
+        Vai sempre para o número **atual** do cliente, e respeita o limite
+        diário (RN10): o reenvio também é uma mensagem automática.
+
+        Devolve quantas mensagens saíram.
+        """
+        hoje = hoje or date.today()
         reenviadas = 0
-        for log in self.log_repo.pendentes_de_reenvio():
-            numero = numeros_por_cliente.get(log.cliente_id)
-            if not numero:
+        contagem: dict[uuid.UUID, int] = {}
+
+        for log, cliente, parcela, venda in self.log_repo.pendentes_de_reenvio(vendedor_id):
+            motivo = self._motivo_para_descartar(log, cliente, parcela, venda, hoje)
+            if motivo:
+                log.status = "descartada"
+                log.detalhe = motivo
                 continue
-            resultado = self.whatsapp.enviar_mensagem(numero, log.conteudo)
+
+            if cliente.id not in contagem:
+                contagem[cliente.id] = self.log_repo.contar_do_dia(vendedor_id, cliente.id, hoje)
+            if log.tipo != "manual" and contagem[cliente.id] >= MAX_MENSAGENS_DIA:
+                continue  # RN10: fica na fila, e expira amanhã
+
+            resultado = self.whatsapp.enviar_mensagem(cliente.whatsapp_numero, log.conteudo)
             if resultado.sucesso:
                 log.status = "enviado"
                 log.enviado_em = datetime.utcnow()
                 log.detalhe = resultado.detalhe or None
+                contagem[cliente.id] += 1
                 reenviadas += 1
+
         self.log_repo.salvar()
         return reenviadas
+
+    @staticmethod
+    def _motivo_para_descartar(log, cliente, parcela, venda, hoje: date) -> str | None:
+        """Por que esta mensagem da fila não deve mais sair. None se deve."""
+        if log.criado_em.date() != hoje:
+            return "Expirou na fila. A varredura do dia manda uma cobrança atualizada."
+        if cliente is None or not cliente.ativo:
+            return "O cliente foi desativado enquanto a mensagem esperava."
+        if parcela is None:
+            return None
+        if parcela.data_pagamento is not None:
+            return "A parcela foi paga enquanto a mensagem esperava."
+        if parcela.aguardando_confirmacao:
+            return "O cliente respondeu que já pagou enquanto a mensagem esperava."
+        if venda is not None and venda.status != "ativa":
+            return "A venda foi cancelada enquanto a mensagem esperava."
+        if log.tipo != "manual" and not cliente.envio_auto_ativo:
+            return "O envio automático deste cliente foi desligado."
+        return None
 
     # ------------------------------------------------------------------ log
     def listar_log(self, vendedor_id: uuid.UUID, desde: date | None = None) -> list[dict]:

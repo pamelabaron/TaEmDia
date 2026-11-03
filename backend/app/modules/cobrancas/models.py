@@ -25,7 +25,8 @@ class CobrancaLog(Base):
     # lembrete | vencimento | atraso | manual | resumo | automatica
     tipo: Mapped[str] = mapped_column(String, nullable=False)
     conteudo: Mapped[str] = mapped_column(Text, nullable=False)
-    # enviado | falhou | pendente (pendente = fila de reenvio)
+    # enviado | pendente | descartada. Pendente é a fila de reenvio (FE01);
+    # descartada é a que esperava na fila e deixou de fazer sentido.
     status: Mapped[str] = mapped_column(String, nullable=False, default="pendente")
     detalhe: Mapped[str | None] = mapped_column(String, nullable=True)
     enviado_em: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

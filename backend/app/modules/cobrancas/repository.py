@@ -54,15 +54,53 @@ class CobrancaLogRepository:
             stmt = stmt.where(CobrancaLog.criado_em >= datetime.combine(desde, time.min))
         return [(linha[0], linha[1] or "Você") for linha in self.db.execute(stmt)]
 
-    def pendentes_de_reenvio(self, limite: int = 50) -> list[CobrancaLog]:
-        """Mensagens que ficaram na fila por falha de conexão (FE01)."""
+    def parcelas_cobradas_no_dia(self, vendedor_id: uuid.UUID, dia: date) -> set[uuid.UUID]:
+        """Parcelas que já têm cobrança registrada no dia, enviada ou na fila.
+
+        A varredura roda de hora em hora. Sem esta consulta, a mesma parcela
+        era cobrada de novo a cada rodada, e o único freio era o limite de 3
+        mensagens por dia (RN10), que é teto e não meta.
+
+        Conta também a que está na fila ("pendente"): ela já é a cobrança do
+        dia, e quem a entrega é o reenvio (FE01). Se a varredura criasse outra
+        a cada hora com o WhatsApp fora do ar, a fila se encheria de cópias.
+        """
+        inicio = datetime.combine(dia, time.min)
+        fim = datetime.combine(dia, time.max)
+        stmt = select(CobrancaLog.parcela_id).where(
+            CobrancaLog.vendedor_id == vendedor_id,
+            CobrancaLog.parcela_id.is_not(None),
+            CobrancaLog.status.in_(("enviado", "pendente")),
+            CobrancaLog.criado_em.between(inicio, fim),
+        )
+        return set(self.db.scalars(stmt))
+
+    def pendentes_de_reenvio(
+        self, vendedor_id: uuid.UUID, limite: int = 50
+    ) -> list[tuple[CobrancaLog, Cliente | None, Parcela | None, Venda | None]]:
+        """Mensagens de cobrança que ficaram na fila por falha de conexão (FE01).
+
+        Vem com o cliente, a parcela e a venda, porque o reenvio precisa saber
+        se a cobrança ainda faz sentido: a parcela pode ter sido paga, e o
+        cliente pode ter trocado de número, enquanto a mensagem esperava.
+
+        O resumo diário fica de fora: ele não tem cliente nem parcela, e tem
+        horário próprio.
+        """
         stmt = (
-            select(CobrancaLog)
-            .where(CobrancaLog.status == "pendente")
+            select(CobrancaLog, Cliente, Parcela, Venda)
+            .outerjoin(Cliente, CobrancaLog.cliente_id == Cliente.id)
+            .outerjoin(Parcela, CobrancaLog.parcela_id == Parcela.id)
+            .outerjoin(Venda, Parcela.venda_id == Venda.id)
+            .where(
+                CobrancaLog.vendedor_id == vendedor_id,
+                CobrancaLog.status == "pendente",
+                CobrancaLog.tipo != "resumo",
+            )
             .order_by(CobrancaLog.criado_em)
             .limit(limite)
         )
-        return list(self.db.scalars(stmt))
+        return [(l[0], l[1], l[2], l[3]) for l in self.db.execute(stmt)]
 
 
 class RespostaRepository:
@@ -99,18 +137,31 @@ class CobrancaParcelaRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def elegiveis(self, hoje: date, ate: date) -> list[tuple[Parcela, Venda, Cliente]]:
+    def elegiveis(
+        self, vendedor_id: uuid.UUID, hoje: date, ate: date
+    ) -> list[tuple[Parcela, Venda, Cliente]]:
         """Parcelas em aberto de vendas ativas que vencem até 'ate' (inclui atrasadas),
-        de clientes ativos e com envio automático habilitado."""
+        de clientes ativos e com envio automático habilitado.
+
+        Fica de fora a parcela "aguardando confirmação": o cliente respondeu
+        que já pagou (RN12), e o próximo passo é a vendedora conferir, não uma
+        nova cobrança. Cobrar quem disse que pagou é o constrangimento que os
+        Termos de Uso pedem para evitar.
+
+        O filtro por vendedora fica na consulta (RNF07), e não num "if" depois
+        de trazer as parcelas de todas as contas.
+        """
         stmt = (
             select(Parcela, Venda, Cliente)
             .join(Venda, Parcela.venda_id == Venda.id)
             .join(Cliente, Venda.cliente_id == Cliente.id)
             .where(
+                Venda.vendedor_id == vendedor_id,
                 Venda.status == "ativa",
                 Cliente.ativo.is_(True),
                 Cliente.envio_auto_ativo.is_(True),
                 Parcela.data_pagamento.is_(None),
+                Parcela.aguardando_confirmacao.is_(False),
                 Parcela.data_vencimento <= ate,
             )
             .order_by(Parcela.data_vencimento)

@@ -49,6 +49,12 @@ def job_varredura_cobrancas() -> None:
             config = config_service.obter(vendedor.id)
             if not config.envio_auto_global:
                 continue
+            # Primeiro a fila do que falhou (FE01), depois a varredura. Na
+            # ordem inversa, a varredura veria a parcela como já cobrada (a
+            # mensagem está na fila) e a fila só andaria na rodada seguinte.
+            reenviadas = servico.reenviar_pendentes(vendedor.id)
+            if reenviadas:
+                logger.info("Reenvio: %s mensagens da fila para %s", reenviadas, vendedor.google_email)
             enviados = servico.varrer_e_cobrar(
                 vendedor.id, config.dias_antecedencia_lembrete
             )

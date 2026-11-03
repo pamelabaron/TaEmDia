@@ -191,6 +191,9 @@ todo texto. Foi ele que achou os problemas acima. Olhar não acha.
 | Texto de exemplo longo passa em validação de tamanho (`gere_uma_chave...` tem 40 caracteres) | Valide contra uma **lista de valores de exemplo**, não só pelo comprimento |
 | Coluna nova + migração aplicada e **16 testes quebram** com `UndefinedColumn`. O banco de testes é outro (`taemdia_test`) e nasce de `Base.metadata.create_all`, que cria tabela que falta mas **não acrescenta coluna em tabela que já existe** | Apague o banco de testes e deixe o conftest recriar: `docker compose exec db psql -U taemdia -d postgres -c "DROP DATABASE IF EXISTS taemdia_test;"` |
 | Campo novo é aceito pela API, some, e a tela mostra vazio sem erro nenhum | O service monta o objeto **campo a campo** (não com `**model_dump()`), de propósito. Campo novo no schema precisa ser acrescentado lá também |
+| O teste de limite diário passava **por acaso**: o cenário tinha 3 parcelas, a primeira varredura gastava as 3 mensagens, e a repetição da mesma cobrança a cada hora ficou escondida. Um cliente com 1 parcela recebia 3 cobranças iguais por dia | Teste de limite prova o teto, não a ausência de repetição. Escreva o cenário mínimo (uma parcela) e rode o dia inteiro de varreduras |
+| `/health` respondia "ok" sem olhar o banco: com o PostgreSQL parado, o monitor ficaria verde | O `/health` faz `SELECT 1` e responde 503; o monitor confere `"banco":"ok"` no corpo, não só o código 200 |
+| Teste de guarda que lê YAML **como texto** tropeça em comentário (um comentário entre `schedule:` e `cron:`, outro citando "o curl" sem `-f`) | Leia com `yaml.safe_load`. Atenção: no YAML 1.1 a chave `on` vira o booleano `True` |
 
 ## Sinais de alerta. Pare e verifique
 

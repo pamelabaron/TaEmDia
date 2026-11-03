@@ -118,7 +118,7 @@ parcela  (1) ─── (N) resposta_devedor
 | parcela_id  | UUID (FK)  |                                                     |
 | tipo        | ENUM       | `lembrete`, `vencimento`, `atraso`, `manual`, `resumo` |
 | conteudo    | TEXT       | mensagem efetivamente enviada                       |
-| status      | ENUM       | `enviado`, `falhou`, `pendente` (fila de reenvio)   |
+| status      | ENUM       | `enviado`, `pendente` (fila de reenvio, FE01), `descartada` (saiu da fila sem envio) |
 | enviado_em  | TIMESTAMP null |                                                 |
 | criado_em   | TIMESTAMP  |                                                     |
 

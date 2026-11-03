@@ -1,8 +1,14 @@
 """Ponto de entrada da API TáEmDia."""
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+
+from app.db.session import get_db
 
 from app.modules.auth.router import router as auth_router
 from app.modules.clientes.router import router as clientes_router
@@ -50,9 +56,25 @@ app.add_middleware(
 
 
 @app.get("/health", tags=["infra"])
-def health_check():
-    """Verifica se a API está no ar."""
-    return {"status": "ok", "servico": "taemdia-api"}
+def health_check(db: Session = Depends(get_db)):
+    """Verifica se a API está no ar **e** se o banco responde.
+
+    É o endereço que o monitor (.github/workflows/monitor.yml) consulta. Antes
+    ele respondia "ok" sem olhar o banco: com o PostgreSQL parado, a API
+    continuava jurando que estava tudo bem, e o monitor ficaria verde com o
+    sistema quebrado.
+
+    Fala com o banco direto, sem repository, de propósito: não lê dado de
+    ninguém, só pergunta se a conexão existe. Por isso também não exige login.
+    """
+    try:
+        db.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "fora do ar", "servico": "taemdia-api", "banco": "sem resposta"},
+        )
+    return {"status": "ok", "servico": "taemdia-api", "banco": "ok"}
 
 
 # Módulos do domínio (crescem sprint a sprint)
