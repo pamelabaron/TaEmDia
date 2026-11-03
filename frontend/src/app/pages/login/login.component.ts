@@ -203,6 +203,16 @@ const PASSOS: Passo[] = [
        numa área de rolagem própria e o cabeçalho fixo (.topo, sticky) deixaria
        de grudar no topo. */
     .pagina { background: var(--superficie); overflow-x: clip; }
+    /* Sem recuo nas laterais. A regra global de ".pagina" dá 16px de margem,
+       que nas telas internas separa o conteúdo da borda; aqui ela deixava uma
+       tira em volta do cabeçalho e das faixas, que têm fundo próprio e devem
+       ir de uma borda à outra. Cada seção já cuida do próprio respiro interno.
+       Só fica o recuo que o aparelho exige: o do entalhe da câmera com o
+       celular deitado e o da barra inferior. Em tela comum esses valores são
+       zero. */
+    .pagina {
+      padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
 
     /* Navegador sem "overflow: clip" (Safari anterior ao 16): a aurora não
        sangra para os lados, para não haver o que recortar. */
@@ -507,25 +517,78 @@ const PASSOS: Passo[] = [
       position: relative; overflow: hidden; max-width: none;
       background-color: var(--fundo-900);
     }
+    /* A foto da faixa.
+       Na primeira versão ela entrava com uns 3% da luz original (brilho 42%,
+       opacidade 50%, e uma camada escura de 80% por cima) e virava um vulto.
+       Pior: o rosto caía bem atrás do título. Clarear só piorava a leitura.
+       A saída foi dar a ela um lugar próprio: no computador, a pessoa fica à
+       esquerda e o texto à direita, sobre o escuro; no celular, ela fica no
+       alto e o texto começa abaixo do rosto. Em nenhum dos dois o texto passa
+       por cima dela.
+       Dessaturada para o roxo por cima tingir uma imagem neutra, e não brigar
+       com o azul da janela e o verde da planta da foto original. */
     .problema::before {
       content: ""; position: absolute; inset: 0;
       background-image: url("/assets/equipe-trabalhando.webp");
-      background-size: cover;
-      background-position: 70% 40%;
-      /* Dessaturada e escurecida antes mesmo da camada de cor: assim o roxo
-         por cima tinge uma imagem neutra, e não briga com o azul da janela
-         e o verde da planta que havia na foto original. */
-      filter: grayscale(1) brightness(0.42) contrast(1.1);
-      opacity: 0.5;
+      background-repeat: no-repeat;
+      filter: grayscale(1) brightness(0.92) contrast(1.05);
     }
     /* A camada de cor por cima da foto. Separada do ::before para que a foto
-       possa ser filtrada sem o filtro alcançar o roxo. */
+       possa ser filtrada sem o filtro alcançar o roxo. O véu sobre a pessoa é
+       roxo-escuro e não preto: assim ela pertence à paleta e não parece foto
+       de banco de imagem colada na página. */
     .problema::after {
       content: ""; position: absolute; inset: 0; pointer-events: none;
-      background-image:
-        radial-gradient(40rem 26rem at 82% -6%, rgba(134, 99, 187, 0.62), transparent 62%),
-        radial-gradient(34rem 26rem at 10% 112%, rgba(201, 169, 255, 0.38), transparent 60%),
-        linear-gradient(160deg, rgba(15, 11, 20, 0.86) 0%, rgba(30, 23, 38, 0.80) 100%);
+    }
+
+    /* Celular: foto no alto, texto embaixo. */
+    @media (max-width: 899.98px) {
+      .faixa.problema { padding-top: 300px; }
+      .problema::before {
+        /* Nunca mais estreita que a faixa: com altura fixa, num tablet a foto
+           virava uma caixa no meio com bordas duras dos dois lados. */
+        background-size: max(100%, 510px) auto;
+        background-position: 30% 0;
+        /* A borda da foto se dissolve, em vez de ser coberta: coberta, ela
+           deixava um degrau visível logo abaixo do título. */
+        -webkit-mask-image: linear-gradient(180deg, #000 0, #000 210px, transparent 336px);
+                mask-image: linear-gradient(180deg, #000 0, #000 210px, transparent 336px);
+      }
+      .problema::after {
+        background-image: linear-gradient(180deg,
+          rgba(34, 22, 54, 0.42) 0, rgba(34, 22, 54, 0.52) 190px,
+          rgba(20, 15, 28, 0.95) 318px, rgba(20, 15, 28, 0.96) 100%);
+      }
+    }
+
+    /* Computador: a pessoa à esquerda, o texto numa coluna à direita. */
+    @media (min-width: 900px) {
+      .faixa.problema {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 34rem);
+        column-gap: 48px;
+        padding-right: max(40px, calc((100% - 1160px) / 2));
+        text-align: left;
+      }
+      .problema > h2, .problema > .secao-texto, .problema > .numeros { grid-column: 2; }
+      .problema > h2 { text-wrap: balance; }
+      .faixa.problema > .secao-texto { margin-left: 0; }
+      .faixa.problema > .numeros { max-width: none; margin: 0; }
+      .problema::before {
+        background-size: auto 112%;
+        /* Em tela muito larga a foto acompanha o conteúdo, em vez de ficar
+           presa na borda esquerda longe do texto. */
+        background-position: left max(0px, calc(50% - 760px)) top 18%;
+        -webkit-mask-image: linear-gradient(90deg, #000 0, #000 42%, transparent 64%);
+                mask-image: linear-gradient(90deg, #000 0, #000 42%, transparent 64%);
+      }
+      .problema::after {
+        background-image:
+          radial-gradient(36rem 24rem at 92% -10%, rgba(134, 99, 187, 0.50), transparent 62%),
+          linear-gradient(90deg,
+            rgba(34, 22, 54, 0.40) 0%, rgba(34, 22, 54, 0.48) 34%,
+            rgba(20, 15, 28, 0.87) 56%, rgba(20, 15, 28, 0.93) 100%);
+      }
     }
     /* O conteúdo precisa subir acima das duas camadas. */
     .problema > * { position: relative; z-index: 1; }
