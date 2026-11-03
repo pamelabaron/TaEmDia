@@ -10,12 +10,16 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Template, TemplatesService } from '../../core/templates.service';
+import { bloqueadoPorAssinatura } from '../../core/erros';
+import { EsqueletoComponent } from '../../core/esqueleto.component';
+import { EstadoErroComponent } from '../../core/estado-erro.component';
+import { EstadoVazioComponent } from '../../core/estado-vazio.component';
 
 const VARIAVEIS = ['nome_cliente', 'valor_parcela', 'data_vencimento', 'dias_atraso'];
 const EXEMPLO: Record<string, string> = {
-  nome_cliente: 'Maria Silva',
-  valor_parcela: 'R$ 100,00',
-  data_vencimento: '10/08/2026',
+  nome_cliente: 'Rosangela Ferreira',
+  valor_parcela: 'R$ 147,90',
+  data_vencimento: '18/09/2026',
   dias_atraso: '3',
 };
 const TIPO_LABEL: Record<string, string> = {
@@ -30,17 +34,32 @@ const TIPO_LABEL: Record<string, string> = {
   imports: [
     FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule,
     MatIconModule, MatSlideToggleModule, MatChipsModule, MatProgressSpinnerModule,
+    EsqueletoComponent, EstadoErroComponent, EstadoVazioComponent,
   ],
   template: `
     <div class="pagina">
       <h2>Mensagens de cobrança</h2>
       <p class="ajuda">
-        Personalize as mensagens que o sistema enviará. Use as variáveis abaixo — elas
+        Personalize as mensagens que o sistema enviará. Use as variáveis abaixo. Elas
         serão trocadas pelos dados reais de cada cliente na hora do envio.
       </p>
 
-      @if (carregando()) {
-        <div class="centro"><mat-spinner diameter="40"></mat-spinner></div>
+      @if (erro()) {
+        <app-estado-erro
+          titulo="Não deu para carregar as mensagens"
+          texto="Pode ter sido a conexão. Os textos que você escreveu continuam
+                 salvos."
+          (aoTentar)="carregar()" />
+      } @else if (carregando()) {
+        <app-esqueleto quantidade="3" rotulo="Carregando os modelos" />
+      } @else if (templates.length === 0) {
+        <app-estado-vazio
+          titulo="Nenhum modelo de mensagem"
+          texto="Cada tipo de cobrança tem um texto que o sistema envia, com o
+                 nome, o valor e a data preenchidos sozinhos. Os modelos padrão
+                 deveriam estar aqui."
+          acao="Recarregar"
+          (aoAgir)="carregar()" />
       } @else {
         @for (t of templates; track t.id) {
           <mat-card class="tpl">
@@ -51,12 +70,13 @@ const TIPO_LABEL: Record<string, string> = {
 
             <mat-form-field appearance="outline" class="campo">
               <mat-label>Título</mat-label>
-              <input matInput [(ngModel)]="t.titulo" [name]="'titulo-' + t.id" />
+              <input matInput [(ngModel)]="t.titulo" [name]="'titulo-' + t.id" maxlength="60" />
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="campo">
               <mat-label>Mensagem</mat-label>
-              <textarea matInput rows="3" [(ngModel)]="t.corpo" [name]="'corpo-' + t.id"></textarea>
+              <textarea matInput rows="3" [(ngModel)]="t.corpo" [name]="'corpo-' + t.id"
+                        maxlength="1000"></textarea>
             </mat-form-field>
 
             <div class="variaveis">
@@ -81,17 +101,17 @@ const TIPO_LABEL: Record<string, string> = {
   `,
   styles: [`
     .pagina { max-width: 760px; margin: 0 auto; padding: 16px; }
-    .ajuda { color: #666; margin-bottom: 16px; }
+    .ajuda { color: var(--texto-suave); margin-bottom: 16px; }
     .centro { display: flex; justify-content: center; padding: 32px; }
     .tpl { padding: 16px; margin-bottom: 20px; }
     .tpl-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .tipo { font-weight: 600; color: #1565c0; }
+    .tipo { font-weight: 600; color: var(--lilas-300); }
     .campo { width: 100%; }
     .variaveis { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-    .variaveis .rot { color: #777; font-size: 0.85rem; }
-    .chip-var { font-size: 0.75rem; min-width: 0; padding: 0 10px; line-height: 30px; }
-    .preview { background: #e7f3ff; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
-    .preview .rot { font-size: 0.75rem; color: #1565c0; font-weight: 500; }
+    .variaveis .rot { color: var(--texto-suave); font-size: 0.85rem; }
+    .chip-var { font-size: 0.75rem; min-width: 0; padding: 0 12px; }
+    .preview { background: rgba(201, 169, 255, 0.10); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+    .preview .rot { font-size: 0.75rem; color: var(--lilas-300); font-weight: 500; }
     .preview p { margin: 4px 0 0; white-space: pre-wrap; }
   `],
 })
@@ -101,13 +121,18 @@ export class TemplatesComponent implements OnInit {
 
   templates: Template[] = [];
   readonly carregando = signal<boolean>(true);
+  readonly erro = signal<boolean>(false);
   readonly salvando = signal<boolean>(false);
   readonly variaveis = VARIAVEIS;
 
-  ngOnInit(): void {
+  ngOnInit(): void { this.carregar(); }
+
+  carregar(): void {
+    this.carregando.set(true);
+    this.erro.set(false);
     this.service.listar().subscribe({
       next: (lista) => { this.templates = lista; this.carregando.set(false); },
-      error: () => { this.carregando.set(false); this.snack.open('Erro ao carregar mensagens.', 'OK', { duration: 4000 }); },
+      error: () => { this.carregando.set(false); this.erro.set(true); },
     });
   }
 
@@ -126,8 +151,12 @@ export class TemplatesComponent implements OnInit {
   salvar(t: Template): void {
     this.salvando.set(true);
     this.service.editar(t.id, { titulo: t.titulo, corpo: t.corpo, ativo: t.ativo }).subscribe({
-      next: () => { this.salvando.set(false); this.snack.open('Mensagem salva!', 'OK', { duration: 3000 }); },
-      error: () => { this.salvando.set(false); this.snack.open('Erro ao salvar.', 'OK', { duration: 4000 }); },
+      next: () => { this.salvando.set(false); this.snack.open('Mensagem salva', 'OK', { duration: 3000 }); },
+      error: (erro) => {
+        this.salvando.set(false);
+        if (bloqueadoPorAssinatura(erro)) return;
+        this.snack.open('Não deu para salvar. O que estava valendo continua valendo.', 'OK', { duration: 4000 });
+      },
     });
   }
 }
