@@ -1,7 +1,7 @@
 """Serviço de cobrança: seleciona o template, aplica as variáveis, envia pelo
 WhatsApp Client e registra o histórico. Respeita as regras de negócio do RFC."""
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 from app.modules.clientes.models import Cliente
 from app.modules.cobrancas.models import CobrancaLog
@@ -23,6 +23,7 @@ from app.modules.templates.repository import TemplateRepository
 from app.modules.templates.service import TemplateService, renderizar
 from app.modules.vendas.models import Parcela
 from app.modules.whatsapp.client import WhatsAppClient
+from app.core.relogio import agora_utc
 
 
 class ParcelaNaoEncontradaError(Exception):
@@ -75,7 +76,7 @@ class CobrancaService:
             # Falha de conexão deixa a mensagem na fila para reenvio (FE01).
             status="enviado" if resultado.sucesso else "pendente",
             detalhe=resultado.detalhe or None,
-            enviado_em=datetime.utcnow() if resultado.sucesso else None,
+            enviado_em=agora_utc() if resultado.sucesso else None,
         )
         return self.log_repo.registrar(log)
 
@@ -178,7 +179,7 @@ class CobrancaService:
             resultado = self.whatsapp.enviar_mensagem(cliente.whatsapp_numero, log.conteudo)
             if resultado.sucesso:
                 log.status = "enviado"
-                log.enviado_em = datetime.utcnow()
+                log.enviado_em = agora_utc()
                 log.detalhe = resultado.detalhe or None
                 contagem[cliente.id] += 1
                 reenviadas += 1

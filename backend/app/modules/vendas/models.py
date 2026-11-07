@@ -12,6 +12,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
+from app.core.relogio import agora_utc
 
 
 class Venda(Base):
@@ -26,7 +27,7 @@ class Venda(Base):
     num_parcelas: Mapped[int] = mapped_column(Integer, nullable=False)
     data_primeira_parcela: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[str] = mapped_column(String, default="ativa")  # ativa | cancelada
-    criado_em: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    criado_em: Mapped[datetime] = mapped_column(DateTime, default=agora_utc)
 
     parcelas: Mapped[list["Parcela"]] = relationship(
         back_populates="venda", cascade="all, delete-orphan", order_by="Parcela.numero_parcela"
@@ -45,6 +46,6 @@ class Parcela(Base):
     data_vencimento: Mapped[date] = mapped_column(Date, nullable=False)
     data_pagamento: Mapped[date | None] = mapped_column(Date, nullable=True)
     aguardando_confirmacao: Mapped[bool] = mapped_column(Boolean, default=False)
-    criado_em: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    criado_em: Mapped[datetime] = mapped_column(DateTime, default=agora_utc)
 
     venda: Mapped["Venda"] = relationship(back_populates="parcelas")

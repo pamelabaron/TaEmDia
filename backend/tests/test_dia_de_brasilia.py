@@ -175,3 +175,27 @@ def test_rodada_atrasada_e_rodada_no_horario_mandam_um_resumo_so(db, vendedor, m
         CobrancaLog.vendedor_id == vendedor.id, CobrancaLog.tipo == "resumo"
     ).count()
     assert resumos == 1, f"O vendedor recebeu {resumos} resumos no mesmo dia."
+
+
+# --------------------------------------- relógio UTC sem chamada descontinuada
+class TestAgoraUtc:
+    """A N1 prometeu trocar datetime.utcnow(), descontinuada no Python 3.12.
+    As colunas guardam UTC sem fuso; agora_utc() devolve isso mesmo."""
+
+    def test_devolve_utc_sem_fuso(self):
+        from datetime import timezone
+
+        from app.core.relogio import agora_utc
+
+        valor = agora_utc()
+        assert valor.tzinfo is None
+        referencia = datetime.now(timezone.utc).replace(tzinfo=None)
+        assert abs((referencia - valor).total_seconds()) < 5
+
+    def test_nenhum_modulo_usa_utcnow(self):
+        raiz = Path(__file__).resolve().parents[1] / "app"
+        culpados = sorted(
+            str(a.relative_to(raiz)) for a in raiz.rglob("*.py")
+            if "utcnow" in a.read_text(encoding="utf-8")
+        )
+        assert culpados == [], f"datetime.utcnow() é descontinuada: {culpados}"

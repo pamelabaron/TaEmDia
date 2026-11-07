@@ -4,6 +4,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import date, datetime, time
 
+from app.core.relogio import agora_utc
 from app.modules.cobrancas.models import CobrancaLog, RespostaDevedor
 from app.modules.cobrancas.regras import (
     RESPOSTA_CANAL_FECHADO,
@@ -145,6 +146,6 @@ class AgenteService:
                 conteudo=texto,
                 status="enviado" if resultado.sucesso else "pendente",
                 detalhe=resultado.detalhe or None,
-                enviado_em=datetime.utcnow() if resultado.sucesso else None,
+                enviado_em=agora_utc() if resultado.sucesso else None,
             )
         )

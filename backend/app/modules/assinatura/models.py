@@ -11,6 +11,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
+from app.core.relogio import agora_utc
 
 
 class Assinatura(Base):
@@ -24,9 +25,9 @@ class Assinatura(Base):
     )
     valido_ate: Mapped[date] = mapped_column(Date, nullable=False)
     origem: Mapped[str] = mapped_column(String, nullable=False)  # "teste" | "pago"
-    criado_em: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    criado_em: Mapped[datetime] = mapped_column(DateTime, default=agora_utc)
     atualizado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=agora_utc, onupdate=agora_utc
     )
 
 
@@ -48,7 +49,7 @@ class PagamentoAssinatura(Base):
     situacao: Mapped[str] = mapped_column(
         String, nullable=False, default="pendente"
     )  # "pendente" | "aprovado" | "recusado"
-    enviado_em: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    enviado_em: Mapped[datetime] = mapped_column(DateTime, default=agora_utc)
     avaliado_em: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     avaliado_por: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     observacao: Mapped[str | None] = mapped_column(String, nullable=True)

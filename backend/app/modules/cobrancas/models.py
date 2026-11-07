@@ -8,6 +8,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
+from app.core.relogio import agora_utc
 
 
 class CobrancaLog(Base):
@@ -30,7 +31,7 @@ class CobrancaLog(Base):
     status: Mapped[str] = mapped_column(String, nullable=False, default="pendente")
     detalhe: Mapped[str | None] = mapped_column(String, nullable=True)
     enviado_em: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    criado_em: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    criado_em: Mapped[datetime] = mapped_column(DateTime, default=agora_utc, index=True)
 
 
 class RespostaDevedor(Base):
@@ -47,4 +48,4 @@ class RespostaDevedor(Base):
     )
     # 1_ja_paguei | 2_pago_hoje | 3_nao_consigo
     opcao: Mapped[str] = mapped_column(String, nullable=False)
-    recebido_em: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    recebido_em: Mapped[datetime] = mapped_column(DateTime, default=agora_utc, index=True)

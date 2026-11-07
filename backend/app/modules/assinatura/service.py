@@ -1,10 +1,11 @@
 """Regras de negócio da assinatura. Não toca no banco: fala com o repositório."""
 import uuid
-from datetime import date, datetime
+from datetime import date
 
 from app.modules.assinatura import regras
 from app.modules.assinatura.models import Assinatura, PagamentoAssinatura
 from app.modules.assinatura.repository import AssinaturaRepository
+from app.core.relogio import agora_utc
 
 
 class AssinaturaService:
@@ -95,7 +96,7 @@ class AssinaturaService:
             linha.origem = nova.origem
 
         pagamento.situacao = "aprovado"
-        pagamento.avaliado_em = datetime.utcnow()
+        pagamento.avaliado_em = agora_utc()
         pagamento.avaliado_por = admin_id
         self.repo.confirmar()
         return pagamento
@@ -106,7 +107,7 @@ class AssinaturaService:
         """RN-A03. Recusar não mexe na vigência."""
         pagamento = self._pendente(pagamento_id)
         pagamento.situacao = "recusado"
-        pagamento.avaliado_em = datetime.utcnow()
+        pagamento.avaliado_em = agora_utc()
         pagamento.avaliado_por = admin_id
         pagamento.observacao = motivo
         self.repo.confirmar()
