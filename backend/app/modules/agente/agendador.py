@@ -6,7 +6,6 @@ Dois jobs:
   (b) envio do resumo analítico diário, no horário configurado por cada vendedor.
 """
 import logging
-from datetime import date
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -89,7 +88,7 @@ def job_resumo_diario() -> None:
                 continue
             if abs(config.horario_resumo.minute - agora.minute) > 7:
                 continue
-            enviado = agente.enviar_resumo(vendedor.id, numero, date.today())
+            enviado = agente.enviar_resumo(vendedor.id, numero, agora.date())
             if enviado:
                 logger.info("Resumo diário enviado para %s", vendedor.google_email)
     except Exception:

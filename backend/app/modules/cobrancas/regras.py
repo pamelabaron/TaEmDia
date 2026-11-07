@@ -1,5 +1,5 @@
 """Regras puras do motor de cobrança (sem banco e sem HTTP). Fáceis de testar."""
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 FUSO_BRASILIA = ZoneInfo("America/Sao_Paulo")
@@ -21,6 +21,38 @@ OPCOES_RESPOSTA = (
 
 def agora_brasilia() -> datetime:
     return datetime.now(FUSO_BRASILIA)
+
+
+def hoje_brasilia(agora: datetime | None = None) -> date:
+    """O dia de hoje em Brasília (RN11 usa Brasília; a data também).
+
+    Não use date.today(): ela devolve o dia do relógio do container, que no
+    Docker é UTC. Das 21h à meia-noite de Brasília o container já está no dia
+    seguinte (apontamento da revisão de código da N1).
+    """
+    agora = agora or agora_brasilia()
+    return agora.astimezone(FUSO_BRASILIA).date()
+
+
+def janela_utc_do_dia(dia: date) -> tuple[datetime, datetime]:
+    """Início e fim (exclusivo) do dia de Brasília, em UTC e sem fuso.
+
+    Os registros de envio guardam criado_em em UTC sem fuso. Para contar o que
+    saiu "hoje" (RN10) é preciso olhar o dia de Brasília, que vai das 3h UTC
+    de um dia às 3h UTC do outro.
+    """
+    utc = ZoneInfo("UTC")
+    inicio = datetime.combine(dia, time.min, tzinfo=FUSO_BRASILIA)
+    fim = datetime.combine(dia + timedelta(days=1), time.min, tzinfo=FUSO_BRASILIA)
+    return (
+        inicio.astimezone(utc).replace(tzinfo=None),
+        fim.astimezone(utc).replace(tzinfo=None),
+    )
+
+
+def dia_em_brasilia(momento_utc: datetime) -> date:
+    """A que dia de Brasília pertence um registro gravado em UTC sem fuso."""
+    return momento_utc.replace(tzinfo=ZoneInfo("UTC")).astimezone(FUSO_BRASILIA).date()
 
 
 def dentro_horario_comercial(momento: datetime | None = None) -> bool:

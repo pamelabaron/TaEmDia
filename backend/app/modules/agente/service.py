@@ -125,7 +125,13 @@ class AgenteService:
     def enviar_resumo(
         self, vendedor_id: uuid.UUID, numero_vendedor: str, dia: date
     ) -> CobrancaLog | None:
-        """Envia o resumo diário ao WhatsApp do vendedor (UC10)."""
+        """Envia o resumo diário ao WhatsApp do vendedor (UC10).
+
+        Um por dia: se o resumo deste dia já saiu, não manda de novo, mesmo que
+        o agendador passe outra vez dentro da janela do horário configurado.
+        """
+        if self.log_repo.resumo_enviado_no_dia(vendedor_id, dia):
+            return None
         texto = self.montar_resumo(vendedor_id, dia)
         if texto is None or not numero_vendedor:
             return None

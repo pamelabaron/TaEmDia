@@ -7,6 +7,9 @@ from app.modules.clientes.models import Cliente
 from app.modules.cobrancas.models import CobrancaLog
 from app.modules.cobrancas.regras import (
     MAX_MENSAGENS_DIA,
+    agora_brasilia,
+    dia_em_brasilia,
+    hoje_brasilia,
     acrescentar_opcoes,
     dentro_horario_comercial,
     escolher_tipo,
@@ -86,7 +89,7 @@ class CobrancaService:
         if encontrado is None:
             raise ParcelaNaoEncontradaError()
         parcela, _venda, cliente = encontrado
-        hoje = date.today()
+        hoje = hoje_brasilia(agora_brasilia())
         tipo = escolher_tipo(parcela.data_vencimento, hoje, dias_antecedencia=999) or "atraso"
         texto = self._texto_da_cobranca(vendedor_id, cliente, parcela, tipo, hoje)
         return self._enviar_e_registrar(vendedor_id, cliente, parcela, "manual", texto)
@@ -101,7 +104,7 @@ class CobrancaService:
         Respeita: horário comercial (RN11), limite diário por cliente (RN10) e o
         sinalizador de envio automático de cada cliente.
         """
-        hoje = hoje or date.today()
+        hoje = hoje or hoje_brasilia(agora_brasilia())
         if not ignorar_horario and not dentro_horario_comercial():
             return []
 
@@ -156,7 +159,7 @@ class CobrancaService:
 
         Devolve quantas mensagens saíram.
         """
-        hoje = hoje or date.today()
+        hoje = hoje or hoje_brasilia(agora_brasilia())
         reenviadas = 0
         contagem: dict[uuid.UUID, int] = {}
 
@@ -186,7 +189,7 @@ class CobrancaService:
     @staticmethod
     def _motivo_para_descartar(log, cliente, parcela, venda, hoje: date) -> str | None:
         """Por que esta mensagem da fila não deve mais sair. None se deve."""
-        if log.criado_em.date() != hoje:
+        if dia_em_brasilia(log.criado_em) != hoje:
             return "Expirou na fila. A varredura do dia manda uma cobrança atualizada."
         if cliente is None or not cliente.ativo:
             return "O cliente foi desativado enquanto a mensagem esperava."

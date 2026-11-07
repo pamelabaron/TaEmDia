@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.modules.clientes.models import Cliente
 from app.modules.cobrancas.models import CobrancaLog, RespostaDevedor
+from app.modules.cobrancas.regras import janela_utc_do_dia
 from app.modules.vendas.models import Parcela, Venda
 
 
@@ -25,8 +26,8 @@ class CobrancaLogRepository:
 
     def contar_do_dia(self, vendedor_id: uuid.UUID, cliente_id: uuid.UUID, dia: date) -> int:
         """Quantas mensagens automáticas já foram enviadas hoje para este cliente (RN10)."""
-        inicio = datetime.combine(dia, time.min)
-        fim = datetime.combine(dia, time.max)
+        # Dia de Brasília convertido para UTC: criado_em é gravado em UTC.
+        inicio, fim = janela_utc_do_dia(dia)
         stmt = (
             select(func.count(CobrancaLog.id))
             .where(
@@ -34,7 +35,8 @@ class CobrancaLogRepository:
                 CobrancaLog.cliente_id == cliente_id,
                 CobrancaLog.status == "enviado",
                 CobrancaLog.tipo != "resumo",
-                CobrancaLog.criado_em.between(inicio, fim),
+                CobrancaLog.criado_em >= inicio,
+                CobrancaLog.criado_em < fim,
             )
         )
         return self.db.scalar(stmt) or 0
@@ -54,6 +56,24 @@ class CobrancaLogRepository:
             stmt = stmt.where(CobrancaLog.criado_em >= datetime.combine(desde, time.min))
         return [(linha[0], linha[1] or "Você") for linha in self.db.execute(stmt)]
 
+    def resumo_enviado_no_dia(self, vendedor_id: uuid.UUID, dia: date) -> bool:
+        """Já saiu um resumo para este vendedor neste dia de Brasília?
+
+        É o registro do envio que garante "um resumo por dia", e não o relógio:
+        uma rodada atrasada do agendador e a rodada seguinte podem cair as duas
+        na janela do horário configurado (apontamento da revisão da N1).
+        Conta só o enviado: o que falhou pode sair na rodada seguinte.
+        """
+        inicio, fim = janela_utc_do_dia(dia)
+        stmt = select(func.count(CobrancaLog.id)).where(
+            CobrancaLog.vendedor_id == vendedor_id,
+            CobrancaLog.tipo == "resumo",
+            CobrancaLog.status == "enviado",
+            CobrancaLog.criado_em >= inicio,
+            CobrancaLog.criado_em < fim,
+        )
+        return (self.db.scalar(stmt) or 0) > 0
+
     def parcelas_cobradas_no_dia(self, vendedor_id: uuid.UUID, dia: date) -> set[uuid.UUID]:
         """Parcelas que já têm cobrança registrada no dia, enviada ou na fila.
 
@@ -65,13 +85,13 @@ class CobrancaLogRepository:
         dia, e quem a entrega é o reenvio (FE01). Se a varredura criasse outra
         a cada hora com o WhatsApp fora do ar, a fila se encheria de cópias.
         """
-        inicio = datetime.combine(dia, time.min)
-        fim = datetime.combine(dia, time.max)
+        inicio, fim = janela_utc_do_dia(dia)
         stmt = select(CobrancaLog.parcela_id).where(
             CobrancaLog.vendedor_id == vendedor_id,
             CobrancaLog.parcela_id.is_not(None),
             CobrancaLog.status.in_(("enviado", "pendente")),
-            CobrancaLog.criado_em.between(inicio, fim),
+            CobrancaLog.criado_em >= inicio,
+            CobrancaLog.criado_em < fim,
         )
         return set(self.db.scalars(stmt))
 
