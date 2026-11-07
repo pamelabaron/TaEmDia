@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
+from app.core.relogio import agora_utc
 
 
 class TemplateMensagem(Base):
@@ -23,4 +24,4 @@ class TemplateMensagem(Base):
     corpo: Mapped[str] = mapped_column(Text, nullable=False)
     is_padrao: Mapped[bool] = mapped_column(Boolean, default=False)
     ativo: Mapped[bool] = mapped_column(Boolean, default=True)
-    criado_em: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    criado_em: Mapped[datetime] = mapped_column(DateTime, default=agora_utc)

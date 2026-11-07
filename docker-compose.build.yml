@@ -1,0 +1,19 @@
+# Compilar no próprio servidor, em vez de baixar as imagens prontas.
+#
+# É o caminho de emergência: serve quando o GitHub está fora do ar, quando as
+# imagens não subiram, ou para testar uma mudança no servidor sem passar pelo
+# repositório. O caminho normal é o robô do deploy.
+#
+#   docker compose -f docker-compose.prod.yml -f docker-compose.build.yml up -d --build
+#
+# Compilar aqui leva de 5 a 10 minutos e usa memória de troca em disco: a
+# máquina tem 909 MB e o Angular não cabe nisso sem ela.
+services:
+  backend:
+    build: ./backend
+  agendador:
+    build: ./backend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile

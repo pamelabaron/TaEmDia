@@ -112,3 +112,32 @@ class RelatorioRepository:
             .order_by(total.desc())
         )
         return [(l[0], l[1], l[2]) for l in self.db.execute(stmt)]
+
+
+class RelatorioDetalhadoRepository:
+    """Consultas do relatório detalhado exportado em PDF."""
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def parcelas_no_periodo(
+        self, vendedor_id: uuid.UUID, desde: date, ate: date
+    ) -> list[tuple[str, int, Decimal, date, date | None]]:
+        """(cliente, nº da parcela, valor, vencimento, pagamento) das parcelas cujo
+        vencimento cai no período, de vendas ativas."""
+        stmt = (
+            select(
+                Cliente.nome, Parcela.numero_parcela, Parcela.valor,
+                Parcela.data_vencimento, Parcela.data_pagamento,
+            )
+            .select_from(Parcela)
+            .join(Venda, Parcela.venda_id == Venda.id)
+            .join(Cliente, Venda.cliente_id == Cliente.id)
+            .where(
+                Venda.vendedor_id == vendedor_id,
+                Venda.status == "ativa",
+                Parcela.data_vencimento.between(desde, ate),
+            )
+            .order_by(Parcela.data_vencimento, Cliente.nome)
+        )
+        return [(l[0], l[1], l[2], l[3], l[4]) for l in self.db.execute(stmt)]

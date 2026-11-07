@@ -1,5 +1,6 @@
 """Formatos de saída do dashboard."""
 import uuid
+from datetime import date
 
 from pydantic import BaseModel
 
@@ -39,3 +40,19 @@ class RankingOut(BaseModel):
     inadimplentes: int
     sem_historico: int
     clientes: list[RankingClienteOut]
+
+
+class ResumoDoDiaOut(BaseModel):
+    """Os números de um dia, para a tela e para o PDF."""
+
+    dia: date
+    houve_atividade: bool
+    cobrancas_enviadas: int
+    cobrancas_falharam: int
+    pagamentos: int
+    valor_recebido: float
+    sem_resposta: int
+    #: Chave é a opção respondida pelo devedor; valor é quantas vezes veio.
+    respostas: dict[str, int]
+    #: Rótulo legível de cada opção, para a tela não repetir esse texto.
+    rotulos: dict[str, str]

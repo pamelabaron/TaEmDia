@@ -27,6 +27,9 @@ export interface PerfilCliente {
   id: string;
   nome: string;
   whatsapp_numero: string;
+  /** Pronto para a tela: "55 (47) 99999-0000". Calculado pela API. */
+  whatsapp_formatado: string;
+  cpf_formatado: string;
   cpf: string | null;
   endereco: string | null;
   saldo_devedor: number;

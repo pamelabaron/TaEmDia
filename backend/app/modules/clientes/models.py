@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
+from app.core.relogio import agora_utc
 
 
 class Cliente(Base):
@@ -25,4 +26,4 @@ class Cliente(Base):
     envio_auto_ativo: Mapped[bool] = mapped_column(Boolean, default=True)
     interacao_habilitada: Mapped[bool] = mapped_column(Boolean, default=True)
     ativo: Mapped[bool] = mapped_column(Boolean, default=True)  # soft delete
-    criado_em: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    criado_em: Mapped[datetime] = mapped_column(DateTime, default=agora_utc)

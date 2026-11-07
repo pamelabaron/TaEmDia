@@ -1,7 +1,7 @@
 # TáEmDia
 
 Sistema web de **cobrança automatizada via WhatsApp** e **gestão de carteira de clientes**,
-voltado a pequenos empreendedores. Projeto de portfólio / TCC — Engenharia de Software, Católica SC.
+voltado a pequenos empreendedores. Projeto de portfólio / TCC. Engenharia de Software, Católica SC.
 Autora: **Pámela Baron**.
 
 Documento base do projeto: RFC v1.0. Modelo de dados: [`docs/modelo-de-dados.md`](docs/modelo-de-dados.md).
@@ -81,10 +81,10 @@ taemdia/
 
 ### Como cada módulo do backend é organizado
 O código segue o padrão do RFC (Seção 5.3), em quatro camadas:
-- **router** — recebe as requisições da web e devolve as respostas (HTTP).
-- **service** — regras de negócio (o "cérebro").
-- **repository** — única parte que conversa com o banco de dados.
-- **models / schemas** — formato das tabelas e dos dados que entram/saem.
+- **router**. Recebe as requisições da web e devolve as respostas (HTTP).
+- **service**. Regras de negócio (o "cérebro").
+- **repository**. Única parte que conversa com o banco de dados.
+- **models / schemas**. Formato das tabelas e dos dados que entram/saem.
 
 O módulo `clientes` já está pronto como **modelo** para os próximos.
 
